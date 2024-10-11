@@ -1,4 +1,4 @@
-package flu.demo;
+package flu.demo.table_class;
 
 
 import jakarta.persistence.Column;
@@ -13,20 +13,17 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@Table(name="Department")
-public class Department {
+@Table(name="Permission")
+public class Permission {
 
     @Id
-    @Column(name="department_id")
-    private int department_id;
+    @Column(name="permission_id")
+    private int permission_id;
 
-    @Column(name="department_name")
-    private String department_name;
+    @Column(name="permission_name")
+    private String permission_name;
 
-    @Column(name="department_code")
-    private String department_code;
-
-
-
+    @Column(name="description")
+    private String description;
 
 }

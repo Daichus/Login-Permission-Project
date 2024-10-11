@@ -1,4 +1,4 @@
-package flu.demo;
+package flu.demo.table_class;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

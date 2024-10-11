@@ -1,4 +1,4 @@
-package flu.demo;
+package flu.demo.table_class;
 
 
 import jakarta.persistence.Column;
@@ -13,17 +13,21 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@Table(name="Permission")
-public class Permission {
+@Table(name="PermissionMap")
+public class PermissionMap {
 
     @Id
+    @Column(name="permissionMap_id")
+    private int permissionMap_id;
+
+
+    @Column(name="position_id")
+    private int position_id;
+
     @Column(name="permission_id")
     private int permission_id;
 
-    @Column(name="permission_name")
-    private String permission_name;
 
-    @Column(name="description")
-    private String description;
+
 
 }
