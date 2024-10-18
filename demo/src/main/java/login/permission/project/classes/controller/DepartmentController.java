@@ -6,6 +6,9 @@ import org.springframework.web.bind.annotation.*;
 import login.permission.project.classes.service.DepartmentService;
 import java.util.List;
 
+/**
+ * Depart
+ */
 @RestController
 @RequestMapping("/department/test")
 public class DepartmentController {
@@ -19,7 +22,6 @@ public class DepartmentController {
     }
 
     @GetMapping("/get")
-    @ResponseBody
     public List<Department> getAllDepartments() {
         return ds.getAllDepartments();
     }
@@ -27,5 +29,15 @@ public class DepartmentController {
     @PostMapping("/add")
     public String addDepartment(@RequestBody Department department) {
         return ds.addDepartment(department);
+    }
+
+    @PutMapping("/edit")
+    public String updateDepartment (@RequestBody Department department) {
+        return ds.updateDepartment(department);
+    }
+
+    @DeleteMapping("/delete")
+    public  String deleteDepartment (@RequestBody int id) {
+        return ds.deleteDepartment(id);
     }
 }

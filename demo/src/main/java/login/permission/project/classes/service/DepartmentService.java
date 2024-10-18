@@ -25,4 +25,24 @@ public class DepartmentService {
                 department.getDepartment_id(),
                 department.getDepartment_code());
     }
+
+    public List<Department> findAll() {
+        return dr.findAll();
+    }
+
+    public String updateDepartment (Department department) {
+        if(department != null) {
+            dr.save(department);
+            return "修改部門資訊完成";
+        } else {
+            return "更新部門資訊失敗";
+        }
+
+    }
+
+    public String deleteDepartment (int id) {
+        dr.deleteById(id);
+        return "刪除部門成功";
+    }
+
 }
