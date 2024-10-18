@@ -6,6 +6,9 @@ import org.springframework.web.bind.annotation.*;
 import login.permission.project.classes.service.DepartmentService;
 import java.util.List;
 
+/**
+ * Depart
+ */
 @RestController
 @RequestMapping("/department/test")
 public class DepartmentController {
@@ -13,13 +16,7 @@ public class DepartmentController {
     @Autowired
     DepartmentService ds;
 
-    @GetMapping("/")
-    public String home() {
-        return "test";
-    }
-
     @GetMapping("/get")
-    @ResponseBody
     public List<Department> getAllDepartments() {
         return ds.getAllDepartments();
     }
@@ -28,4 +25,21 @@ public class DepartmentController {
     public String addDepartment(@RequestBody Department department) {
         return ds.addDepartment(department);
     }
+
+    @PutMapping("/edit")
+    public String updateDepartment (@RequestBody Department department) {
+        return ds.updateDepartment(department);
+    }
+
+    @DeleteMapping("/delete")
+    public  String deleteDepartment (@RequestBody Department department) {
+        return ds.deleteDepartment(department.getDepartment_id());
+    }
+
+    //GPT推薦方法
+//    @DeleteMapping("/delete/{id}")
+//    public String deleteStudent(@PathVariable int id) {
+//        return ds.deleteDepartment(id);
+//    }
+
 }
