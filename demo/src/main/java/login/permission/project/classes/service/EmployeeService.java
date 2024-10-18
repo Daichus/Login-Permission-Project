@@ -1,7 +1,7 @@
 package login.permission.project.classes.service;
 
 
-import login.permission.project.classes.model.Department;
+
 import login.permission.project.classes.model.Employee;
 import login.permission.project.classes.repository.EmployeeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
