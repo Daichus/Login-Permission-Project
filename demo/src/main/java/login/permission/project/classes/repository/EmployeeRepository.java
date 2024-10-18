@@ -1,6 +1,6 @@
-package repository;
+package login.permission.project.classes.repository;
 
-import classes.Employee;
+import login.permission.project.classes.model.Employee;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface EmployeeRepository extends JpaRepository<Employee,Integer> {

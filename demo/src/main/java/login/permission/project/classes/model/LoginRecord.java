@@ -1,4 +1,4 @@
-package classes;
+package login.permission.project.classes.model;
 
 
 import jakarta.persistence.Column;

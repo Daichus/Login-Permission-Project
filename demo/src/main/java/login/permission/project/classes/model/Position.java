@@ -1,4 +1,4 @@
-package classes;
+package login.permission.project.classes.model;
 
 
 import jakarta.persistence.Column;
@@ -13,13 +13,19 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@Table(name="Status")
-public class Status {
+@Table(name="Position")
+public class Position {
 
     @Id
-    @Column(name="status_id")
-    private int status_id;
+    @Column(name="position_id")
+    private int position_id;
 
-    @Column(name="name")
-    private String name;
+
+    @Column(name="position")
+    private String position;
+
+
+    @Column(name="unit_id")
+    private int unit_id;
+
 }

@@ -1,16 +1,22 @@
-package service;
+package login.permission.project.classes.service;
 
 
-import classes.Department;
+import login.permission.project.classes.model.Department;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import repository.DepartmentRepository;
+import login.permission.project.classes.repository.DepartmentRepository;
+
+import java.util.List;
 
 @Service
 public class DepartmentService {
 
     @Autowired
     DepartmentRepository dr;
+
+    public List<Department> getAllDepartments() {
+        return dr.findAll();
+    }
 
     public String addDepartment(Department department) {
         dr.save(department);

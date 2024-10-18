@@ -1,6 +1,6 @@
-package repository;
+package login.permission.project.classes.repository;
 
-import classes.Position;
+import login.permission.project.classes.model.Position;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PositionRepository extends JpaRepository<Position,Integer> {

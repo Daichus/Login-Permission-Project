@@ -1,7 +1,6 @@
-package repository;
+package login.permission.project.classes.repository;
 
-import classes.Position;
-import classes.Status;
+import login.permission.project.classes.model.Status;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface StatusRepository extends JpaRepository<Status,Integer> {
