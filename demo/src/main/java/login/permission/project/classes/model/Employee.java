@@ -35,7 +35,7 @@ public class Employee {
     @Column(name="position_id")
     private int position_id;
 
-    @Column(name="status")
+    @Column(name="status_id")
     private  int status;
 
 
