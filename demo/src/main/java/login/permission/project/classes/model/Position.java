@@ -25,7 +25,7 @@ public class Position {
     private String position;
 
 
-    @Column(name="unit_id")
-    private int unit_id;
+    @Column(name="unit_id", nullable = true)
+    private Integer unit_id;
 
 }
