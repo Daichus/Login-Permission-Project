@@ -26,10 +26,6 @@ public class DepartmentService {
                 department.getDepartment_code());
     }
 
-    public List<Department> findAll() {
-        return dr.findAll();
-    }
-
     public String updateDepartment (Department department) {
         if(department != null) {
             dr.save(department);
