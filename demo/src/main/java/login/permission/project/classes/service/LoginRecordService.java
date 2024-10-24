@@ -4,10 +4,12 @@ import jakarta.persistence.Column;
 import login.permission.project.classes.model.LoginRecord;
 import login.permission.project.classes.repository.LoginRecordRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
 
+@Service
 public class LoginRecordService {
 
     @Autowired
