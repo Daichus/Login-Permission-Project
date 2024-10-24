@@ -12,7 +12,7 @@ import java.util.List;
 public class EmpPositionMapController {
 
     @Autowired
-    private EmpPositionMapService eps;
+    EmpPositionMapService eps;
 
     // 獲取所有職位設定
     @GetMapping("/get")

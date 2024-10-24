@@ -3,9 +3,11 @@ package login.permission.project.classes.service;
 import login.permission.project.classes.model.PermissionMap;
 import login.permission.project.classes.repository.PermissionMapRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class PermissionMapService {
     @Autowired
     PermissionMapRepository dr;
