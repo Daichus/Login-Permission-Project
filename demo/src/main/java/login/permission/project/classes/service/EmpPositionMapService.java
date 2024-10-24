@@ -3,9 +3,10 @@ package login.permission.project.classes.service;
 import login.permission.project.classes.model.EmpPositionMap;
 import login.permission.project.classes.repository.EmpPositionMapRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
-
+@Service
 public class EmpPositionMapService {
 
     @Autowired
