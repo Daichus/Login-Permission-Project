@@ -1,7 +1,5 @@
 package login.permission.project.classes.service;
 
-
-
 import login.permission.project.classes.model.Employee;
 import login.permission.project.classes.model.EmployeeLoginRequest;
 import login.permission.project.classes.repository.EmployeeLoginRequestRepository;
@@ -25,7 +23,6 @@ public class EmployeeService {
     }
 
 
-
     public String addEmployee (Employee employee) {
         if(employee !=null){
             er.save(employee);
@@ -45,7 +42,6 @@ public class EmployeeService {
         } else {
             return "更新員工資訊失敗";
         }
-
     }
 
     public String deleteEmployee (int id) {
@@ -60,12 +56,9 @@ public class EmployeeService {
         Optional<Employee> employeeOp = er.findById(request.getEmployee_id());
         if(employeeOp != null) {
             Employee employee = employeeOp.get();
-
             if(request.getPassword().equals(employee.getPassword())) {
                 return employee;
             }
-
-
         }
         return null;
     }

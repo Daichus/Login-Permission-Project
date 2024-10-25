@@ -15,14 +15,22 @@ public class PositionController {
     PositionService ds;
 
     @GetMapping("/get")
-    public List<Position> getAllPositions() { return ds.getAllPositions(); }
+    public List<Position> getAllPositions() {
+        return ds.getAllPositions();
+    }
 
     @PostMapping("/add")
-    public String addPosition (@RequestBody Position position) {return ds.addPosition(position); }
+    public String addPosition (@RequestBody Position position) {
+        return ds.addPosition(position);
+    }
 
     @PutMapping("/edit")
-    public String updatePosition (@RequestBody Position position) { return ds.updatePosition(position); }
+    public String updatePosition (@RequestBody Position position) {
+        return ds.updatePosition(position);
+    }
 
-    @DeleteMapping("/delete")
-    public String deletePosition (@RequestBody int id) { return ds.deletePosition(id); }
+    @DeleteMapping("/delete/{id}")
+    public String deletePosition (@PathVariable int id) {
+        return ds.deletePosition(id);
+    }
 }

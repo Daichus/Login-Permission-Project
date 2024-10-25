@@ -13,7 +13,9 @@ public class PositionService {
     @Autowired
     PositionRepository pr;
 
-    public List<Position> getAllPositions() { return pr.findAll(); }
+    public List<Position> getAllPositions() {
+        return pr.findAll();
+    }
 
     public String addPosition(Position position){
         pr.save(position);
@@ -22,8 +24,6 @@ public class PositionService {
                 position.getPosition_id(),
                 position.getUnit_id());
     }
-
-    public List<Position> findAll(){ return pr.findAll(); }
 
     public String updatePosition(Position position) {
         if (position != null) {
