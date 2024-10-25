@@ -1,13 +1,12 @@
 package login.permission.project.classes.model;
 
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.Set;
 
 @Entity
 @AllArgsConstructor
@@ -26,6 +25,13 @@ public class Unit {
     @Column(name="unit_code")
     private String unit_code;
 
-    @Column(name="department_id")
-    private int department_id;
+    @Column(name = "department_id")
+    private Integer department_id;
+
+    @ManyToOne
+    @JoinColumn(name = "department_id", insertable = false, updatable = false)
+    private Department department;
+
+    @OneToMany(mappedBy = "unit")
+    private Set<Position> positions;
 }

@@ -1,12 +1,11 @@
 package login.permission.project.classes.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.Set;
 
 @Entity
 @AllArgsConstructor
@@ -17,30 +16,39 @@ public class Employee {
 
 
     @Id
-    @Column(name="employee_id")
     private int employee_id;
 
-    @Column(name="name")
-    private String name;
-
-    @Column(name="password")
-    private String password;
-
-    @Column(name="email")
+    @Column(name = "email")
     private String email;
 
-    @Column(name="phone_number")
-    private String phone_number;
+    @Column(name = "name")
+    private String name;
 
-    @Column(name="position_id")
-    private int position_id;
+    @Column(name = "password")
+    private String password;
 
-    @Column(name="status_id")
-    private  int status;
+    @Column(name = "phone_number")
+    private String phoneNumber;
 
+    @Column(name = "status")
+    private int status;
 
+    @Column(name = "position_id")
+    private Integer position_id;
 
+    @ManyToOne
+    @JoinColumn(name = "status_id")
+    private Status employeeStatus;
 
+    @ManyToMany
+    @JoinTable(
+            name = "EmpPositionMap",
+            joinColumns = @JoinColumn(name = "employee_id"),
+            inverseJoinColumns = @JoinColumn(name = "position_id")
+    )
+    private Set<Position> positions;
 
+    @OneToMany(mappedBy = "employee")
+    private Set<LoginRecord> loginRecords;
 
 }

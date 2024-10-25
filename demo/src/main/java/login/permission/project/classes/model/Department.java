@@ -4,6 +4,8 @@ package login.permission.project.classes.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.Set;
+
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
@@ -22,5 +24,6 @@ public class Department {
     @Column(name="department_code")
     private String department_code;
 
-
+    @OneToMany(mappedBy = "department")
+    private Set<Unit> units;
 }
