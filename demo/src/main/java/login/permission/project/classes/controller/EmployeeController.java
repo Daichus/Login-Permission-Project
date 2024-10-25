@@ -1,7 +1,5 @@
 package login.permission.project.classes.controller;
 
-
-
 import login.permission.project.classes.model.Employee;
 import login.permission.project.classes.model.EmployeeLoginRequest;
 import login.permission.project.classes.service.EmployeeService;
@@ -13,6 +11,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/employee/test")
+
 public class EmployeeController {
 
     @Autowired
@@ -23,7 +22,8 @@ public class EmployeeController {
         return es.getAllEmployees();
     }
 
-    @GetMapping("/login")
+    @CrossOrigin("http://localhost:5173/")
+    @PostMapping("/login")
     public Employee login (@RequestBody EmployeeLoginRequest request) {
         return  es.login(request);
     }

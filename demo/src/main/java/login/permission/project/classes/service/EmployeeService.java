@@ -29,7 +29,7 @@ public class EmployeeService {
     public String addEmployee (Employee employee) {
         if(employee !=null){
             er.save(employee);
-            return String.format("\"新增員工成功\\n員工名稱: %s\\n員工id: %s\\n員工職位代號: %s\",\n",
+            return String.format("新增員工成功\n員工名稱: %s\n員工id: %s\n員工職位代號: %s",
                     employee.getName(),
                     employee.getEmployee_id(),
                     employee.getPosition_id());
