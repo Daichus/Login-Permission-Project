@@ -3,8 +3,10 @@ package login.permission.project.classes.controller;
 
 
 import login.permission.project.classes.model.Employee;
+import login.permission.project.classes.model.EmployeeLoginRequest;
 import login.permission.project.classes.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,6 +21,11 @@ public class EmployeeController {
     @GetMapping("/get")
     public List<Employee> getAllEmployees() {
         return es.getAllEmployees();
+    }
+
+    @GetMapping("/login")
+    public Employee login (@RequestBody EmployeeLoginRequest request) {
+        return  es.login(request);
     }
 
     @PostMapping("/add")
