@@ -1,9 +1,6 @@
 package login.permission.project.classes.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,14 +13,21 @@ import lombok.NoArgsConstructor;
 public class EmpPositionMap {
 
     @Id
-    @Column(name="EmpPositionMap_id")
-    private int EmpPositionMap_id;
+    private int empPositionMap_id;
 
-    @Column(name="employee_id")
-    private int employee_id;
+    @Column(name = "employee_id")
+    private Integer employee_id;
 
-    @Column(name="position_id")
-    private int position_id;
+    @Column(name = "position_id")
+    private Integer position_id;
+
+    @ManyToOne
+    @JoinColumn(name = "employee_id", insertable = false, updatable = false)
+    private Employee employee;
+
+    @ManyToOne
+    @JoinColumn(name = "position_id", insertable = false, updatable = false)
+    private Position position;
 
 }
 

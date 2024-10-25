@@ -1,13 +1,12 @@
 package login.permission.project.classes.model;
 
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.Set;
 
 @Entity
 @AllArgsConstructor
@@ -17,13 +16,16 @@ import lombok.NoArgsConstructor;
 public class Permission {
 
     @Id
-    @Column(name="permission_id")
     private int permission_id;
 
-    @Column(name="permission_name")
+    @Column(name = "permission_name")
     private String permission_name;
 
-    @Column(name="description")
+    @Column(name = "description")
     private String description;
+
+    @ManyToMany(mappedBy = "permissions")
+    private Set<Position> positions;
+
 
 }
