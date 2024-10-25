@@ -30,9 +30,6 @@ public class Employee {
     @Column(name = "phone_number")
     private String phoneNumber;
 
-    @Column(name = "status")
-    private int status;
-
     @Column(name = "position_id")
     private Integer position_id;
 
