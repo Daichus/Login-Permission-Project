@@ -25,6 +25,7 @@ public class LoginRecord {
     @Column(name = "ip_address")
     private String ip_address;  // 改回符合資料庫的命名
 
+    //LocalDateTime 格式 yyyy-MM-ddTHH:mm:ss
     @Column(name = "login_time")
     private LocalDateTime login_time;  // 改回符合資料庫的命名
 

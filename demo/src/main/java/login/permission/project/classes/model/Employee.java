@@ -33,8 +33,11 @@ public class Employee {
     @Column(name = "position_id")
     private Integer position_id;
 
+    @Column(name = "status_id")
+    private Integer status_id;
+
     @ManyToOne
-    @JoinColumn(name = "status_id")
+    @JoinColumn(name = "status_id", insertable = false, updatable = false)
     private Status employeeStatus;
 
     @ManyToMany
