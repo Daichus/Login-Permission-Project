@@ -1,5 +1,6 @@
 package login.permission.project.classes.service;
 
+import login.permission.project.classes.JwtService;
 import login.permission.project.classes.model.Employee;
 import login.permission.project.classes.model.EmployeeLoginRequest;
 import login.permission.project.classes.repository.EmployeeLoginRequestRepository;
@@ -52,14 +53,19 @@ public class EmployeeService {
 
     @Autowired
     EmployeeLoginRequestRepository elr;
-    public Employee login(EmployeeLoginRequest request) {
+
+    @Autowired
+    JwtService jwtService;
+
+    public String login(EmployeeLoginRequest request) {
         Optional<Employee> employeeOp = er.findById(request.getEmployee_id());
-        if(employeeOp != null) {
+        if(employeeOp.isPresent()) {
             Employee employee = employeeOp.get();
             if(request.getPassword().equals(employee.getPassword())) {
-                return employee;
+                return jwtService.generateToken(employee);
             }
         }
+        System.out.println("Error,user not found");
         return null;
     }
 

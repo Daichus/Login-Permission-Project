@@ -4,10 +4,13 @@ import login.permission.project.classes.model.Employee;
 import login.permission.project.classes.model.EmployeeLoginRequest;
 import login.permission.project.classes.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/employee/test")
@@ -22,10 +25,16 @@ public class EmployeeController {
         return es.getAllEmployees();
     }
 
-    @CrossOrigin("http://localhost:5173/")
+
     @PostMapping("/login")
-    public Employee login (@RequestBody EmployeeLoginRequest request) {
-        return  es.login(request);
+    @CrossOrigin("http://localhost:5173/")
+    public ResponseEntity<Map<String, String>> login (@RequestBody EmployeeLoginRequest request) {
+
+        String token = es.login(request);
+        Map<String, String> response = new HashMap<>();
+        response.put("JWT_token", token);
+
+        return  ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(response);
     }
 
     @PostMapping("/add")

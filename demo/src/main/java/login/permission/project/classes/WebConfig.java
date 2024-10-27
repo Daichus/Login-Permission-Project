@@ -16,7 +16,7 @@ public class WebConfig {
         registry.addMapping("/**")
                 .allowedOrigins("http://localhost:5173")  // 設置允許的前端來源
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                .allowedHeaders("*")
+                .allowedHeaders("Content-Type")
                 .allowCredentials(true);
       }
     };
