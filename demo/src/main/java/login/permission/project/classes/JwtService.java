@@ -1,8 +1,6 @@
 package login.permission.project.classes;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import login.permission.project.classes.model.Employee;
@@ -10,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 
 import java.security.Key;
+import java.security.SignatureException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,7 +17,7 @@ import java.util.Map;
 public class JwtService {
 
 
-    private static final String KEY = "5k4g4ji32k7ru8au4m4ul4t6su3h9j142l4g45k4g4uke7rul4mpv4cl31j4cl3";
+    private static final String KEY = "5gk4g4j5i32k7ru8auu4m4ul4t6su3ah9j14i2l4g45k4g4bu4ke7rul4kmpv4cl391j4cl3";
 
     private static final long EXPIRATION_TIME = 3600000; //毫秒為單位,每小時使用者需重新登錄
 
@@ -36,7 +35,7 @@ public class JwtService {
         userData.put("userPositionId", employee.getPosition_id());
         userData.put("userStatusId", employee.getStatus_id());
 
-        Date expDate = new Date(  System.currentTimeMillis() + EXPIRATION_TIME);
+        Date expDate = new Date(System.currentTimeMillis() + EXPIRATION_TIME);
 
         return Jwts.builder()
                 .setIssuer("Fcu 113-1 CSIE Team 2")
@@ -48,33 +47,33 @@ public class JwtService {
                 .compact();
     }
 
-    // 驗證 JWT
-//    public boolean validateToken(String token, String username) {
-//        String extractedUsername = extractUsername(token);
-//        return (extractedUsername.equals(username) && !isTokenExpired(token));
-//    }
 
-//    // 提取用戶名
-//    public String extractUsername(String token) {
-//        return extractAllClaims(token).getSubject();
-//    }
-//
-//    // 驗證 Token 是否過期
-//    private boolean isTokenExpired(String token) {
-//        return extractAllClaims(token).getExpiration().before(new Date());
-//    }
 
-    // 提取所有 Claims
-//    private Claims extractAllClaims(String token) {
-//        return Jwts.parserBuilder()
-//                .setSigningKey(getSigningKey())
-//                .build()
-//                .parseClaimsJws(token)
-//                .getBody();
-//    }
-
-    // 獲取簽名的 Key
+    // 獲取簽名的 Key,Key僅為後端所擁有
     private Key getSigningKey() {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(KEY));
     }
+
+    /**
+     * 抽取使用者傳過來的
+     * token中的payload部分並進行驗證
+     */
+    public Object isTokenValid(String token) {
+        try {
+            Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token);
+            return true;
+        } catch (JwtException e) {
+            return false;
+        }
+    }
+
+
+
+
 }
+
+
+

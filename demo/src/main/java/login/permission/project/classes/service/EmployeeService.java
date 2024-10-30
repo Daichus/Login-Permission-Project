@@ -18,6 +18,12 @@ public class EmployeeService {
     @Autowired
     EmployeeRepository er;
 
+    @Autowired
+    EmployeeLoginRequestRepository elr;
+
+    @Autowired
+    JwtService jwtService;
+
 
     public List<Employee> getAllEmployees() {
         return er.findAll();
@@ -51,11 +57,6 @@ public class EmployeeService {
     }
 
 
-    @Autowired
-    EmployeeLoginRequestRepository elr;
-
-    @Autowired
-    JwtService jwtService;
 
     public String login(EmployeeLoginRequest request) {
         Optional<Employee> employeeOp = er.findById(request.getEmployee_id());

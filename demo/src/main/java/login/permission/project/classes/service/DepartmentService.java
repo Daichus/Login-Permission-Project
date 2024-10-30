@@ -33,7 +33,6 @@ public class DepartmentService {
         } else {
             return "更新部門資訊失敗";
         }
-
     }
 
     public String deleteDepartment (int id) {

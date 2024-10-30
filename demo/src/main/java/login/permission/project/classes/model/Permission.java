@@ -16,6 +16,7 @@ import java.util.Set;
 public class Permission {
 
     @Id
+    @Column(name = "permission_id")
     private int permission_id;
 
     @Column(name = "permission_name")
