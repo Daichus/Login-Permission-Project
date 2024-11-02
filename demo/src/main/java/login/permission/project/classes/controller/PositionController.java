@@ -22,15 +22,15 @@ public class PositionController {
         return ds.getAllPositions();
     }
 
-    @GetMapping("/getAll")
-    public List<PositionDTO> getAllPositionsAndUnit() {
-        return ds.getAllPositions().stream().map(position -> new PositionDTO(
-                position.getPosition_id(),
-                position.getPosition(),
-                position.getUnit().getUnit_id(),
-                position.getUnit().getUnit_name()
-        )).collect(Collectors.toList());
-    }
+//    @GetMapping("/getAll")
+//    public List<PositionDTO> getAllPositionsAndUnit() {
+//        return ds.getAllPositions().stream().map(position -> new PositionDTO(
+//                position.getPosition_id(),
+//                position.getPosition(),
+//                position.getUnit().getUnit_id(),
+//                position.getUnit().getUnit_name()
+//        )).collect(Collectors.toList());
+//    }
 
     @GetMapping("/search")
     public List<Position> searchPositions(
