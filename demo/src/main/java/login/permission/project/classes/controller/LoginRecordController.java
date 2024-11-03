@@ -3,9 +3,11 @@ package login.permission.project.classes.controller;
 import login.permission.project.classes.model.LoginRecord;
 import login.permission.project.classes.service.LoginRecordService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/loginRecord")
@@ -36,6 +38,11 @@ public class LoginRecordController {
     @DeleteMapping("/delete/{id}")
     public String deleteLoginRecord(@PathVariable int id) {
         return lrs.deleteLoginRecord(id);
+    }
+
+    @GetMapping("/getLoginRecord/{employee_id}")
+    public ResponseEntity<?> getUserLoginRecord(@PathVariable int employee_id) {
+        return lrs.getLoginRecordById(employee_id);
     }
 }
 

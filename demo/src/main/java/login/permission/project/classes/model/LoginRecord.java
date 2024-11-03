@@ -16,7 +16,19 @@ import java.util.Date;
 @Table(name="Login_Record")
 public class LoginRecord {
 
+
+    public LoginRecord(Integer employee_id, String ip_address, LocalDateTime login_time,
+                       LocalDateTime logout_time, String status) {
+        this.employee_id = employee_id;
+        this.ip_address = ip_address;
+        this.login_time = login_time;
+        this.logout_time = logout_time;
+        this.status = status;
+    }
+
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name="record_id")
     private int record_id;   // 保持與資料庫欄位名稱一致
 
     @Column(name = "employee_id")
