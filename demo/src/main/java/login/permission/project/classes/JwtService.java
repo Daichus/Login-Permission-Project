@@ -40,7 +40,6 @@ public class JwtService {
         userData.put("userName", employee.getName());
         userData.put("userEmail", employee.getEmail());
         userData.put("userPhone", employee.getPhoneNumber());
-        userData.put("userPositionId", employee.getPosition_id());
         userData.put("userStatusId", employee.getStatus_id());
 
         Date expDate = new Date(System.currentTimeMillis() + EXPIRATION_TIME);

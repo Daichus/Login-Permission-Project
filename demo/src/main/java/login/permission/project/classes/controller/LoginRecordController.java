@@ -42,6 +42,7 @@ public class LoginRecordController {
 
     @GetMapping("/getLoginRecord/{employee_id}")
     public ResponseEntity<?> getUserLoginRecord(@PathVariable int employee_id) {
+
         return lrs.getLoginRecordById(employee_id);
     }
 }

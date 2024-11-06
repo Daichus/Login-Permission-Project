@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import login.permission.project.classes.JwtService;
 import login.permission.project.classes.model.Employee;
 import login.permission.project.classes.model.EmployeeLoginRequest;
+import login.permission.project.classes.model.EmployeeManageResponse;
 import login.permission.project.classes.model.LoginRecord;
 import login.permission.project.classes.repository.EmployeeLoginRequestRepository;
 import login.permission.project.classes.repository.EmployeeRepository;
@@ -44,8 +45,7 @@ public class EmployeeService {
             er.save(employee);
             return String.format("新增員工成功\n員工名稱: %s\n員工id: %s\n員工職位代號: %s",
                     employee.getName(),
-                    employee.getEmployee_id(),
-                    employee.getPosition_id());
+                    employee.getEmployee_id());
         } else {
             return "添加員工失敗";
         }
@@ -84,6 +84,10 @@ public class EmployeeService {
             }
         }
         return "登錄失敗,找不到用戶";
+    }
+
+    public List<EmployeeManageResponse> findAllEmployeeManageResponses () {
+        return er.findAllEmployeeManageResponses();
     }
 
 

@@ -30,8 +30,6 @@ public class Employee {
     @Column(name = "phone_number")
     private String phoneNumber;
 
-    @Column(name = "position_id")
-    private Integer position_id;
 
     @Column(name = "status_id")
     private Integer status_id;

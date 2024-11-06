@@ -3,6 +3,7 @@ package login.permission.project.classes.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import login.permission.project.classes.model.Employee;
 import login.permission.project.classes.model.EmployeeLoginRequest;
+import login.permission.project.classes.model.EmployeeManageResponse;
 import login.permission.project.classes.service.EmployeeService;
 import login.permission.project.classes.service.LoginRecordService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,5 +62,10 @@ public class EmployeeController {
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletRequest request) {
         return lrs.updateLogoutTime(request);
+    }
+
+    @GetMapping("/getAllEmployeeInfo")
+    public List<EmployeeManageResponse> findAllEmployeeManageResponses () {
+        return es.findAllEmployeeManageResponses();
     }
 }
