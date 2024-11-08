@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PositionService {
@@ -15,6 +16,10 @@ public class PositionService {
 
     public List<Position> getAllPositions() {
         return pr.findAll();
+    }
+
+    public List<Position> getPositionById(Integer unitId, Integer positionId) {
+        return pr.findByUnitIdAndPositionId(unitId, positionId);
     }
 
     public String addPosition(Position position){
