@@ -34,14 +34,8 @@ public class EmployeeController {
 
     @PostMapping("/login")
     @CrossOrigin("http://localhost:5173/")
-    public ResponseEntity<Map<String, String>> login (@RequestBody EmployeeLoginRequest request) {
-
-        String token = es.login(request);
-        Map<String, String> response = new HashMap<>();
-        response.put("JWT_Token", token);
-        System.out.println("token send:\n" +token);
-
-        return  ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(response);
+    public ResponseEntity<?> login (@RequestBody EmployeeLoginRequest request) {
+        return  es.login(request);
     }
 
     @PostMapping("/add")

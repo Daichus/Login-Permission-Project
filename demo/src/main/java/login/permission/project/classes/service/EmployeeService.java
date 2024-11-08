@@ -12,6 +12,7 @@ import login.permission.project.classes.repository.EmployeeLoginRequestRepositor
 import login.permission.project.classes.repository.EmployeeRepository;
 import login.permission.project.classes.repository.LoginRecordRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -69,7 +70,7 @@ public class EmployeeService {
     /**
      * 登錄成功以後回傳JWT　token
      */
-    public String login(EmployeeLoginRequest request) {
+    public ResponseEntity<?> login (EmployeeLoginRequest request) {
         Optional<Employee> employeeOp = er.findById(request.getEmployee_id());
         Employee employee;
         if(employeeOp.isPresent()) {
@@ -78,12 +79,15 @@ public class EmployeeService {
                 LoginRecord record = new LoginRecord(employee.getEmployee_id(),"testIpAddress", LocalDateTime.now(),null,"成功");
                 record = lrr.save(record);
                 int record_id = record.getRecord_id();
-                return jwtService.generateToken(employee,record_id);
+                String JWT_Token = jwtService.generateToken(employee,record_id);
+                System.out.println(JWT_Token + "send");
+                return ResponseEntity.ok(JWT_Token);
             }  else {
                 lrr.save(new LoginRecord(employee.getEmployee_id(),"testIpAddress", null,null,"失敗"));
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("密碼錯誤");
             }
         }
-        return "登錄失敗,找不到用戶";
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("找不到用戶");
     }
 
     public List<EmployeeManageResponse> findAllEmployeeManageResponses () {
