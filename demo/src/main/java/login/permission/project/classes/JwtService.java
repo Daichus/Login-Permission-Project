@@ -15,10 +15,7 @@ import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.security.SignatureException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Component
 public class JwtService {
@@ -33,7 +30,7 @@ public class JwtService {
      *JWT包含Header,Payload,Signature三個部分
      *方法中需要手動設定JWT的Payload以定義要傳送回前端的訊息
      */
-    public String generateToken(Employee employee,int record_id) {
+    public String generateToken(Employee employee,int record_id, List<Integer> permission_id) {
         Map<String, Object> userData = new HashMap<>();
         String employee_id = String.valueOf(employee.getEmployee_id());
         userData.put("loginRecordId",record_id);
@@ -41,6 +38,7 @@ public class JwtService {
         userData.put("userEmail", employee.getEmail());
         userData.put("userPhone", employee.getPhoneNumber());
         userData.put("userStatusId", employee.getStatus_id());
+        userData.put("permissionId", permission_id);
 
         Date expDate = new Date(System.currentTimeMillis() + EXPIRATION_TIME);
 
@@ -62,6 +60,7 @@ public class JwtService {
     /**
      * 抽取使用者傳過來的
      * token中的payload部分並進行驗證
+     * 並還原成Claims物件
      */
     public Claims isTokenValid(HttpServletRequest request) {
         try{

@@ -44,7 +44,7 @@ public class EmployeeService {
     public String addEmployee (Employee employee) {
         if(employee !=null){
             er.save(employee);
-            return String.format("新增員工成功\n員工名稱: %s\n員工id: %s\n員工職位代號: %s",
+            return String.format("新增員工成功\n員工名稱: %s\n員工id: %d",
                     employee.getName(),
                     employee.getEmployee_id());
         } else {
@@ -79,7 +79,8 @@ public class EmployeeService {
                 LoginRecord record = new LoginRecord(employee.getEmployee_id(),"testIpAddress", LocalDateTime.now(),null,"成功");
                 record = lrr.save(record);
                 int record_id = record.getRecord_id();
-                String JWT_Token = jwtService.generateToken(employee,record_id);
+                List<Integer> permission_id = er.getPermissionById(employee.getEmployee_id());
+                String JWT_Token = jwtService.generateToken(employee, record_id, permission_id);
                 System.out.println(JWT_Token + "send");
                 return ResponseEntity.ok(JWT_Token);
             }  else {

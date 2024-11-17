@@ -75,12 +75,25 @@ public class LoginRecordService {
         }
     }
 
-    public  ResponseEntity<?> getLoginRecordById(int employee_id) {
-        List<LoginRecord> loginRecords = lrr.findByEmployeeId(employee_id);
-        if (loginRecords != null){
-            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(loginRecords);
+    public  ResponseEntity<?> getRecordByPermissionId(HttpServletRequest request) {
+        Claims claims = js.isTokenValid(request);
+        List<LoginRecord> loginRecords = null;
+
+        if(claims != null) {
+            List<Integer> permissionId = claims.get("permissionId", List.class);
+            for(Integer id : permissionId) {
+                if(id == 2 || id == 3 || id == 4) {
+                    loginRecords = lrr.findAll();
+                } else {
+                    loginRecords = lrr.findByEmployeeId(Integer.parseInt(claims.getSubject()));
+                }
+            }
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Login record not found");
         }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Login record not found");
+            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(loginRecords);
+
+
     }
 
 

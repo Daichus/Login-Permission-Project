@@ -1,5 +1,6 @@
 package login.permission.project.classes.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import login.permission.project.classes.model.LoginRecord;
 import login.permission.project.classes.service.LoginRecordService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,10 +41,9 @@ public class LoginRecordController {
         return lrs.deleteLoginRecord(id);
     }
 
-    @GetMapping("/getLoginRecord/{employee_id}")
-    public ResponseEntity<?> getUserLoginRecord(@PathVariable int employee_id) {
-
-        return lrs.getLoginRecordById(employee_id);
+    @PostMapping("/getLoginRecord")
+    public ResponseEntity<?> getRecordByPermissionId(HttpServletRequest request) {
+        return lrs.getRecordByPermissionId(request);
     }
 }
 

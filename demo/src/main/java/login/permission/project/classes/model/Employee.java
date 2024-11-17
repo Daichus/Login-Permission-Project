@@ -16,6 +16,8 @@ public class Employee {
 
 
     @Id
+    @Column(name = "employee_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int employee_id;
 
     @Column(name = "email")
