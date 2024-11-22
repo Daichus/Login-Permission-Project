@@ -25,6 +25,9 @@ public class Permission {
     @Column(name = "description")
     private String description;
 
+    @Column(name="permission_code")
+    private String permission_code;
+
     @ManyToMany(mappedBy = "permissions")
     private Set<Position> positions;
 

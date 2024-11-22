@@ -78,13 +78,14 @@ public class EmployeeService {
             if(request.getPassword().equals(employee.getPassword())) {
                 LoginRecord record = new LoginRecord(employee.getEmployee_id(),"testIpAddress", LocalDateTime.now(),null,"成功");
                 record = lrr.save(record);
+                //為避免混淆,登錄紀錄id變數名稱之後需再修改
                 int record_id = record.getRecord_id();
-                List<Integer> permission_id = er.getPermissionById(employee.getEmployee_id());
-                String JWT_Token = jwtService.generateToken(employee, record_id, permission_id);
-                System.out.println(JWT_Token + "send");
+                List<String> permission_code = er.getPermissionById(employee.getEmployee_id());
+
+                String JWT_Token = jwtService.generateToken(employee, record_id, permission_code);
                 return ResponseEntity.ok(JWT_Token);
             }  else {
-                lrr.save(new LoginRecord(employee.getEmployee_id(),"testIpAddress", null,null,"失敗"));
+                lrr.save(new LoginRecord(employee.getEmployee_id(),"testIpAddress", LocalDateTime.now(),null,"失敗"));
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("密碼錯誤");
             }
         }

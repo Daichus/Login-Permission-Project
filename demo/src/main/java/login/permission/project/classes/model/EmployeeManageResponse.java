@@ -7,7 +7,7 @@ import lombok.Data;
 
 @Data
 public class EmployeeManageResponse {
-    public EmployeeManageResponse(int employee_id, String name, String email, String phoneNumber, String departmentName, int permission_id,String unitName, String positionName, String statusName) {
+    public EmployeeManageResponse(int employee_id, String name, String email, String phoneNumber, String departmentName, String permission_code,String unitName, String positionName, String statusName) {
         this.employee_id = employee_id;
         this.name = name;
         this.email = email;
@@ -15,7 +15,7 @@ public class EmployeeManageResponse {
         this.departmentName = departmentName;
         this.unitName = unitName;
         this.positionName = positionName;
-        this.permission_id = permission_id;
+        this.permission_code = permission_code;
         this.statusName = statusName;
     }
 
@@ -25,7 +25,7 @@ public class EmployeeManageResponse {
     private String phoneNumber;
     private String departmentName;
     private String unitName;
-    private int permission_id;
+    private String permission_code;
     private String positionName;
     private String statusName;
 

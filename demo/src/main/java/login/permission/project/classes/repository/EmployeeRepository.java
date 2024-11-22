@@ -21,11 +21,12 @@ public interface EmployeeRepository extends JpaRepository<Employee, Integer> {
             "JOIN PermissionMap pm ON pm.position_id = empPositionMap.position_id")
     List<EmployeeManageResponse> findAllEmployeeManageResponses();
 
-    @Query("SELECT pm.permission_id " +
+    @Query("SELECT p.permission_code " +
             "FROM EmpPositionMap e " +
             "JOIN PermissionMap pm ON pm.position_id = e.position_id " +
+            "JOIN Permission p ON p.permission_id  = pm.permission_id " +
             "WHERE e.employee_id = :employee_id")
-    List<Integer> getPermissionById(@Param("employee_id") int employee_id);
+    List<String> getPermissionById(@Param("employee_id") int employee_id);
 
 
 
