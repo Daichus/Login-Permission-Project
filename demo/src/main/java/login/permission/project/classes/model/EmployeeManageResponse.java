@@ -1,23 +1,9 @@
 package login.permission.project.classes.model;
 
-
-
 import lombok.Data;
-
 
 @Data
 public class EmployeeManageResponse {
-    public EmployeeManageResponse(int employee_id, String name, String email, String phoneNumber, String departmentName, String permission_code,String unitName, String positionName, String statusName) {
-        this.employee_id = employee_id;
-        this.name = name;
-        this.email = email;
-        this.phoneNumber = phoneNumber;
-        this.departmentName = departmentName;
-        this.unitName = unitName;
-        this.positionName = positionName;
-        this.permission_code = permission_code;
-        this.statusName = statusName;
-    }
 
     private int employee_id;
     private String name;
@@ -25,9 +11,22 @@ public class EmployeeManageResponse {
     private String phoneNumber;
     private String departmentName;
     private String unitName;
-    private String permission_code;
     private String positionName;
     private String statusName;
+    public EmployeeManageResponse(int employee_id, String name, String email,
+                                  String phoneNumber, String departmentName,String unitName,
+                                  String positionName, String statusName) {
+        this.employee_id = employee_id;
+        this.name = name;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+        this.departmentName = departmentName;
+        this.unitName = unitName;
+        this.positionName = positionName;
+        this.statusName = statusName;
+    }
+
+
 
 
 

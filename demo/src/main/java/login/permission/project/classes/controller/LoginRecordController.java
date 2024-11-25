@@ -43,7 +43,7 @@ public class LoginRecordController {
 
     @PostMapping("/getLoginRecord")
     public ResponseEntity<?> getRecordByPermissionId(HttpServletRequest request) {
-        return lrs.getRecordByPermissionId(request);
+        return lrs.getRecordByPermissionCode(request);
     }
 }
 

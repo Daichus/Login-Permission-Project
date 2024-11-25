@@ -75,14 +75,14 @@ public class LoginRecordService {
         }
     }
 
-    public  ResponseEntity<?> getRecordByPermissionId(HttpServletRequest request) {
+    public  ResponseEntity<?> getRecordByPermissionCode(HttpServletRequest request) {
         Claims claims = js.isTokenValid(request);
         List<LoginRecord> loginRecords = null;
 
         if(claims != null) {
-            List<Integer> permissionId = claims.get("permissionId", List.class);
-            for(Integer id : permissionId) {
-                if(id == 2 || id == 3 || id == 4) {
+            List<String> permissionCode = claims.get("permissionCode", List.class);
+            for(String code : permissionCode) {
+                if(code.equals("login_rec_read") || code.equals("login_rec_update") || code.equals("login_rec_create") || code.equals("login_rec_delete")) {
                     loginRecords = lrr.findAll();
                 } else {
                     loginRecords = lrr.findByEmployeeId(Integer.parseInt(claims.getSubject()));
