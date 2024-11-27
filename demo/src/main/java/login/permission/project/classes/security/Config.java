@@ -24,7 +24,7 @@ public class Config {
                     return config;
                 }))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login").permitAll()
+                        .requestMatchers("/employee/test/login").permitAll()
                         .anyRequest().denyAll()
                 )
                 .httpBasic(httpBasic -> httpBasic.disable());
