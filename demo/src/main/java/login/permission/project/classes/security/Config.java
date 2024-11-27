@@ -12,9 +12,9 @@ public class Config {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
         http
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/login").permitAll()
+                        .requestMatchers("/login").permitAll().anyRequest().denyAll()
 
-                );
+                ).httpBasic(httpBasic -> httpBasic.disable());;
 
 
         return http.build();
