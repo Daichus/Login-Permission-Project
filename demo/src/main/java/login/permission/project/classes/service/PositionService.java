@@ -1,46 +1,60 @@
 package login.permission.project.classes.service;
 
+import java.util.List;
 import login.permission.project.classes.model.Position;
 import login.permission.project.classes.repository.PositionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
 
+/**
+ * PositionService.
+ */
 @Service
 public class PositionService {
 
-    @Autowired
-    PositionRepository pr;
+  @Autowired
+  PositionRepository pr;
 
-    public List<Position> getAllPositions() {
-        return pr.findAll();
-    }
+  public List<Position> getAllPositions() {
+    return pr.findAll();
+  }
 
-    public List<Position> getPositionById(Integer unitId, Integer positionId) {
-        return pr.findByUnitIdAndPositionId(unitId, positionId);
-    }
+  public List<Position> getPositionById(Integer unitId, Integer positionId) {
+    return pr.findByUnitIdAndPositionId(unitId, positionId);
+  }
 
-    public String addPosition(Position position){
-        pr.save(position);
-        return String.format("新增職位成功\n職位名稱: %s\n職位id: %s\n科別代號: %s",
-                position.getPosition(),
-                position.getPosition_id(),
-                position.getUnit_id());
-    }
+  /**
+   * 新增職位.
+   *
+   * @param position Create
+   * @return New Position
+   */
+  public String addPosition(Position position) {
+    pr.save(position);
+    return String.format("新增職位成功\n職位名稱: %s\n職位id: %s\n科別代號: %s",
+            position.getPosition(),
+            position.getPosition_id(),
+            position.getUnit_id());
+  }
 
-    public String updatePosition(Position position) {
-        if (position != null) {
-            pr.save(position);
-            return "修改職位資訊完成";
-        } else {
-            return "更新職位資訊失敗";
-        }
+  /**
+   * 更新職位資訊.
+   *
+   * @param position Edit
+   * @return After Edit Position Information
+   */
+  public String updatePosition(Position position) {
+    if (position != null) {
+      pr.save(position);
+      return "修改職位資訊完成";
+    } else {
+      return "更新職位資訊失敗";
     }
+  }
 
-    public String deletePosition(int id) {
-        pr.deleteById(id);
-        return "刪除職位成功";
-    }
+  public String deletePosition(int id) {
+    pr.deleteById(id);
+    return "刪除職位成功";
+  }
 }
