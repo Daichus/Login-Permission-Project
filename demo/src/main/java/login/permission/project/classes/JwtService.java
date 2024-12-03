@@ -64,7 +64,11 @@ public class JwtService {
      */
     public Claims isTokenValid(HttpServletRequest request) {
         try{
-            String token = request.getHeader("Authorization").replace("Bearer ","");
+            String authHeader = request.getHeader("Authorization");
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                return null;
+            }
+            String token = authHeader.substring(7);
             return Jwts.parserBuilder()
                     .setSigningKey(getSigningKey())
                     .requireIssuer("Fcu 113-1 CSIE Team 2")
