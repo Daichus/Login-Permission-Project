@@ -1,6 +1,5 @@
 package login.permission.project.classes.model;
 
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -9,25 +8,32 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Entity class representing the mapping between positions and permissions.
+ */
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@Table(name="PermissionMap")
+@Table(name = "PermissionMap")
 public class PermissionMap {
 
-    @Id
-    @Column(name="permissionMap_id")
-    private int permissionMap_id;
+  /**
+   * Primary key identifier for the permission mapping.
+   */
+  @Id
+  @Column(name = "permissionMap_id")
+  private int permissionMapId;
 
+  /**
+   * ID of the position in this mapping.
+   */
+  @Column(name = "position_id")
+  private int positionId;
 
-    @Column(name="position_id")
-    private int position_id;
-
-    @Column(name="permission_id")
-    private int permission_id;
-
-
-
-
+  /**
+   * ID of the permission in this mapping.
+   */
+  @Column(name = "permission_id")
+  private int permissionId;
 }

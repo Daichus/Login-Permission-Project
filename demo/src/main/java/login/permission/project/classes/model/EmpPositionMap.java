@@ -5,34 +5,45 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Entity class representing the mapping between employees and positions.
+ */
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@Table(name="EmpPositionMap")
+@Table(name = "EmpPositionMap")
 public class EmpPositionMap {
 
-    @Id
-    private int empPositionMap_id;
+  /**
+   * Primary key identifier for the employee-position mapping.
+   */
+  @Id
+  private int empPositionMapId;
 
-    @Column(name = "employee_id")
-    private Integer employee_id;
+  /**
+   * ID of the employee in this mapping.
+   */
+  @Column(name = "employee_id")
+  private Integer employeeId;
 
-    @Column(name = "position_id")
-    private Integer position_id;
+  /**
+   * ID of the position in this mapping.
+   */
+  @Column(name = "position_id")
+  private Integer positionId;
 
-    @ManyToOne
-    @JoinColumn(name = "employee_id", insertable = false, updatable = false)
-    private Employee employee;
+  /**
+   * Employee entity associated with this mapping.
+   */
+  @ManyToOne
+  @JoinColumn(name = "employee_id", insertable = false, updatable = false)
+  private Employee employee;
 
-    @ManyToOne
-    @JoinColumn(name = "position_id", insertable = false, updatable = false)
-    private Position position;
-
+  /**
+   * Position entity associated with this mapping.
+   */
+  @ManyToOne
+  @JoinColumn(name = "position_id", insertable = false, updatable = false)
+  private Position position;
 }
-
-
-
-
-
-
