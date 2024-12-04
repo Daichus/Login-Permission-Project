@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface EmployeeRepository extends JpaRepository<Employee, Integer> {
 
@@ -39,5 +40,9 @@ public interface EmployeeRepository extends JpaRepository<Employee, Integer> {
             "WHERE e.employee_id = :employee_id")
     List<Employee.DepartmentAndUnit> getDepartmentAndUnit(@Param("employee_id") int employee_id);
 
+    //驗證 Mail
+    Optional<Employee> findByVerificationToken(String token);
 
+    @Query("SELECT MAX(e.employee_id) FROM Employee e")
+    Integer findMaxEmployeeId();
 }

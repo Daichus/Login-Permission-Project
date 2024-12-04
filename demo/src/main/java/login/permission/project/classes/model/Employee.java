@@ -17,7 +17,7 @@ public class Employee {
 
     @Id
     @Column(name = "employee_id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int employee_id;
 
     @Column(name = "email")
@@ -32,9 +32,14 @@ public class Employee {
     @Column(name = "phone_number")
     private String phoneNumber;
 
-
     @Column(name = "status_id")
     private Integer status_id;
+
+    @Column(name = "enabled")
+    private boolean enabled = false;  // 是否已驗證
+
+    @Column(name = "verification_token")
+    private String verificationToken;  // 驗證碼
 
     @ManyToOne
     @JoinColumn(name = "status_id", insertable = false, updatable = false)

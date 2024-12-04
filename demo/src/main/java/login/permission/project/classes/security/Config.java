@@ -27,13 +27,20 @@ public class Config {
                     CorsConfiguration config = new CorsConfiguration();
                     config.setAllowedOrigins(List.of("http://localhost:5173"));
                     config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
-                    config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+//                    config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+                    config.setAllowedHeaders(List.of("*"));  // 允許所有 headers
                     config.setAllowCredentials(true);
+
                     return config;
                 }))
                 .authorizeHttpRequests(auth -> auth
-                        // 登入不需要權限
-                        .requestMatchers("/employee/test/login").permitAll()
+
+                        // 允許不需要驗證的端點
+                        // 登入和註冊不需要權限
+                        .requestMatchers(
+                                "/employee/test/login",
+                                "/employee/test/add"   // 添加註冊端點
+                        ).permitAll()
 
                         // 部門管理相關權限
                         .requestMatchers(HttpMethod.GET, "/department/**").hasAuthority("dept_mgt_read")

@@ -62,4 +62,9 @@ public class EmployeeController {
     public List<EmployeeManageResponse> findAllEmployeeManageResponses () {
         return es.findAllEmployeeManageResponses();
     }
+
+    @GetMapping("/verify")
+    public String verifyAccount(@RequestParam String token) {
+        return es.verifyAccount(token);
+    }
 }
