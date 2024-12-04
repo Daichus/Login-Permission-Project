@@ -51,4 +51,14 @@ public class Employee {
     @OneToMany(mappedBy = "employee")
     private Set<LoginRecord> loginRecords;
 
+    @Data
+    @AllArgsConstructor
+    public static class DepartmentAndUnit {
+        private int department_id;
+        private int unit_id;
+        private String department_name;
+        private String unit_name;
+        private String position;
+    }
+
 }

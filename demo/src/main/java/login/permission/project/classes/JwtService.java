@@ -30,7 +30,7 @@ public class JwtService {
      *JWT包含Header,Payload,Signature三個部分
      *方法中需要手動設定JWT的Payload以定義要傳送回前端的訊息
      */
-    public String generateToken(Employee employee,int record_id, List<String> permission_code) {
+    public String generateToken(Employee employee,int record_id, List<String> permission_code, List<Employee.DepartmentAndUnit> departmentAndUnits) {
         Map<String, Object> userData = new HashMap<>();
         String employee_id = String.valueOf(employee.getEmployee_id());
         userData.put("loginRecordId",record_id);
@@ -39,6 +39,7 @@ public class JwtService {
         userData.put("userPhone", employee.getPhoneNumber());
         userData.put("userStatusId", employee.getStatus_id());
         userData.put("permissionCode", permission_code);
+        userData.put("departmentAndUnit",departmentAndUnits);
 
         Date expDate = new Date(System.currentTimeMillis() + EXPIRATION_TIME);
 
