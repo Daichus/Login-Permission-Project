@@ -42,6 +42,14 @@ public class Config {
                                 "/employee/test/add"   // 添加註冊端點
                         ).permitAll()
 
+                        //測試 打開 Permission, Position 權限
+                                .requestMatchers(
+                                        "/Permission/test/get",
+                                        "/Position/get",
+                                "/status/test/get",
+                                        "/employee/test/getAllEmployeeInfo"
+                                ).permitAll()
+
                         // 部門管理相關權限
                         .requestMatchers(HttpMethod.GET, "/department/**").hasAuthority("dept_mgt_read")
                         .requestMatchers(HttpMethod.POST, "/department/**").hasAuthority("dept_mgt_create")
