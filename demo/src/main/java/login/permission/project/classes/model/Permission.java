@@ -28,8 +28,8 @@ public class Permission {
     @Column(name="permission_code")
     private String permission_code;
 
-    @ManyToMany(mappedBy = "permissions")
-    private Set<Position> positions;
+    //@ManyToMany(mappedBy = "permissions")
+    //private Set<Position> positions;
 
 
 }

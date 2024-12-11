@@ -32,13 +32,13 @@ public interface EmployeeRepository extends JpaRepository<Employee, Integer> {
     List<String> getPermissionById(@Param("employee_id") int employee_id);
 
 
-    @Query("SELECT new login.permission.project.classes.model.Employee$DepartmentAndUnit(department.department_id, unit.unit_id, department.department_name, unit.unit_name, position.position) " +
-            "FROM EmpPositionMap e  " +
-            "JOIN Position position ON e.position_id = position.position_id " +
-            "JOIN Unit unit ON position.unit_id = unit.unit_id " +
-            "JOIN Department department ON unit.department_id = department.department_id " +
-            "WHERE e.employee_id = :employee_id")
-    List<Employee.DepartmentAndUnit> getDepartmentAndUnit(@Param("employee_id") int employee_id);
+//    @Query("SELECT new login.permission.project.classes.model.Employee$DepartmentAndUnit(department.department_id, unit.unit_id, department.department_name, unit.unit_name, position.position) " +
+//            "FROM EmpPositionMap e  " +
+//            "JOIN Position position ON e.position_id = position.position_id " +
+//            "JOIN Unit unit ON position.unit_id = unit.unit_id " +
+//            "JOIN Department department ON unit.department_id = department.department_id " +
+//            "WHERE e.employee_id = :employee_id")
+//    List<Employee.DepartmentAndUnit> getDepartmentAndUnit(@Param("employee_id") int employee_id);
 
     //驗證 Mail
     Optional<Employee> findByVerificationToken(String token);

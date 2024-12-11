@@ -45,7 +45,7 @@ public class Employee {
     @JoinColumn(name = "status_id", insertable = false, updatable = false)
     private Status employeeStatus;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "EmpPositionMap",
             joinColumns = @JoinColumn(name = "employee_id"),

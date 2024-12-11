@@ -31,10 +31,10 @@ public class Position {
     @JoinColumn(name = "unit_id", insertable = false, updatable = false)
     private Unit unit;
 
-    @ManyToMany(mappedBy = "positions")
-    private Set<Employee> employees;
+    //@ManyToMany(mappedBy = "positions")
+    //private Set<Employee> employees;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "PermissionMap",
             joinColumns = @JoinColumn(name = "position_id"),

@@ -120,9 +120,8 @@ public class EmployeeService {
                 //為避免混淆,登錄紀錄id變數名稱之後需再修改
                 int record_id = record.getRecord_id();
                 List<String> permission_code = er.getPermissionById(employee.getEmployee_id());
-                List<Employee.DepartmentAndUnit> departmentAndUnit = er.getDepartmentAndUnit(employee.getEmployee_id());
 
-                String JWT_Token = jwtService.generateToken(employee, record_id, permission_code, departmentAndUnit);
+                String JWT_Token = jwtService.generateToken(employee, record_id, permission_code);
                 return ResponseEntity.ok(JWT_Token);
             }  else {
                 lrr.save(new LoginRecord(employee.getEmployee_id(),"testIpAddress", LocalDateTime.now(),null,"失敗"));
