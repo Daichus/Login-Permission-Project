@@ -7,10 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import login.permission.project.classes.JwtService;
 
 
-import login.permission.project.classes.model.Permission;
-import login.permission.project.classes.model.Role;
-import login.permission.project.classes.model.RoleDTO;
-import login.permission.project.classes.model.ServerResponse;
+import login.permission.project.classes.model.*;
 import login.permission.project.classes.repository.PermissionRepository;
 import login.permission.project.classes.repository.RoleRepository;
 
@@ -34,10 +31,13 @@ public class RoleService {
     @Autowired
     PermissionRepository permissionRepository;
 
+    @Autowired
+    ResponseUtil responseUtil;
+
 
     public ResponseEntity<?> getAllRole() {
         List<Role> roles =  roleRepository.findAll();
-        return createResponse("獲取所有角色成功",roles, HttpStatus.OK);
+        return ResponseUtil.createResponse("獲取所有角色成功",roles, HttpStatus.OK);
     }
 
     /**
@@ -56,10 +56,10 @@ public class RoleService {
             Role role = new Role();
             setupRole(role, roleDto);
 
-            return createResponse("新增角色成功",null, HttpStatus.OK);
+            return  ResponseUtil.createResponse("新增角色成功",null, HttpStatus.OK);
 
         } else {
-            return createResponse("你沒有新增角色的權限", null, HttpStatus.UNAUTHORIZED);
+            return  ResponseUtil.createResponse("你沒有新增角色的權限", null, HttpStatus.UNAUTHORIZED);
         }
 
     }
@@ -84,12 +84,12 @@ public class RoleService {
             if(roleOption.isPresent()) {
                 Role role = roleOption.get();
                 setupRole(role, roleDto);
-                return createResponse("修改角色成功",null, HttpStatus.OK);
+                return ResponseUtil.createResponse("修改角色成功",null, HttpStatus.OK);
             } else {
-                return createResponse("找不到指定的角色",null, HttpStatus.NOT_FOUND);
+                return  ResponseUtil.createResponse("找不到指定的角色",null, HttpStatus.NOT_FOUND);
             }
         } else {
-            return createResponse("你沒有修改角色的權限",null, HttpStatus.UNAUTHORIZED);
+            return   ResponseUtil.createResponse("你沒有修改角色的權限",null, HttpStatus.UNAUTHORIZED);
         }
 
     }
@@ -119,11 +119,6 @@ public class RoleService {
     }
 
 
-    /**
-     *  創建回應的方法
-     */
-    private ResponseEntity<ServerResponse> createResponse(String message, Object data, HttpStatus status) {
-        return ResponseEntity.status(status).body(new ServerResponse(message, data));
-    }
+
 
 }
