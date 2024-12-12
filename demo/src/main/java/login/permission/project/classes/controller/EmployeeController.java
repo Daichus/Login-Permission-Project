@@ -27,15 +27,19 @@ public class EmployeeController {
     LoginRecordService lrs;
 
     @GetMapping("/get")
-    public List<Employee> getAllEmployees() {
-        return es.getAllEmployees();
+    public ResponseEntity<?> getAllEmployees(HttpServletRequest request) {
+        return es.getAllEmployees( request);
     }
-
 
     @PostMapping("/login")
     @CrossOrigin("http://localhost:5173/")
     public ResponseEntity<?> login (@RequestBody EmployeeLoginRequest request) {
         return  es.login(request);
+    }
+
+    @PostMapping("/getEmployeeById/{id}")
+    public ResponseEntity<?> getEmployeeById(@PathVariable int id,HttpServletRequest request) {
+        return es.getEmployeeById(id,request);
     }
 
     @PostMapping("/add")
@@ -58,10 +62,10 @@ public class EmployeeController {
         return lrs.updateLogoutTime(request);
     }
 
-    @GetMapping("/getAllEmployeeInfo")
-    public List<EmployeeManageResponse> findAllEmployeeManageResponses () {
-        return es.findAllEmployeeManageResponses();
-    }
+//    @GetMapping("/getAllEmployeeInfo")
+//    public List<EmployeeManageResponse> findAllEmployeeManageResponses () {
+//        return es.findAllEmployeeManageResponses();
+//    }
 
     @GetMapping("/verify")
     public String verifyAccount(@RequestParam String token) {

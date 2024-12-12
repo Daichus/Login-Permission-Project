@@ -1,6 +1,7 @@
 package login.permission.project.classes;
 
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.impl.DefaultClaims;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,15 +31,9 @@ public class JwtService {
      *JWT包含Header,Payload,Signature三個部分
      *方法中需要手動設定JWT的Payload以定義要傳送回前端的訊息
      */
-    public String generateToken(Employee employee,int record_id, List<String> permission_code) {
+    public String generateToken(String employee_id,int record_id) {
         Map<String, Object> userData = new HashMap<>();
-        String employee_id = String.valueOf(employee.getEmployee_id());
         userData.put("loginRecordId",record_id);
-        userData.put("userName", employee.getName());
-        userData.put("userEmail", employee.getEmail());
-        userData.put("userPhone", employee.getPhoneNumber());
-        userData.put("userStatusId", employee.getStatus_id());
-        userData.put("permissionCode", permission_code);
 
         Date expDate = new Date(System.currentTimeMillis() + EXPIRATION_TIME);
 
@@ -76,7 +71,6 @@ public class JwtService {
                     .parseClaimsJws(token)
                     .getBody();
         } catch(JwtException e) {
-            System.out.println("Token validation failed: " + e.getMessage());
             return null;
         }
     }

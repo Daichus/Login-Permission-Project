@@ -21,10 +21,9 @@ public class PermissionService {
   //post
   public String addPermission(Permission permission) {
     permissionRepository.save(permission);
-    return String.format("新增權限成功\n權限id: %s\n權限名稱: %s\n權限描述: %s",
+    return String.format("新增權限成功\n權限id: %s\n權限名稱: %s",
             permission.getPermission_id(),
-            permission.getPermission_name(),
-            permission.getDescription());
+            permission.getPermission_name());
   }
 
   //put

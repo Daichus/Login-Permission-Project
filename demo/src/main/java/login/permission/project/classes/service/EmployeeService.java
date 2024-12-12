@@ -1,11 +1,13 @@
 package login.permission.project.classes.service;
 
+import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.HttpServletRequest;
 import login.permission.project.classes.JwtService;
 import login.permission.project.classes.model.Employee;
 import login.permission.project.classes.model.EmployeeLoginRequest;
-import login.permission.project.classes.model.EmployeeManageResponse;
+
 import login.permission.project.classes.model.LoginRecord;
-import login.permission.project.classes.repository.EmployeeLoginRequestRepository;
+
 import login.permission.project.classes.repository.EmployeeRepository;
 import login.permission.project.classes.repository.LoginRecordRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,14 +22,16 @@ import java.util.UUID;
 @Service
 public class EmployeeService {
 
+
+
     @Autowired
     EmployeeRepository er;
 
-    @Autowired
-    EmployeeLoginRequestRepository elr;
+//    @Autowired
+//    EmployeeLoginRequestRepository elr;
 
     @Autowired
-    LoginRecordRepository lrr;
+    LoginRecordRepository logRecRepository;
 
     @Autowired
     JwtService jwtService;
@@ -35,8 +39,42 @@ public class EmployeeService {
     @Autowired
     EmailService emailService;
 
-    public List<Employee> getAllEmployees() {
-        return er.findAll();
+    private static final String unAuthMessage = "您沒有權限,或持有的jwt憑證已過期";
+
+    public ResponseEntity<?> getAllEmployees(HttpServletRequest request) {
+        Claims claims = jwtService.isTokenValid(request);
+        ResponseEntity<?> response;
+
+        if(claims != null) {
+            List<Employee> employees = er.findAll();
+            for(Employee employee : employees) {
+                employee.setPassword("NaN");
+            }
+            response = ResponseEntity.ok().body(employees);
+        } else {
+            response = ResponseEntity.status(HttpStatus.NOT_FOUND).body(unAuthMessage);
+        }
+        return response;
+    }
+
+    public ResponseEntity<?> getEmployeeById(int id, HttpServletRequest request){
+        Claims claims = jwtService.isTokenValid(request);
+        ResponseEntity<?> response;
+
+        if(claims != null) {
+            Optional<Employee> employeeOption = er.findById(id);
+            if(employeeOption.isPresent()) {
+                Employee employee = employeeOption.get();
+                employee.setPassword("NaN");
+                response = ResponseEntity.ok().body(employee);
+            } else {
+                response = ResponseEntity.status(HttpStatus.NOT_FOUND).body("找不到用戶");
+            }
+
+        } else {
+            response = ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(unAuthMessage);
+        }
+        return response;
     }
 
 
@@ -97,7 +135,6 @@ public class EmployeeService {
         return "刪除員工成功";
     }
 
-
     /**
      * 1. 登錄成功以後回傳JWT　token
      * 2. 修改登入方法，加入驗證檢查
@@ -116,24 +153,25 @@ public class EmployeeService {
 
             if(request.getPassword().equals(employee.getPassword())) {
                 LoginRecord record = new LoginRecord(employee.getEmployee_id(),"testIpAddress", LocalDateTime.now(),null,"成功");
-                record = lrr.save(record);
+                record = logRecRepository.save(record);
                 //為避免混淆,登錄紀錄id變數名稱之後需再修改
                 int record_id = record.getRecord_id();
-                List<String> permission_code = er.getPermissionById(employee.getEmployee_id());
+                String employee_id = String.valueOf(employee.getEmployee_id());
 
-                String JWT_Token = jwtService.generateToken(employee, record_id, permission_code);
+
+                String JWT_Token = jwtService.generateToken(employee_id, record_id);
                 return ResponseEntity.ok(JWT_Token);
             }  else {
-                lrr.save(new LoginRecord(employee.getEmployee_id(),"testIpAddress", LocalDateTime.now(),null,"失敗"));
+                logRecRepository.save(new LoginRecord(employee.getEmployee_id(),"testIpAddress", LocalDateTime.now(),null,"失敗"));
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("密碼錯誤");
             }
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("找不到用戶");
     }
 
-    public List<EmployeeManageResponse> findAllEmployeeManageResponses () {
-        return er.findAllEmployeeManageResponses();
-    }
+//    public List<EmployeeManageResponse> findAllEmployeeManageResponses () {
+//        return er.findAllEmployeeManageResponses();
+//    }
 
 
 

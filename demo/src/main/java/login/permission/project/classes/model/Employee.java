@@ -41,29 +41,31 @@ public class Employee {
     @Column(name = "verification_token")
     private String verificationToken;  // 驗證碼
 
-    @ManyToOne
+
+//一對多與多對多關聯表
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "status_id", insertable = false, updatable = false)
     private Status employeeStatus;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-            name = "EmpPositionMap",
+            name = "EmployeePositionMap",
             joinColumns = @JoinColumn(name = "employee_id"),
-            inverseJoinColumns = @JoinColumn(name = "position_id")
+            inverseJoinColumns = @JoinColumn(name = "role_id")
     )
-    private Set<Position> positions;
+    private Set<Role> roles;
 
-    @OneToMany(mappedBy = "employee")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "employee")
     private Set<LoginRecord> loginRecords;
 
-    @Data
-    @AllArgsConstructor
-    public static class DepartmentAndUnit {
-        private int department_id;
-        private int unit_id;
-        private String department_name;
-        private String unit_name;
-        private String position;
-    }
+//    @Data
+//    @AllArgsConstructor
+//    public static class DepartmentAndUnit {
+//        private int department_id;
+//        private int unit_id;
+//        private String department_name;
+//        private String unit_name;
+//        private String position;
+//    }
 
 }
