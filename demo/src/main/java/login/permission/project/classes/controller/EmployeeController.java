@@ -3,17 +3,14 @@ package login.permission.project.classes.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import login.permission.project.classes.model.Employee;
 import login.permission.project.classes.model.EmployeeLoginRequest;
-import login.permission.project.classes.model.EmployeeManageResponse;
 import login.permission.project.classes.service.EmployeeService;
 import login.permission.project.classes.service.LoginRecordService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
 
 @RestController
 @RequestMapping("/employee/test")
@@ -62,10 +59,7 @@ public class EmployeeController {
         return lrs.updateLogoutTime(request);
     }
 
-//    @GetMapping("/getAllEmployeeInfo")
-//    public List<EmployeeManageResponse> findAllEmployeeManageResponses () {
-//        return es.findAllEmployeeManageResponses();
-//    }
+
 
     @GetMapping("/verify")
     public String verifyAccount(@RequestParam String token) {

@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -32,13 +33,14 @@ public class RoleService {
     PermissionRepository permissionRepository;
 
     @Autowired
-    ResponseUtil responseUtil;
+    JwtUtil jwtUtil;
 
 
     public ResponseEntity<?> getAllRole() {
         List<Role> roles =  roleRepository.findAll();
-        return ResponseUtil.createResponse("獲取所有角色成功",roles, HttpStatus.OK);
+        return ResponseUtil.success("獲取所有角色成功",  HttpStatus.OK);
     }
+
 
     /**
      *創建新角色的方法,前端必須傳一個包含jwt token的HttpServletRequest,
@@ -49,20 +51,17 @@ public class RoleService {
      * }資料的body,這筆資料需要用於創建新的Role
      */
     public ResponseEntity<?> createNewRole (RoleDTO roleDto, HttpServletRequest request) {
-        Claims claims = jwtService.isTokenValid(request);
-        ResponseEntity<?> response;
-
-        if(claims != null) {
+        try {
+            jwtUtil.validateRequest(request);
             Role role = new Role();
             setupRole(role, roleDto);
-
-            return  ResponseUtil.createResponse("新增角色成功",null, HttpStatus.OK);
-
-        } else {
-            return  ResponseUtil.createResponse("你沒有新增角色的權限", null, HttpStatus.UNAUTHORIZED);
+            return  ResponseUtil.success("新增角色成功",  HttpStatus.OK);
+        } catch ( IllegalArgumentException e) {
+            return  ResponseUtil.error("你沒有新增角色的權限",  HttpStatus.UNAUTHORIZED);
         }
 
     }
+
 
     /**
      *  此方法用於更新角色, 接受一個包含jwt token的HttpServletRequest,
@@ -74,24 +73,20 @@ public class RoleService {
      *        }
      *      的資料
      */
-
     public ResponseEntity<?> updateRole(RoleDTO roleDto, HttpServletRequest request) {
-        Claims claims = jwtService.isTokenValid(request);
-        ResponseEntity<?> response;
-
-        if(claims != null) {
+        try{
+            jwtUtil.validateRequest(request);
             Optional<Role> roleOption = roleRepository.findById(roleDto.getRole_id());
             if(roleOption.isPresent()) {
                 Role role = roleOption.get();
                 setupRole(role, roleDto);
-                return ResponseUtil.createResponse("修改角色成功",null, HttpStatus.OK);
+                return ResponseUtil.success("修改角色成功",  HttpStatus.OK);
             } else {
-                return  ResponseUtil.createResponse("找不到指定的角色",null, HttpStatus.NOT_FOUND);
+                return   ResponseUtil.error("找不到指定id的角色",  HttpStatus.NOT_FOUND);
             }
-        } else {
-            return   ResponseUtil.createResponse("你沒有修改角色的權限",null, HttpStatus.UNAUTHORIZED);
+        } catch (IllegalArgumentException e) {
+            return   ResponseUtil.error("你沒有修改角色的權限",  HttpStatus.UNAUTHORIZED);
         }
-
     }
 
 
@@ -102,6 +97,7 @@ public class RoleService {
         role.setRoleName(roleDto.getRoleName());
         role.setPermissions(getPermissionsFromIds(roleDto.getPermission_id()));
     }
+
 
     /**
      *  根據用戶傳來的權限id, 回傳相應的權限set,以供setupRole更新角色的權限資訊
@@ -117,6 +113,11 @@ public class RoleService {
             throw new IllegalArgumentException("權限 ID 格式錯誤,必須為阿拉伯數字", e);
         }
     }
+
+
+
+
+
 
 
 

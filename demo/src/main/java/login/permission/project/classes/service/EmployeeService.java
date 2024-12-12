@@ -3,22 +3,18 @@ package login.permission.project.classes.service;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import login.permission.project.classes.JwtService;
-import login.permission.project.classes.model.Employee;
-import login.permission.project.classes.model.EmployeeLoginRequest;
-
-import login.permission.project.classes.model.EmployeeRoleDto;
-import login.permission.project.classes.model.LoginRecord;
+import login.permission.project.classes.model.*;
 
 import login.permission.project.classes.repository.EmployeeRepository;
 import login.permission.project.classes.repository.LoginRecordRepository;
+import login.permission.project.classes.repository.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class EmployeeService {
@@ -39,6 +35,14 @@ public class EmployeeService {
 
     @Autowired
     EmailService emailService;
+
+    @Autowired
+    JwtUtil jwtUtil;
+
+    @Autowired
+    RoleRepository roleRepository;
+
+
 
     private static final String unAuthMessage = "您沒有權限,或持有的jwt憑證已過期";
 
@@ -77,7 +81,6 @@ public class EmployeeService {
         }
         return response;
     }
-
 
     public String addEmployee (Employee employee) {
         if(employee != null){
@@ -170,8 +173,29 @@ public class EmployeeService {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("找不到用戶");
     }
 
+
+
     public ResponseEntity<?> setEmployeeRole (EmployeeRoleDto dto, HttpServletRequest request) {
-        return null;
+       try {
+           jwtUtil.validateRequest(request);
+           Optional<Employee> employeeOptional = er.findById(dto.getEmployee_id());
+           if(employeeOptional.isPresent()) {
+               Set<Integer> roleIds = Arrays.stream(dto.getRoleIds()) // 转换为 Stream
+                       .map(Integer::parseInt)                  // 将字符串解析为整数
+                       .collect(Collectors.toSet());
+               Set<Role> roles = new HashSet<>(roleRepository.findAllById(roleIds));
+               Employee employee = employeeOptional.get();
+               employee.setRoles(roles);
+
+               return ResponseUtil.error("設定員工角色成功",HttpStatus.OK);
+           } else {
+               return ResponseUtil.error("找不到指定id的員工",HttpStatus.NOT_FOUND);
+           }
+
+
+       } catch (IllegalArgumentException e) {
+           return ResponseUtil.error("你沒有設定角色的權限",HttpStatus.UNAUTHORIZED);
+       }
     }
 
 
