@@ -49,7 +49,7 @@ public class Employee {
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-            name = "EmployeePositionMap",
+            name = "EmployeeRoleMap",
             joinColumns = @JoinColumn(name = "employee_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
@@ -58,14 +58,6 @@ public class Employee {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "employee")
     private Set<LoginRecord> loginRecords;
 
-//    @Data
-//    @AllArgsConstructor
-//    public static class DepartmentAndUnit {
-//        private int department_id;
-//        private int unit_id;
-//        private String department_name;
-//        private String unit_name;
-//        private String position;
-//    }
+
 
 }

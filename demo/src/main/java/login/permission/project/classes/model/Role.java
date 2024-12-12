@@ -32,11 +32,13 @@ public class Role {
      * 由jpa自動生成關聯表,對應permission表
      */
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "rolePermissionMap",
+    @JoinTable(name = "RolePermissionMap",
                joinColumns = @JoinColumn(name = "role_id"),
                inverseJoinColumns = @JoinColumn(name = "permission_id")
     )
     private Set<Permission> permissions = new HashSet<>();
+
+
 
 
 
