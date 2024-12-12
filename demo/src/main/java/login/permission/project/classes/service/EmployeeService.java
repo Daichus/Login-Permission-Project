@@ -169,9 +169,11 @@ public class EmployeeService {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("找不到用戶");
     }
 
-//    public List<EmployeeManageResponse> findAllEmployeeManageResponses () {
-//        return er.findAllEmployeeManageResponses();
-//    }
+    public ResponseEntity<?> setEmployeeRole (HttpServletRequest request) {
+
+    }
+
+
 
 
 
