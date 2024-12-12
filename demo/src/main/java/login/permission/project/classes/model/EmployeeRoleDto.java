@@ -10,5 +10,8 @@ import lombok.NoArgsConstructor;
 @Data
 public class EmployeeRoleDto {
 
+    private int employee_id;
+
+    private String [] roleIds;
 
 }

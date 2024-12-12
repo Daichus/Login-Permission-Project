@@ -6,6 +6,7 @@ import login.permission.project.classes.JwtService;
 import login.permission.project.classes.model.Employee;
 import login.permission.project.classes.model.EmployeeLoginRequest;
 
+import login.permission.project.classes.model.EmployeeRoleDto;
 import login.permission.project.classes.model.LoginRecord;
 
 import login.permission.project.classes.repository.EmployeeRepository;
@@ -169,8 +170,8 @@ public class EmployeeService {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("找不到用戶");
     }
 
-    public ResponseEntity<?> setEmployeeRole (HttpServletRequest request) {
-
+    public ResponseEntity<?> setEmployeeRole (EmployeeRoleDto dto, HttpServletRequest request) {
+        return null;
     }
 
 

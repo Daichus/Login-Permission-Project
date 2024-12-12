@@ -6,6 +6,7 @@ import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import login.permission.project.classes.JwtService;
 
+
 import login.permission.project.classes.model.Permission;
 import login.permission.project.classes.model.Role;
 import login.permission.project.classes.model.RoleDTO;
@@ -48,7 +49,7 @@ public class RoleService {
      * }資料的body,這筆資料需要用於創建新的Role
      */
     public ResponseEntity<?> createNewRole (RoleDTO roleDto, HttpServletRequest request) {
-        Claims claims = validateToken(request);
+        Claims claims = jwtService.isTokenValid(request);
         ResponseEntity<?> response;
 
         if(claims != null) {
@@ -65,11 +66,17 @@ public class RoleService {
 
     /**
      *  此方法用於更新角色, 接受一個包含jwt token的HttpServletRequest,
-     *  與要用於更新角色的相關資料做為參數
+     *  與要用於更新角色的相關資料做為參數,同樣需要前端傳送一個
+     *  結構為{
+     *        role_id:"1",
+     *        roleName:"Admin",
+     *        permission_id:["1","2","3"]
+     *        }
+     *      的資料
      */
 
     public ResponseEntity<?> updateRole(RoleDTO roleDto, HttpServletRequest request) {
-        Claims claims = validateToken(request);
+        Claims claims = jwtService.isTokenValid(request);
         ResponseEntity<?> response;
 
         if(claims != null) {
@@ -87,12 +94,6 @@ public class RoleService {
 
     }
 
-    /**
-     *  驗證jwt token的方法
-     */
-    private Claims validateToken(HttpServletRequest request) {
-        return jwtService.isTokenValid(request);
-    }
 
     /**
      *  更新role的方法
