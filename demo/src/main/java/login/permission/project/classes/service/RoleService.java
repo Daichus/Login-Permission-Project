@@ -48,7 +48,7 @@ public class RoleService {
      *     permission_id:["1","2","3"]
      * }資料的body,這筆資料需要用於創建新的Role
      */
-    public ResponseEntity<?> createNewRole (RoleDTO roleDto, HttpServletRequest request) {
+    public ResponseEntity<?> createRole (RoleDTO roleDto, HttpServletRequest request) {
         try {
             jwtUtil.validateRequest(request);
             Role role = new Role();

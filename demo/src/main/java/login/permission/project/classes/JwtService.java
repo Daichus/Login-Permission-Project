@@ -34,6 +34,7 @@ public class JwtService {
     public String generateToken(String employee_id,int record_id) {
         Map<String, Object> userData = new HashMap<>();
         userData.put("loginRecordId",record_id);
+        userData.put("permissionCode",new String[]{});
 
         Date expDate = new Date(System.currentTimeMillis() + EXPIRATION_TIME);
 
