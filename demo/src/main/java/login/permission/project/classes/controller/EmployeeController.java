@@ -3,6 +3,7 @@ package login.permission.project.classes.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import login.permission.project.classes.model.Employee;
 import login.permission.project.classes.model.EmployeeLoginRequest;
+import login.permission.project.classes.model.dto.EmployeeRoleDto;
 import login.permission.project.classes.service.EmployeeService;
 import login.permission.project.classes.service.LoginRecordService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +60,10 @@ public class EmployeeController {
         return lrs.updateLogoutTime(request);
     }
 
-
+    @PostMapping("/setRole")
+    public ResponseEntity<?> setEmployeeRole (@RequestBody EmployeeRoleDto dto, HttpServletRequest request) {
+            return es.setEmployeeRole(dto,request);
+    }
 
     @GetMapping("/verify")
     public String verifyAccount(@RequestParam String token) {
