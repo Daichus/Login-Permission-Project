@@ -1,13 +1,14 @@
 package login.permission.project.classes.service;
 
 
-import io.jsonwebtoken.Claims;
-
 import jakarta.servlet.http.HttpServletRequest;
 import login.permission.project.classes.JwtService;
 
 
 import login.permission.project.classes.model.*;
+import login.permission.project.classes.model.dto.RoleDTO;
+import login.permission.project.classes.model.util.JwtUtil;
+import login.permission.project.classes.model.util.ResponseUtil;
 import login.permission.project.classes.repository.PermissionRepository;
 import login.permission.project.classes.repository.RoleRepository;
 
@@ -25,9 +26,6 @@ public class RoleService {
 
     @Autowired
     RoleRepository roleRepository;
-
-    @Autowired
-    JwtService jwtService;
 
     @Autowired
     PermissionRepository permissionRepository;
@@ -55,6 +53,7 @@ public class RoleService {
             jwtUtil.validateRequest(request);
             Role role = new Role();
             setupRole(role, roleDto);
+            roleRepository.save(role);
             return  ResponseUtil.success("新增角色成功",  HttpStatus.OK);
         } catch ( IllegalArgumentException e) {
             return  ResponseUtil.error("你沒有新增角色的權限",  HttpStatus.UNAUTHORIZED);
@@ -80,6 +79,7 @@ public class RoleService {
             if(roleOption.isPresent()) {
                 Role role = roleOption.get();
                 setupRole(role, roleDto);
+                roleRepository.save(role);
                 return ResponseUtil.success("修改角色成功",  HttpStatus.OK);
             } else {
                 return   ResponseUtil.error("找不到指定id的角色",  HttpStatus.NOT_FOUND);
@@ -91,7 +91,7 @@ public class RoleService {
 
 
     /**
-     *  更新role的方法
+     *  更新Role(角色)的方法,設定Role名稱與Role的多對多關聯
      */
     private void setupRole(Role role, RoleDTO roleDto) {
         role.setRoleName(roleDto.getRoleName());
@@ -100,7 +100,8 @@ public class RoleService {
 
 
     /**
-     *  根據用戶傳來的權限id, 回傳相應的權限set,以供setupRole更新角色的權限資訊
+     *  設定Role多對多關聯時需要傳入一個Set<Permission>
+     *  此方法根據用戶傳來的權限id, 查找並回傳相應的權限set,屬於setupRole方法的一部分
      */
     private Set<Permission> getPermissionsFromIds(String[] permissionIdsString) {
         try{

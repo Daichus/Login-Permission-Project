@@ -23,7 +23,7 @@ public class JwtService {
 
     private static final String KEY = "5gk4g4j5i32k7ru8auu4m4ul4t6su3ah9j14i2l4g45k4g4bu4ke7rul4kmpv4cl391j4cl3";
 
-    private static final long EXPIRATION_TIME = 3600000; //毫秒為單位,每小時使用者需重新登錄
+    private static final long EXPIRATION_TIME = 3_600_000; //毫秒為單位,每小時使用者需重新登錄
 
     /**
      *

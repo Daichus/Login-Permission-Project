@@ -1,13 +1,11 @@
 package login.permission.project.classes.controller;
 
 import login.permission.project.classes.model.Position;
-import login.permission.project.classes.model.PositionDTO;
 import login.permission.project.classes.service.PositionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/Position")

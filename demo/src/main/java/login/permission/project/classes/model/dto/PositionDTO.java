@@ -1,4 +1,4 @@
-package login.permission.project.classes.model;
+package login.permission.project.classes.model.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -16,11 +16,15 @@ import java.util.Set;
 public class Permission {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "permission_id")
     private int permission_id;
 
     @Column(name = "permission_name")
     private String permission_name;
+
+    @Column(name="category")
+    private String category;
 
     @Column(name="permission_code")
     private String permission_code;

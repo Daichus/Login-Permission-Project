@@ -1,8 +1,10 @@
 package login.permission.project.classes.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import login.permission.project.classes.model.Permission;
 import login.permission.project.classes.service.PermissionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,18 +18,18 @@ public class PermissionController {
   PermissionService permissionService;
 
   @GetMapping("/get")
-  public List<Permission> getAllPermission() {
-    return permissionService.getAllPermission();
+  public ResponseEntity<?> getAllPermission(HttpServletRequest request) {
+    return permissionService.getAllPermission(request);
   }
 
   @PostMapping("/add")
-  public String addPermission(@RequestBody Permission permission) {
-    return permissionService.addPermission(permission);
+  public ResponseEntity<?> addPermission(@RequestBody Permission permission,HttpServletRequest request) {
+    return permissionService.addPermission(permission,request);
   }
 
   @PutMapping("/edit")
-  public String updatePermission(@RequestBody Permission permission) {
-    return permissionService.updatePermission(permission);
+  public ResponseEntity<?> updatePermission(@RequestBody Permission permission,HttpServletRequest  request) {
+    return permissionService.updatePermission(permission,request);
   }
 
   @DeleteMapping("/delete/{id}")

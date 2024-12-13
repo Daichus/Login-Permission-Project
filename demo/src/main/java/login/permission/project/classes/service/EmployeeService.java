@@ -1,10 +1,12 @@
 package login.permission.project.classes.service;
 
-import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import login.permission.project.classes.JwtService;
 import login.permission.project.classes.model.*;
 
+import login.permission.project.classes.model.dto.EmployeeRoleDto;
+import login.permission.project.classes.model.util.JwtUtil;
+import login.permission.project.classes.model.util.ResponseUtil;
 import login.permission.project.classes.repository.EmployeeRepository;
 import login.permission.project.classes.repository.LoginRecordRepository;
 import login.permission.project.classes.repository.RoleRepository;
@@ -19,13 +21,8 @@ import java.util.stream.Collectors;
 @Service
 public class EmployeeService {
 
-
-
     @Autowired
     EmployeeRepository er;
-
-//    @Autowired
-//    EmployeeLoginRequestRepository elr;
 
     @Autowired
     LoginRecordRepository logRecRepository;
@@ -43,43 +40,33 @@ public class EmployeeService {
     RoleRepository roleRepository;
 
 
-
-    private static final String unAuthMessage = "您沒有權限,或持有的jwt憑證已過期";
-
     public ResponseEntity<?> getAllEmployees(HttpServletRequest request) {
-        Claims claims = jwtService.isTokenValid(request);
-        ResponseEntity<?> response;
-
-        if(claims != null) {
+        try{
+            jwtUtil.validateRequest(request);
             List<Employee> employees = er.findAll();
             for(Employee employee : employees) {
                 employee.setPassword("NaN");
             }
-            response = ResponseEntity.ok().body(employees);
-        } else {
-            response = ResponseEntity.status(HttpStatus.NOT_FOUND).body(unAuthMessage);
+            return ResponseUtil.success("獲取員工資訊成功",employees);
+        } catch (IllegalArgumentException e) {
+            return ResponseUtil.error("你沒有獲取員工資訊的權限",HttpStatus.UNAUTHORIZED);
         }
-        return response;
     }
 
     public ResponseEntity<?> getEmployeeById(int id, HttpServletRequest request){
-        Claims claims = jwtService.isTokenValid(request);
-        ResponseEntity<?> response;
-
-        if(claims != null) {
+        try{
+            jwtUtil.validateRequest(request);
             Optional<Employee> employeeOption = er.findById(id);
             if(employeeOption.isPresent()) {
                 Employee employee = employeeOption.get();
                 employee.setPassword("NaN");
-                response = ResponseEntity.ok().body(employee);
+                return ResponseUtil.success("獲取員工資訊成功",employee);
             } else {
-                response = ResponseEntity.status(HttpStatus.NOT_FOUND).body("找不到用戶");
+                return ResponseUtil.error("找不到指定的員工",HttpStatus.NOT_FOUND);
             }
-
-        } else {
-            response = ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(unAuthMessage);
+        } catch (IllegalArgumentException e) {
+            return ResponseUtil.error("你沒有獲取員工資訊的權限",HttpStatus.UNAUTHORIZED);
         }
-        return response;
     }
 
     public String addEmployee (Employee employee) {
@@ -151,48 +138,52 @@ public class EmployeeService {
 
             // 檢查是否已驗證
             if (!employee.isEnabled()) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body("請先驗證您的電子郵件！");
+                return ResponseUtil.error("請先驗證您的電子郵件",HttpStatus.UNAUTHORIZED);
             }
 
             if(request.getPassword().equals(employee.getPassword())) {
                 LoginRecord record = new LoginRecord(employee.getEmployee_id(),"testIpAddress", LocalDateTime.now(),null,"成功");
                 record = logRecRepository.save(record);
                 //為避免混淆,登錄紀錄id變數名稱之後需再修改
-                int record_id = record.getRecord_id();
                 String employee_id = String.valueOf(employee.getEmployee_id());
-
+                int record_id = record.getRecord_id();
 
                 String JWT_Token = jwtService.generateToken(employee_id, record_id);
                 return ResponseEntity.ok(JWT_Token);
             }  else {
                 logRecRepository.save(new LoginRecord(employee.getEmployee_id(),"testIpAddress", LocalDateTime.now(),null,"失敗"));
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("密碼錯誤");
+                return ResponseUtil.error("密碼錯誤",HttpStatus.UNAUTHORIZED);
             }
         }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("找不到用戶");
+        return ResponseUtil.error("找不到用戶",HttpStatus.NOT_FOUND);
     }
 
 
-
+    /**
+     *此方法用於設定員工的角色, 前端應傳送結構為:
+     * {
+     *     employee_id:1
+     *     roleIds:[1,2,3]
+     * }
+     * 的body, JPA將會根據role id尋找相對應的所有Role
+     * ,回傳一個Set<Role>,並進行更新員工的角色多對多關聯
+     */
     public ResponseEntity<?> setEmployeeRole (EmployeeRoleDto dto, HttpServletRequest request) {
        try {
            jwtUtil.validateRequest(request);
            Optional<Employee> employeeOptional = er.findById(dto.getEmployee_id());
            if(employeeOptional.isPresent()) {
-               Set<Integer> roleIds = Arrays.stream(dto.getRoleIds()) // 转换为 Stream
-                       .map(Integer::parseInt)                  // 将字符串解析为整数
+               Set<Integer> roleIds = Arrays.stream(dto.getRoleIds())
+                       .map(Integer::parseInt)
                        .collect(Collectors.toSet());
                Set<Role> roles = new HashSet<>(roleRepository.findAllById(roleIds));
                Employee employee = employeeOptional.get();
                employee.setRoles(roles);
-
+               er.save(employee);
                return ResponseUtil.error("設定員工角色成功",HttpStatus.OK);
            } else {
                return ResponseUtil.error("找不到指定id的員工",HttpStatus.NOT_FOUND);
            }
-
-
        } catch (IllegalArgumentException e) {
            return ResponseUtil.error("你沒有設定角色的權限",HttpStatus.UNAUTHORIZED);
        }

@@ -1,4 +1,4 @@
-package login.permission.project.classes.model;
+package login.permission.project.classes.model.util;
 
 
 import io.jsonwebtoken.Claims;
@@ -7,6 +7,11 @@ import login.permission.project.classes.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+/**
+ * 此方法是將先前Jwt驗證token的方法獨立出,
+ * 減少重複的代碼。
+ * 驗證未通過會拋出IllegalArgumentException
+ */
 @Component
 public class JwtUtil {
 
