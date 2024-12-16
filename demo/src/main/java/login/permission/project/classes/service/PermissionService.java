@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import login.permission.project.classes.model.util.JwtUtil;
 import login.permission.project.classes.model.Permission;
 import login.permission.project.classes.model.util.ResponseUtil;
+import login.permission.project.classes.repository.EmployeeRepository;
 import login.permission.project.classes.repository.PermissionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,6 +23,9 @@ public class PermissionService {
   @Autowired
   JwtUtil jwtUtil;
 
+  @Autowired
+  EmployeeRepository employeeRepository;
+
 
   /**
    * 前端透過傳遞jwt token驗證,
@@ -36,6 +40,18 @@ public class PermissionService {
       return ResponseUtil.error("你沒有獲取所有權限的權力", HttpStatus.UNAUTHORIZED);
     }
   }
+
+  // 測試獲取員工自己的權限
+  public ResponseEntity<?> getPermissionById(HttpServletRequest request, int id) {
+    try{
+      jwtUtil.validateRequest(request);
+      List<String> permissions = employeeRepository.getPermissionById(id);
+      return ResponseUtil.success("獲取員工本人權限成功",permissions);
+    } catch(IllegalArgumentException e) {
+      return ResponseUtil.error("你沒有獲取員工本人所有權限的權力", HttpStatus.UNAUTHORIZED);
+    }
+  }
+
 
   /**
    * 添加Permission的方法,前端需傳遞jwt token供驗證外,需傳遞和Permission物件相同構造的body,但無須傳送id,

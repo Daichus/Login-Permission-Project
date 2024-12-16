@@ -22,6 +22,11 @@ public class PermissionController {
     return permissionService.getAllPermission(request);
   }
 
+  @GetMapping("/getById/{id}")
+  public ResponseEntity<?> getPermissionById(HttpServletRequest request, @PathVariable int id) {
+    return permissionService.getPermissionById(request, id);
+  }
+
   @PostMapping("/add")
   public ResponseEntity<?> addPermission(@RequestBody Permission permission,HttpServletRequest request) {
     return permissionService.addPermission(permission,request);
