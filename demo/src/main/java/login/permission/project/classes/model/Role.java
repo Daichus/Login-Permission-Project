@@ -27,8 +27,8 @@ public class Role {
     /**
      * 僅供標示角色名稱用
      */
-    @Column(name="roleName")
-    private String roleName;
+    @Column(name="Role")
+    private String role;
 
     /**
      * 由jpa自動生成關聯表,對應permission表

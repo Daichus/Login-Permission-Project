@@ -2,7 +2,6 @@ package login.permission.project.classes.service;
 
 
 import jakarta.servlet.http.HttpServletRequest;
-import login.permission.project.classes.JwtService;
 
 
 import login.permission.project.classes.model.*;
@@ -94,7 +93,7 @@ public class RoleService {
      *  更新Role(角色)的方法,設定Role名稱與Role的多對多關聯
      */
     private void setupRole(Role role, RoleDTO roleDto) {
-        role.setRoleName(roleDto.getRoleName());
+        role.setRole(roleDto.getRoleName());
         role.setPermissions(getPermissionsFromIds(roleDto.getPermission_id()));
     }
 
