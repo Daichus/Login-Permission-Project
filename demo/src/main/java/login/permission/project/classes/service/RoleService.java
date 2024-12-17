@@ -35,7 +35,7 @@ public class RoleService {
 
     public ResponseEntity<?> getAllRole() {
         List<Role> roles =  roleRepository.findAll();
-        return ResponseUtil.success("獲取所有角色成功",  HttpStatus.OK);
+        return ResponseUtil.success("獲取所有角色成功", roles);
     }
 
 

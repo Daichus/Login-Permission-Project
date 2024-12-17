@@ -47,7 +47,8 @@ public class Config {
                                         "/Permission/test/get",
                                         "/Position/get",
                                 "/status/test/get",
-                                        "/employee/test/getAllEmployeeInfo"
+                                        "/employee/test/getAllEmployeeInfo",
+                                        "/role/getAll"
                                 ).permitAll()
 
                         // 部門管理相關權限
