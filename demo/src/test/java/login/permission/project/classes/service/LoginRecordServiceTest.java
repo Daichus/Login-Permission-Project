@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,6 +22,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@SpringBootTest
 class LoginRecordServiceTest {
 
   @InjectMocks
@@ -40,10 +42,13 @@ class LoginRecordServiceTest {
     MockitoAnnotations.openMocks(this);
   }
 
-  // 測試 getAllLoginRecords()
+  /**
+   * 測試：取得所有登入記錄
+   * 驗證 Service 是否正確調用 Repository 並返回結果。
+   */
   @Test
   void getAllLoginRecords() {
-
+    // Arrange
     List<LoginRecord> records = List.of(
             new LoginRecord(1, "127.0.0.1", LocalDateTime.now(), null,"SUCCESS"),
             new LoginRecord(2, "127.0.0.2", LocalDateTime.now(), null,"FAIL")
@@ -60,7 +65,10 @@ class LoginRecordServiceTest {
     verify(loginRecordRepository, times(1)).findAll();
   }
 
-  // 新增登入記錄
+  /**
+   * 測試：新增登入記錄
+   * 驗證記錄成功儲存，並返回正確訊息。
+   */
   @Test
   void addLoginRecord() {
     // Arrange
@@ -83,6 +91,10 @@ class LoginRecordServiceTest {
 
   }
 
+  /**
+   * 測試：更新登入記錄
+   * 驗證記錄成功更新，並返回正確訊息。
+   */
   @Test
   void updateLoginRecord() {
     // Arrange
@@ -104,6 +116,10 @@ class LoginRecordServiceTest {
     verify(loginRecordRepository, times(1)).save(record);
   }
 
+  /**
+   * 測試：刪除登入記錄
+   * 驗證記錄成功刪除，並返回正確訊息。
+   */
   @Test
   void deleteLoginRecord() {
     // Arrange
@@ -118,6 +134,10 @@ class LoginRecordServiceTest {
     verify(loginRecordRepository, times(1)).deleteById(recordId);
   }
 
+  /**
+   * 測試：更新登出時間（成功情境）
+   * 驗證在 JWT 合法時，登出時間被正確更新。
+   */
   @Test
   void updateLogoutTime_Success() {
     // Arrange
@@ -144,6 +164,10 @@ class LoginRecordServiceTest {
     verify(loginRecordRepository, times(1)).save(record);
   }
 
+  /**
+   * 測試：根據權限碼獲取登入記錄（擁有正確權限）
+   * 驗證使用者擁有 'login_rec_read' 權限時，所有記錄都被返回。
+   */
   @Test
   void getRecordByPermissionCode_WithPermission() {
     // Arrange
@@ -152,7 +176,7 @@ class LoginRecordServiceTest {
     when(claims.get("permissionCode", List.class)).thenReturn(List.of("login_rec_read"));
 
     List<LoginRecord> records = List.of(
-            new LoginRecord(1, "127.0.0.1", LocalDateTime.now(), null, "SCUESS")
+            new LoginRecord(1, "127.0.0.1", LocalDateTime.now(), null, "SUCCESS")
     );
 
     when(loginRecordRepository.findAll()).thenReturn(records);
@@ -163,7 +187,34 @@ class LoginRecordServiceTest {
     // Assert
     assertEquals(HttpStatus.OK, result.getStatusCode());
     assertEquals(records, result.getBody());
-
-
+    verify(loginRecordRepository, times(1)).findAll();
   }
+
+  /**
+   * 測試：根據權限碼獲取登入記錄（無權限）
+   * 驗證當使用者無相關權限時，只返回個人記錄。
+   */
+  @Test
+  void getRecordByPermissionCode_WithoutPermission() {
+    // Arrange
+    Claims claims = mock(Claims.class);
+    when(jwtService.isTokenValid(request)).thenReturn(claims);
+    when(claims.get("permissionCode", List.class)).thenReturn(List.of("other_permission"));
+    when(claims.getSubject()).thenReturn("1");
+
+    List<LoginRecord> records = List.of(
+            new LoginRecord(1, "127.0.0.1", LocalDateTime.now(), null, "SUCCESS")
+    );
+
+    when(loginRecordRepository.findByEmployeeId(1)).thenReturn(records);
+
+    // Act
+    ResponseEntity<?> result = loginRecordService.getRecordByPermissionCode(request);
+
+    // Assert
+    assertEquals(HttpStatus.OK, result.getStatusCode());
+    assertEquals(records, result.getBody());
+    verify(loginRecordRepository, times(1)).findByEmployeeId(1);
+  }
+
 }
