@@ -47,7 +47,7 @@ public class LoginRecordController {
     }
 
     @PostMapping("/getLoginRecord")
-    @PreAuthorize("hasAuthority('login_rec_create','login_rec_read')")
+    @PreAuthorize("hasAuthority('login_rec_read') or hasAuthority('login_rec_create')")
     public ResponseEntity<?> getRecordByPermissionId(HttpServletRequest request) {
         return lrs.getRecordByPermissionCode(request);
     }

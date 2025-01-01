@@ -1,4 +1,5 @@
 package login.permission.project.classes.security;
+import jakarta.servlet.http.HttpServletResponse;
 import login.permission.project.classes.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -21,7 +22,7 @@ public class Config {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
         http
-                .csrf(csrf -> csrf.disable()) // 禁用 CSRF
+                .csrf(AbstractHttpConfigurer::disable) // 禁用 CSRF
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration config = new CorsConfiguration();
                     config.setAllowedOrigins(List.of("http://localhost:5173"));
@@ -74,6 +75,17 @@ public class Config {
                                 .anyRequest().authenticated()
 
 //                        .anyRequest().denyAll()
+                )
+                // 1/1 新增
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, authException) -> {
+                          response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401
+                          response.getWriter().write("Unauthorized: " + authException.getMessage());
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                          response.setStatus(HttpServletResponse.SC_FORBIDDEN); // 403
+                          response.getWriter().write("Access Denied: " + accessDeniedException.getMessage());
+                        })
                 )
 
                 .addFilterBefore(new JwtAuthFilter(jwtService), UsernamePasswordAuthenticationFilter.class)

@@ -60,14 +60,21 @@ public class LoginRecordService {
 
         if(claims != null) {
             Integer loginRecordId = claims.get("loginRecordId", Integer.class);
+
+            // 新增檢查 loginRecordId 是否為 null
+            if (loginRecordId == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("未授權的JWT");
+            }
+
             Optional<LoginRecord> loginRecordOp = lrr.findById(loginRecordId);
 
             if (loginRecordOp.isPresent()) {
                 LoginRecord loginRecord = loginRecordOp.get();
                 loginRecord.setLogout_time(LocalDateTime.now());  // 設置登出時間
                 lrr.save(loginRecord);
+                return ResponseEntity.ok("登出成功");
             }
-            return ResponseEntity.ok("登出成功");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("登入記錄不存在");
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("未授權的JWT");
         }
@@ -77,21 +84,41 @@ public class LoginRecordService {
         Claims claims = js.verifyToken(request);
         List<LoginRecord> loginRecords = null;
 
-        if(claims != null) {
+        if (claims != null) {
             List<String> permissionCode = claims.get("permissionCode", List.class);
-            for(String code : permissionCode) {
-                if(code.equals("login_rec_read") || code.equals("login_rec_update") || code.equals("login_rec_create") || code.equals("login_rec_delete")) {
+            if (permissionCode != null && !permissionCode.isEmpty()) {
+                if (permissionCode.stream().anyMatch(code ->
+                        code.equals("login_rec_read") ||
+                                code.equals("login_rec_update") ||
+                                code.equals("login_rec_create") ||
+                                code.equals("login_rec_delete"))) {
                     loginRecords = lrr.findAll();
                 } else {
-                    loginRecords = lrr.findByEmployeeId(Integer.parseInt(claims.getSubject()));
+                    String subject = claims.getSubject();
+                    if (subject == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("Login record not found");
+                    }
+                    try {
+                        int employeeId = Integer.parseInt(subject);
+                        loginRecords = lrr.findByEmployeeId(employeeId);
+                    } catch (NumberFormatException e) {
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                .body("Invalid employee ID format in token subject.");
+                    }
                 }
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("No permissions found in the token.");
             }
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Login record not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Login record not found");
         }
-            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(loginRecords);
 
-
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(loginRecords);
     }
 
 
