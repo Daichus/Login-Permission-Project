@@ -10,7 +10,6 @@ import login.permission.project.classes.model.util.JwtUtil;
 import login.permission.project.classes.repository.EmployeeRepository;
 import login.permission.project.classes.repository.LoginRecordRepository;
 import login.permission.project.classes.repository.RoleRepository;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,12 +24,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
-
 import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import login.permission.project.classes.model.ServerResponse;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -66,13 +62,13 @@ class EmployeeServiceTest {
   Set<Role> mockRoles = new HashSet<>();
   Set<LoginRecord> mockLoginRecords = new HashSet<>();
 
-  @BeforeEach
-  void setUp() {
-    MockitoAnnotations.openMocks(this);
-
-    //jwtUtil.validateRequest是檢驗jwt token是否合法的函式, 由於不回傳任何值因此利用doNothing跳過
-    doNothing().when(jwtUtil).validateRequest(any(HttpServletRequest.class));
-  }
+//  @BeforeEach
+//  void setUp() {
+//    MockitoAnnotations.openMocks(this);
+//
+//    //jwtUtil.validateRequest是檢驗jwt token是否合法的函式, 由於不回傳任何值因此利用doNothing跳過
+//    doNothing().when(jwtUtil).validateRequest(any(HttpServletRequest.class));
+//  }
   /**
    * 測試設對象：設定員工角色的方法 setEmployeeRole 是否可以正確設定員工的角色
    * 測試重點：
