@@ -461,6 +461,7 @@ class LoginRecordServiceTest {
     assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
     assertEquals("未授權的JWT", response.getBody());
     verify(loginRecordRepository, never()).findById(anyInt());
+    verify(loginRecordRepository, never()).save(any());
   }
 
   /**

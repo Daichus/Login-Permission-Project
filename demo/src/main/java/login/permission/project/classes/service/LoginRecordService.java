@@ -62,14 +62,21 @@ public class LoginRecordService {
 
         if(claims != null) {
             Integer loginRecordId = claims.get("loginRecordId", Integer.class);
+
+            // 新增檢查 loginRecordId 是否為 null
+            if (loginRecordId == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("未授權的JWT");
+            }
+
             Optional<LoginRecord> loginRecordOp = lrr.findById(loginRecordId);
 
             if (loginRecordOp.isPresent()) {
                 LoginRecord loginRecord = loginRecordOp.get();
                 loginRecord.setLogout_time(LocalDateTime.now());  // 設置登出時間
                 lrr.save(loginRecord);
+                return ResponseEntity.ok("登出成功");
             }
-            return ResponseEntity.ok("登出成功");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("登入記錄不存在");
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("未授權的JWT");
         }
