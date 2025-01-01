@@ -295,6 +295,112 @@ class EmployeeServiceTest {
   }
 
   /**
+   * 測試新增員工
+   * 空值測試
+   */
+  @Test
+  void testAddEmployee_NullEmployee() {
+    // Arrange
+    Employee employee = null;
+
+    // Act
+    String result = employeeService.addEmployee(employee);
+
+    // Assert
+    assertEquals("添加員工失敗", result);
+    Mockito.verify(employeeRepository, Mockito.never()).save(Mockito.any());
+    Mockito.verify(emailService, Mockito.never()).sendVerificationEmail(Mockito.anyString(), Mockito.anyString());
+  }
+
+  /**
+   * 測試新增員工
+   * 首筆資料測試 (maxId 為 null)
+   */
+  @Test
+  void testAddEmployee_FirstRecord() {
+    // Arrange
+    Employee employee = new Employee();
+    employee.setName("First Employee");
+    employee.setEmail("first@example.com");
+
+    Mockito.when(employeeRepository.findMaxEmployeeId()).thenReturn(null);
+    Mockito.when(employeeRepository.save(Mockito.any(Employee.class))).thenAnswer(invocation -> {
+      Employee savedEmployee = invocation.getArgument(0);
+      return savedEmployee;
+    });
+    Mockito.doNothing().when(emailService).sendVerificationEmail(Mockito.anyString(), Mockito.anyString());
+
+    // Act
+    String result = employeeService.addEmployee(employee);
+
+    // Assert
+    assertTrue(result.contains("新增員工成功"));
+    assertEquals(1, employee.getEmployee_id());
+    assertNotNull(employee.getVerificationToken());
+    assertFalse(employee.isEnabled());
+    Mockito.verify(employeeRepository).save(employee);
+  }
+
+  /**
+   * 測試新增員工
+   * 儲存失敗測試
+   */
+  @Test
+  void testAddEmployee_SaveFailed() {
+    // Arrange
+    Employee employee = new Employee();
+    employee.setName("Test Employee");
+    employee.setEmail("test@example.com");
+
+    Mockito.when(employeeRepository.findMaxEmployeeId()).thenReturn(5);
+    Mockito.when(employeeRepository.save(Mockito.any(Employee.class)))
+            .thenThrow(new RuntimeException("Database error"));
+
+    // Act & Assert
+    Exception exception = assertThrows(RuntimeException.class, () -> {
+      employeeService.addEmployee(employee);
+    });
+    assertTrue(exception.getMessage().contains("Database error"));
+    Mockito.verify(emailService, Mockito.never()).sendVerificationEmail(Mockito.anyString(), Mockito.anyString());
+  }
+
+  /**
+   * 測試新增員工
+   * 完整資料驗證測試
+   */
+  @Test
+  void testAddEmployee_FullDataValidation() {
+    // Arrange
+    Employee employee = new Employee();
+    employee.setName("Complete Employee");
+    employee.setEmail("complete@example.com");
+    employee.setPhoneNumber("0912345678");
+    employee.setStatus_id(1);
+    employee.setRoles(mockRoles);
+
+    Mockito.when(employeeRepository.findMaxEmployeeId()).thenReturn(20);
+    Mockito.when(employeeRepository.save(Mockito.any(Employee.class))).thenAnswer(invocation -> {
+      Employee savedEmployee = invocation.getArgument(0);
+      return savedEmployee;
+    });
+    Mockito.doNothing().when(emailService).sendVerificationEmail(Mockito.anyString(), Mockito.anyString());
+
+    // Act
+    String result = employeeService.addEmployee(employee);
+
+    // Assert
+    assertTrue(result.contains("新增員工成功"));
+    assertEquals(21, employee.getEmployee_id());
+    assertNotNull(employee.getVerificationToken());
+    assertFalse(employee.isEnabled());
+    assertEquals("Complete Employee", employee.getName());
+    assertEquals("complete@example.com", employee.getEmail());
+    assertEquals("0912345678", employee.getPhoneNumber());
+    assertEquals(Integer.valueOf(1), employee.getStatus_id());
+    assertEquals(mockRoles, employee.getRoles());
+  }
+
+  /**
    *
    * 測試新增員工
    * 寄Email
