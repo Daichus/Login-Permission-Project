@@ -19,7 +19,7 @@ public class JwtUtil {
     JwtService jwtService;
 
     public   void validateRequest(HttpServletRequest request) {
-        Claims claims = jwtService.isTokenValid(request);
+        Claims claims = jwtService.verifyToken(request);
         if (claims == null) {
             throw new IllegalArgumentException("未經過授權的操作");
         }
