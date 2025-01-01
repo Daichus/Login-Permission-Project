@@ -159,8 +159,8 @@ class LoginRecordServiceTest {
     ResponseEntity<?> response = loginRecordService.getRecordByPermissionCode(request);
 
     // Assert
-    assertEquals(HttpStatus.OK, response.getStatusCode());
-    assertEquals(null, response.getBody());
+    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+    assertEquals("No permissions found in the token.", response.getBody());
     verify(loginRecordRepository, never()).findAll();
     verify(loginRecordRepository, never()).findByEmployeeId(anyInt());
   }
@@ -423,7 +423,8 @@ class LoginRecordServiceTest {
     ResponseEntity<?> response = loginRecordService.updateLogoutTime(request);
 
     // Assert
-    assertEquals(HttpStatus.OK, response.getStatusCode()); // 不應拋出異常
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    assertEquals("登入記錄不存在", response.getBody());
     verify(loginRecordRepository, never()).save(any());
   }
 

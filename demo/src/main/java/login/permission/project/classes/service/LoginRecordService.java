@@ -116,12 +116,15 @@ public class LoginRecordService {
                                 code.equals("login_rec_update") ||
                                 code.equals("login_rec_create") ||
                                 code.equals("login_rec_delete"))) {
-
-                    // 如果有任何一個權限符合條件，返回所有記錄
                     loginRecords = lrr.findAll();
                 } else {
+                    String subject = claims.getSubject();
+                    if (subject == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("Login record not found");
+                    }
                     try {
-                        int employeeId = Integer.parseInt(claims.getSubject());
+                        int employeeId = Integer.parseInt(subject);
                         loginRecords = lrr.findByEmployeeId(employeeId);
                     } catch (NumberFormatException e) {
                         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -133,7 +136,8 @@ public class LoginRecordService {
                         .body("No permissions found in the token.");
             }
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Login record not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Login record not found");
         }
 
         return ResponseEntity.ok()
