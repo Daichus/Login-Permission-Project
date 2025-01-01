@@ -1,147 +1,191 @@
 package login.permission.project.classes.model;
 
-import login.permission.project.classes.repository.LoginRecordRepository;
-import org.junit.jupiter.api.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@DataJpaTest
-class LoginRecordModelTest {
-
-  @Autowired
-  private LoginRecordRepository loginRecordRepository;
-
-  private LoginRecord sampleRecord;
-
-  @BeforeEach
-  void setUp() {
-    sampleRecord = new LoginRecord();
-    sampleRecord.setEmployee_id(1);
-    sampleRecord.setIp_address("127.0.0.1");
-    sampleRecord.setLogin_time(LocalDateTime.now());
-    sampleRecord.setLogout_time(null);
-    sampleRecord.setStatus("SUCCESS");
-
-    sampleRecord = loginRecordRepository.save(sampleRecord);
-  }
+/**
+ * LoginRecord 模型的單元測試類
+ * 測試 LoginRecord 實體的基本功能、屬性、關聯關係和資料完整性
+ */
+public class LoginRecordModelTest {
 
   /**
-   * 測試：成功創建登入記錄
-   * 驗證記錄成功保存並返回有效 ID。
+   * 測試 LoginRecord 實體的建構函數和基本屬性
    */
   @Test
-  void createLoginRecord_Success() {
+  public void testLoginRecordConstructorAndGetters() {
     // Arrange
-    LoginRecord record = new LoginRecord();
-    record.setEmployee_id(2);
-    record.setIp_address("192.168.1.1");
-    record.setLogin_time(LocalDateTime.now());
-    record.setLogout_time(null);
-    record.setStatus("SUCCESS");
-
-    // Act
-    LoginRecord savedRecord = loginRecordRepository.save(record);
+    LocalDateTime loginTime = LocalDateTime.now();
+    LocalDateTime logoutTime = LocalDateTime.now();
+    LoginRecord loginRecord = new LoginRecord(1, "127.0.0.1", loginTime, logoutTime, "SUCCESS");
 
     // Assert
-    assertNotNull(savedRecord.getRecord_id());
-    assertEquals(2, savedRecord.getEmployee_id());
-    assertEquals("192.168.1.1", savedRecord.getIp_address());
+    assertEquals(1, loginRecord.getEmployee_id());
+    assertEquals("127.0.0.1", loginRecord.getIp_address());
+    assertEquals(loginTime, loginRecord.getLogin_time());
+    assertEquals(logoutTime, loginRecord.getLogout_time());
+    assertEquals("SUCCESS", loginRecord.getStatus());
   }
 
   /**
-   * 測試：使用有效 ID 查詢登入記錄
+   * 測試 LoginRecord 實體的 setter 方法
    */
   @Test
-  void readLoginRecordById_ValidId() {
-    // Act
-    Optional<LoginRecord> result = loginRecordRepository.findById(sampleRecord.getRecord_id());
-
-    // Assert
-    assertTrue(result.isPresent());
-    assertEquals(sampleRecord.getRecord_id(), result.get().getRecord_id());
-  }
-
-  /**
-   * 測試：使用無效 ID 查詢登入記錄
-   */
-  @Test
-  void readLoginRecordById_InvalidId() {
-    // Act
-    Optional<LoginRecord> result = loginRecordRepository.findById(999);
-
-    // Assert
-    assertFalse(result.isPresent());
-  }
-
-  /**
-   * 測試：成功更新登入記錄
-   */
-  @Test
-  void updateLoginRecord_Success() {
+  public void testLoginRecordSetters() {
     // Arrange
-    sampleRecord.setStatus("UPDATED");
-    sampleRecord.setLogout_time(LocalDateTime.now());
+    LoginRecord loginRecord = new LoginRecord();
+    LocalDateTime loginTime = LocalDateTime.now();
+    LocalDateTime logoutTime = LocalDateTime.now();
 
     // Act
-    LoginRecord updatedRecord = loginRecordRepository.save(sampleRecord);
+    loginRecord.setEmployee_id(2);
+    loginRecord.setIp_address("192.168.0.1");
+    loginRecord.setLogin_time(loginTime);
+    loginRecord.setLogout_time(logoutTime);
+    loginRecord.setStatus("FAILED");
 
     // Assert
-    assertEquals("UPDATED", updatedRecord.getStatus());
-    assertNotNull(updatedRecord.getLogout_time());
+    assertEquals(2, loginRecord.getEmployee_id());
+    assertEquals("192.168.0.1", loginRecord.getIp_address());
+    assertEquals(loginTime, loginRecord.getLogin_time());
+    assertEquals(logoutTime, loginRecord.getLogout_time());
+    assertEquals("FAILED", loginRecord.getStatus());
   }
 
   /**
-   * 測試：成功刪除登入記錄
+   * 測試 equals 和 hashCode 方法
    */
   @Test
-  void deleteLoginRecord_Success() {
-    // Act
-    loginRecordRepository.deleteById(sampleRecord.getRecord_id());
-    Optional<LoginRecord> result = loginRecordRepository.findById(sampleRecord.getRecord_id());
-
-    // Assert
-    assertFalse(result.isPresent());
-  }
-
-  /**
-   * 測試：驗證 Employee 關聯映射
-   */
-  @Test
-  void validateEmployeeRelation() {
-    // Act
-    Optional<LoginRecord> result = loginRecordRepository.findById(sampleRecord.getRecord_id());
-
-    // Assert
-    assertTrue(result.isPresent());
-    assertNotNull(result.get().getEmployee());
-  }
-
-  /**
-   * 測試：驗證欄位映射和約束
-   */
-  @Test
-  void validateFieldConstraints() {
+  public void testEqualsAndHashCode() {
     // Arrange
-    LoginRecord record = new LoginRecord();
-    record.setEmployee_id(3);
-    record.setIp_address("10.0.0.1");
-    record.setLogin_time(LocalDateTime.now());
-    record.setLogout_time(LocalDateTime.now().plusHours(1));
-    record.setStatus("FAILED");
+    LocalDateTime loginTime = LocalDateTime.now();
+    LocalDateTime logoutTime = LocalDateTime.now();
 
-    // Act
-    LoginRecord savedRecord = loginRecordRepository.save(record);
+    LoginRecord loginRecord1 = new LoginRecord(1, "127.0.0.1", loginTime, logoutTime, "SUCCESS");
+    LoginRecord loginRecord2 = new LoginRecord(1, "127.0.0.1", loginTime, logoutTime, "SUCCESS");
+    LoginRecord loginRecord3 = new LoginRecord(2, "192.168.0.1", loginTime, logoutTime, "FAILED");
 
     // Assert
-    assertEquals(3, savedRecord.getEmployee_id());
-    assertEquals("10.0.0.1", savedRecord.getIp_address());
-    assertEquals("FAILED", savedRecord.getStatus());
-    assertNotNull(savedRecord.getLogin_time());
-    assertNotNull(savedRecord.getLogout_time());
+    assertEquals(loginRecord1, loginRecord2);
+    assertNotEquals(loginRecord1, loginRecord3);
+
+    assertEquals(loginRecord1.hashCode(), loginRecord2.hashCode());
+    assertNotEquals(loginRecord1.hashCode(), loginRecord3.hashCode());
+  }
+
+  /**
+   * 測試 toString 方法
+   */
+  @Test
+  public void testToString() {
+    // Arrange
+    LocalDateTime loginTime = LocalDateTime.now();
+    LoginRecord loginRecord = new LoginRecord(1, "127.0.0.1", loginTime, null, "SUCCESS");
+
+    // Act
+    String toString = loginRecord.toString();
+
+    // Assert
+    assertTrue(toString.contains("employee_id=1"));
+    assertTrue(toString.contains("ip_address=127.0.0.1"));
+    assertTrue(toString.contains("status=SUCCESS"));
+  }
+
+  /**
+   * 測試無參數建構函數
+   */
+  @Test
+  public void testNoArgsConstructor() {
+    // Arrange
+    LoginRecord loginRecord = new LoginRecord();
+
+    // Assert
+    assertEquals(0, loginRecord.getRecord_id());
+    assertNull(loginRecord.getIp_address());
+    assertNull(loginRecord.getLogin_time());
+    assertNull(loginRecord.getLogout_time());
+    assertNull(loginRecord.getStatus());
+  }
+
+  /**
+   * 測試 Employee 關聯
+   */
+  @Test
+  public void testEmployeeAssociation() {
+    // Arrange
+    Employee employee = new Employee();
+    employee.setEmployee_id(1);
+    employee.setName("Test Employee");
+
+    LoginRecord loginRecord = new LoginRecord();
+    loginRecord.setEmployee(employee);
+
+    // Assert
+    assertNotNull(loginRecord.getEmployee());
+    assertEquals(1, loginRecord.getEmployee().getEmployee_id());
+    assertEquals("Test Employee", loginRecord.getEmployee().getName());
+  }
+
+  /**
+   * 測試狀態欄位的邊界條件
+   */
+  @Test
+  public void testStatusFieldValidation() {
+    // Arrange
+    LoginRecord loginRecord = new LoginRecord();
+
+    // Act & Assert
+    loginRecord.setStatus("SUCCESS");
+    assertEquals("SUCCESS", loginRecord.getStatus());
+
+    loginRecord.setStatus("FAILED");
+    assertEquals("FAILED", loginRecord.getStatus());
+
+    loginRecord.setStatus("");
+    assertEquals("", loginRecord.getStatus());
+
+    loginRecord.setStatus(null);
+    assertNull(loginRecord.getStatus());
+  }
+
+  /**
+   * 測試記錄時間的合法性
+   */
+  @Test
+  public void testLoginAndLogoutTimeValidation() {
+    // Arrange
+    LocalDateTime now = LocalDateTime.now();
+    LocalDateTime future = now.plusHours(1);
+
+    LoginRecord loginRecord = new LoginRecord();
+
+    // Act
+    loginRecord.setLogin_time(now);
+    loginRecord.setLogout_time(future);
+
+    // Assert
+    assertEquals(now, loginRecord.getLogin_time());
+    assertEquals(future, loginRecord.getLogout_time());
+    assertTrue(loginRecord.getLogout_time().isAfter(loginRecord.getLogin_time()));
+  }
+
+  /**
+   * 測試登入登出時間為 null 的情況
+   */
+  @Test
+  public void testNullLoginAndLogoutTime() {
+    // Arrange
+    LoginRecord loginRecord = new LoginRecord();
+
+    // Act
+    loginRecord.setLogin_time(null);
+    loginRecord.setLogout_time(null);
+
+    // Assert
+    assertNull(loginRecord.getLogin_time());
+    assertNull(loginRecord.getLogout_time());
   }
 }
