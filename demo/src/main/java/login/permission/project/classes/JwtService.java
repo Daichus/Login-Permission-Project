@@ -1,21 +1,16 @@
 package login.permission.project.classes;
 
 import io.jsonwebtoken.*;
-import io.jsonwebtoken.impl.DefaultClaims;
+
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
-import login.permission.project.classes.model.Employee;
-import login.permission.project.classes.model.LoginRecord;
-import login.permission.project.classes.service.LoginRecordService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+
 import org.springframework.stereotype.Component;
 
 
 import java.security.Key;
-import java.security.SignatureException;
+
 import java.util.*;
 
 @Component
