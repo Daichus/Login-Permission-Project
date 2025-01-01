@@ -91,7 +91,7 @@ public class RoleControllerTest {
     mockClaims.setIssuedAt(new Date());
     mockClaims.setExpiration(new Date(System.currentTimeMillis() + 3600000));
 
-    when(jwtService.isTokenValid(any(HttpServletRequest.class))).thenReturn(mockClaims);
+    when(jwtService.verifyToken(any(HttpServletRequest.class))).thenReturn(mockClaims);
 
     when(roleService.getAllRole()).thenReturn(ResponseEntity
             .status(HttpStatus.OK)
@@ -134,7 +134,7 @@ public class RoleControllerTest {
     mockClaims.setIssuedAt(new Date());
     mockClaims.setExpiration(new Date(System.currentTimeMillis() + 3600000));
 
-    when(jwtService.isTokenValid(any(HttpServletRequest.class))).thenReturn(mockClaims);
+    when(jwtService.verifyToken(any(HttpServletRequest.class))).thenReturn(mockClaims);
 
     when(roleService.createRole(any(RoleDTO.class), any(HttpServletRequest.class)))
             .thenReturn(ResponseEntity.ok(new ServerResponse("Success", "")));
@@ -161,7 +161,7 @@ public class RoleControllerTest {
     roleDto.setRoleName("NEW_ROLE");
     roleDto.setPermission_id(new String[]{"1", "2"});
 
-    when(jwtService.isTokenValid(any(HttpServletRequest.class))).thenReturn(null);
+    when(jwtService.verifyToken(any(HttpServletRequest.class))).thenReturn(null);
 
     mvc.perform(post("/role/create")
       .contentType(MediaType.APPLICATION_JSON)
@@ -214,7 +214,7 @@ public class RoleControllerTest {
     mockClaims.setIssuedAt(new Date());
     mockClaims.setExpiration(new Date(System.currentTimeMillis() + 3600000));
 
-    when(jwtService.isTokenValid(any(HttpServletRequest.class))).thenReturn(mockClaims);
+    when(jwtService.verifyToken(any(HttpServletRequest.class))).thenReturn(mockClaims);
 
     when(roleService.updateRole(any(RoleDTO.class), any(HttpServletRequest.class)))
             .thenReturn(ResponseEntity.ok(new ServerResponse("Success", "")));
@@ -249,7 +249,7 @@ public class RoleControllerTest {
     mockClaims.setIssuedAt(new Date());
     mockClaims.setExpiration(new Date(System.currentTimeMillis() + 3600000));
 
-    when(jwtService.isTokenValid(any(HttpServletRequest.class))).thenReturn(mockClaims);
+    when(jwtService.verifyToken(any(HttpServletRequest.class))).thenReturn(mockClaims);
 
     when(roleService.updateRole(any(RoleDTO.class), any(HttpServletRequest.class)))
             .thenReturn(ResponseEntity
@@ -278,7 +278,7 @@ public class RoleControllerTest {
     roleDto.setRoleName("UPDATED_ROLE");
     roleDto.setPermission_id(new String[]{"1", "2"});
 
-    when(jwtService.isTokenValid(any(HttpServletRequest.class))).thenReturn(null);
+    when(jwtService.verifyToken(any(HttpServletRequest.class))).thenReturn(null);
 
     mvc.perform(put("/role/edit")
                     .contentType(MediaType.APPLICATION_JSON)
@@ -331,7 +331,7 @@ public class RoleControllerTest {
     mockClaims.setIssuedAt(new Date());
     mockClaims.setExpiration(new Date(System.currentTimeMillis() + 3600000));
 
-    when(jwtService.isTokenValid(any(HttpServletRequest.class))).thenReturn(mockClaims);
+    when(jwtService.verifyToken(any(HttpServletRequest.class))).thenReturn(mockClaims);
 
     when(roleService.updateRole(any(RoleDTO.class), any(HttpServletRequest.class)))
             .thenReturn(ResponseEntity
@@ -368,7 +368,7 @@ public class RoleControllerTest {
     mockClaims.setIssuedAt(new Date());
     mockClaims.setExpiration(new Date(System.currentTimeMillis() + 3600000));
 
-    when(jwtService.isTokenValid(any(HttpServletRequest.class))).thenReturn(mockClaims);
+    when(jwtService.verifyToken(any(HttpServletRequest.class))).thenReturn(mockClaims);
 
     when(roleService.updateRole(any(RoleDTO.class), any(HttpServletRequest.class)))
             .thenReturn(ResponseEntity
@@ -405,7 +405,7 @@ public class RoleControllerTest {
     mockClaims.setIssuedAt(new Date());
     mockClaims.setExpiration(new Date(System.currentTimeMillis() + 3600000));
 
-    when(jwtService.isTokenValid(any(HttpServletRequest.class))).thenReturn(mockClaims);
+    when(jwtService.verifyToken(any(HttpServletRequest.class))).thenReturn(mockClaims);
 
     when(roleService.updateRole(any(RoleDTO.class), any(HttpServletRequest.class)))
             .thenReturn(ResponseEntity
@@ -439,7 +439,7 @@ public class RoleControllerTest {
     mockClaims.setIssuedAt(new Date());
     mockClaims.setExpiration(new Date(System.currentTimeMillis() + 3600000));
 
-    when(jwtService.isTokenValid(any(HttpServletRequest.class))).thenReturn(mockClaims);
+    when(jwtService.verifyToken(any(HttpServletRequest.class))).thenReturn(mockClaims);
 
     mvc.perform(put("/role/edit")
                     .header("Authorization", "Bearer mock-token")
@@ -468,7 +468,7 @@ public class RoleControllerTest {
     mockClaims.setIssuedAt(new Date());
     mockClaims.setExpiration(new Date(System.currentTimeMillis() + 3600000));
 
-    when(jwtService.isTokenValid(any(HttpServletRequest.class))).thenReturn(mockClaims);
+    when(jwtService.verifyToken(any(HttpServletRequest.class))).thenReturn(mockClaims);
 
     when(roleService.updateRole(any(RoleDTO.class), any(HttpServletRequest.class)))
             .thenReturn(ResponseEntity
@@ -505,7 +505,7 @@ public class RoleControllerTest {
     mockClaims.setIssuedAt(new Date());
     mockClaims.setExpiration(new Date(System.currentTimeMillis() + 3600000));
 
-    when(jwtService.isTokenValid(any(HttpServletRequest.class))).thenReturn(mockClaims);
+    when(jwtService.verifyToken(any(HttpServletRequest.class))).thenReturn(mockClaims);
 
     when(roleService.updateRole(any(RoleDTO.class), any(HttpServletRequest.class)))
             .thenReturn(ResponseEntity
