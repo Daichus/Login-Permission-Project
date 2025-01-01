@@ -184,29 +184,45 @@ class EmployeeServiceTest {
    * 測試獲取全部員工資訊成功
    */
   @Test
+  @DisplayName("測試獲取全部員工資訊")
   void getAllEmployees_Success() {
+    // 1. 測試數據 -放兩筆員工資料
     List<Employee> mockEmployees = Arrays.asList(
             new Employee(1, "aaa@gmail.com", "Alice", "password1", "0911", 1, true, null, mockStatus, mockRoles, mockLoginRecords),
     new Employee(2, "bob@gmail.com", "Bob", "password2", "0912", 2, true, null, mockStatus, mockRoles, mockLoginRecords)
     );
+    // 2. 設置 Mock 行為 -當..這個方法被呼叫時，就返回..預設的資料
     Mockito.when(employeeRepository.findAll()).thenReturn(mockEmployees);
 
+    // 3. 模擬 HTTP 請求和 JWT 驗證
+    // 這個 mock 物件模擬了 HttpServletRequest 的行為
     HttpServletRequest mockRequest = Mockito.mock(HttpServletRequest.class);
+    //  -doNothing(): 表示不執行任何動作
+    //  -when(jwtUtil): 當使用 jwtUtil 時
+    //  -validateRequest(mockRequest): 呼叫驗證請求的方法
+    //  當呼叫 JWT 驗證時，直接通過，不做任何檢查。
     Mockito.doNothing().when(jwtUtil).validateRequest(mockRequest);
 
+    // 4. 執行測試目標方法
     ResponseEntity<?> response = employeeService.getAllEmployees(mockRequest);
 
+    // 5. 驗證結果 -確認回應狀態碼是 200 OK
     assertEquals(HttpStatus.OK, response.getStatusCode());
-
-    // 正確處理 ServerResponse
+    // ServerResponse 是一個封裝了 API 響應的統一格式，使得前後端交互更加規範和方便
     ServerResponse serverResponse = (ServerResponse) response.getBody();
     assertNotNull(serverResponse);
 
     List<Employee> employees = (List<Employee>) serverResponse.getData();  // 假設 ServerResponse 有 getData 方法
     assertNotNull(employees);
     assertEquals(2, employees.size());
+    // -確認密碼已被正確遮蔽為 "NaN"
     assertEquals("NaN", employees.get(0).getPassword());
     assertEquals("NaN", employees.get(1).getPassword());
+
+    // 驗證 findAll() 是否被呼叫
+    Mockito.verify(employeeRepository).findAll();
+    // 驗證方法是否被呼叫
+    Mockito.verify(jwtUtil).validateRequest(mockRequest);
   }
 
   /**
