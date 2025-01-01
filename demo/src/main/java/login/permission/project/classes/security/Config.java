@@ -5,7 +5,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -36,20 +35,16 @@ public class Config {
                 .authorizeHttpRequests(auth -> auth
 
                         // 允許不需要驗證的端點
-                        // 登入和註冊不需要權限
                         .requestMatchers(
-                                "/employee/test/login",
-                                "/employee/test/add"   // 添加註冊端點
+                      "/employee/test/login",
+                               "/employee/test/add",
+                               "/Permission/test/get",
+                               "/Position/get",
+                               "/status/test/get",
+                               "/employee/test/getAllEmployeeInfo",
+                               "/role/getAll"
                         ).permitAll()
 
-                        //測試 打開 Permission, Position 權限
-                                .requestMatchers(
-                                        "/Permission/test/get",
-                                        "/Position/get",
-                                "/status/test/get",
-                                        "/employee/test/getAllEmployeeInfo",
-                                        "/role/getAll"
-                                ).permitAll()
 
                         // 部門管理相關權限
                         .requestMatchers(HttpMethod.GET, "/department/**").hasAuthority("dept_mgt_read")
@@ -73,6 +68,8 @@ public class Config {
                         .requestMatchers(HttpMethod.POST, "/loginRecord/**").hasAuthority("login_rec_create")
                         .requestMatchers(HttpMethod.PUT, "/loginRecord/**").hasAuthority("login_rec_update")
                         .requestMatchers(HttpMethod.DELETE, "/loginRecord/**").hasAuthority("login_rec_delete")
+                        .requestMatchers(HttpMethod.POST, "/role/**").hasAuthority("role_mgt_create")
+
                                 // 其他請求需要認證
                                 .anyRequest().authenticated()
 

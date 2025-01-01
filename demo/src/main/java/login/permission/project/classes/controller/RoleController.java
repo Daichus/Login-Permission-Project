@@ -21,12 +21,12 @@ public class RoleController {
     }
 
     @PostMapping ("/create")
-    public ResponseEntity<?> createRole(@PathVariable RoleDTO roleDto, HttpServletRequest request) {
+    public ResponseEntity<?> createRole(@RequestBody RoleDTO roleDto, HttpServletRequest request) {
         return roleService.createRole(roleDto,request);
     }
 
     @PutMapping("/edit")
-    public ResponseEntity<?> updateRole (@PathVariable  RoleDTO roleDto, HttpServletRequest request) {
+    public ResponseEntity<?> updateRole (@RequestBody  RoleDTO roleDto, HttpServletRequest request) {
         return roleService.updateRole( roleDto,   request);
     }
 

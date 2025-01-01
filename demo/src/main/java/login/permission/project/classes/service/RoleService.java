@@ -7,7 +7,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import login.permission.project.classes.model.*;
 import login.permission.project.classes.model.dto.RoleDTO;
 import login.permission.project.classes.model.util.JwtUtil;
-import login.permission.project.classes.model.util.ResponseUtil;
 import login.permission.project.classes.repository.PermissionRepository;
 import login.permission.project.classes.repository.RoleRepository;
 
@@ -33,9 +32,10 @@ public class RoleService {
     JwtUtil jwtUtil;
 
 
-    public ResponseEntity<?> getAllRole() {
+    public ResponseEntity<ServerResponse> getAllRole() {
         List<Role> roles =  roleRepository.findAll();
-        return ResponseUtil.success("獲取所有角色成功", roles);
+        return ResponseEntity.status(HttpStatus.OK).body(new ServerResponse("查詢所有角色成功", roles));
+
     }
 
 
@@ -47,15 +47,15 @@ public class RoleService {
      *     permission_id:["1","2","3"]
      * }資料的body,這筆資料需要用於創建新的Role
      */
-    public ResponseEntity<?> createRole (RoleDTO roleDto, HttpServletRequest request) {
+    public ResponseEntity<ServerResponse> createRole (RoleDTO roleDto, HttpServletRequest request) {
         try {
             jwtUtil.validateRequest(request);
             Role role = new Role();
             setupRole(role, roleDto);
             roleRepository.save(role);
-            return  ResponseUtil.success("新增角色成功",  HttpStatus.OK);
+            return  ResponseEntity.status(HttpStatus.OK).body(new ServerResponse("新增角色成功", ""));
         } catch ( IllegalArgumentException e) {
-            return  ResponseUtil.error("你沒有新增角色的權限",  HttpStatus.UNAUTHORIZED);
+            return  ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ServerResponse("你沒有新增角色的權限", ""));
         }
 
     }
@@ -71,7 +71,7 @@ public class RoleService {
      *        }
      *      的資料
      */
-    public ResponseEntity<?> updateRole(RoleDTO roleDto, HttpServletRequest request) {
+    public ResponseEntity<ServerResponse> updateRole(RoleDTO roleDto, HttpServletRequest request) {
         try{
             jwtUtil.validateRequest(request);
             Optional<Role> roleOption = roleRepository.findById(roleDto.getRole_id());
@@ -79,12 +79,15 @@ public class RoleService {
                 Role role = roleOption.get();
                 setupRole(role, roleDto);
                 roleRepository.save(role);
-                return ResponseUtil.success("修改角色成功",  HttpStatus.OK);
+                return  ResponseEntity.status(HttpStatus.OK).body(new ServerResponse("修改角色成功", ""));
+
             } else {
-                return   ResponseUtil.error("找不到指定id的角色",  HttpStatus.NOT_FOUND);
+                return  ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ServerResponse("找不到指定id的角色", ""));
+
             }
         } catch (IllegalArgumentException e) {
-            return   ResponseUtil.error("你沒有修改角色的權限",  HttpStatus.UNAUTHORIZED);
+            return  ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ServerResponse("你沒有修改角色的權限", ""));
+
         }
     }
 
@@ -113,13 +116,5 @@ public class RoleService {
             throw new IllegalArgumentException("權限 ID 格式錯誤,必須為阿拉伯數字", e);
         }
     }
-
-
-
-
-
-
-
-
 
 }

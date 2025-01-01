@@ -28,22 +28,35 @@ public class JwtAuthFilter extends OncePerRequestFilter {
           HttpServletResponse response,
           FilterChain filterChain
   ) throws ServletException, IOException {
-    Claims claims = jwtService.verifyToken(request);
-
-    if (claims != null) {
-      List<String> permissions = (List<String>) claims.get("permissionCode");
-
-      UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-              claims.getSubject(),
-              null,
-              permissions.stream()
-                      .map(SimpleGrantedAuthority::new)
-                      .collect(Collectors.toList())
-      );
-
-      SecurityContextHolder.getContext().setAuthentication(authentication);
+    // 首先檢查是否有 Authorization header
+    String authHeader = request.getHeader("Authorization");
+    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+      response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+      response.setContentType("application/json");
+      response.getWriter().write("{\"message\":\"Token not provided.\"}");
+      return;  // 直接返回，不執行 filterChain
     }
 
+    Claims claims = jwtService.verifyToken(request);
+
+    if (claims == null) {
+      response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+      response.setContentType("application/json");
+      response.getWriter().write("{\"message\":\"Invalid token.\"}");
+      return;  // 直接返回，不執行 filterChain
+    }
+
+    List<String> permissions = (List<String>) claims.get("permissionCode");
+
+    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+            claims.getSubject(),
+            null,
+            permissions.stream()
+                    .map(SimpleGrantedAuthority::new)
+                    .collect(Collectors.toList())
+    );
+
+    SecurityContextHolder.getContext().setAuthentication(authentication);
     filterChain.doFilter(request, response);
   }
 
