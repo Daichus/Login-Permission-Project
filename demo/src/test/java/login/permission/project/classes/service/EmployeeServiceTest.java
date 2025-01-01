@@ -75,12 +75,93 @@ class EmployeeServiceTest {
   }
 
   /**
+   * 測試根據ID獲取員工資訊成功
+   */
+  @Test
+  void getEmployeeById_Success() {
+
+    int employeeId = 1;
+    Employee mockEmployee = new Employee(
+            employeeId,
+            "test@gmail.com",
+            "Test User",
+            "password123",
+            "0912345678",
+            1,
+            true,
+            null,
+            mockStatus,
+            mockRoles,
+            mockLoginRecords
+    );
+
+    HttpServletRequest mockRequest = Mockito.mock(HttpServletRequest.class);
+    Mockito.when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(mockEmployee));
+    Mockito.doNothing().when(jwtUtil).validateRequest(mockRequest);
+
+    ResponseEntity<?> response = employeeService.getEmployeeById(employeeId, mockRequest);
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    ServerResponse serverResponse = (ServerResponse) response.getBody();
+    assertNotNull(serverResponse);
+    assertEquals("獲取員工資訊成功", serverResponse.getMessage());
+
+    Employee returnedEmployee = (Employee) serverResponse.getData();
+    assertNotNull(returnedEmployee);
+    assertEquals(employeeId, returnedEmployee.getEmployee_id());
+    assertEquals("NaN", returnedEmployee.getPassword());
+  }
+
+  /**
+   * 測試根據ID獲取員工資訊
+   * 找不到指定員工
+   */
+  @Test
+  void getEmployeeById_NotFound() {
+
+    int nonExistentEmployeeId = 999;
+    HttpServletRequest mockRequest = Mockito.mock(HttpServletRequest.class);
+
+    Mockito.when(employeeRepository.findById(nonExistentEmployeeId)).thenReturn(Optional.empty());
+    Mockito.doNothing().when(jwtUtil).validateRequest(mockRequest);
+
+    ResponseEntity<?> response = employeeService.getEmployeeById(nonExistentEmployeeId, mockRequest);
+
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    ServerResponse serverResponse = (ServerResponse) response.getBody();
+    assertNotNull(serverResponse);
+    assertEquals("找不到指定的員工", serverResponse.getMessage());
+    assertNull(serverResponse.getData());
+  }
+
+  /**
+   * 測試根據ID獲取員工資訊
+   * 無權限訪問
+   */
+  @Test
+  void getEmployeeById_Unauthorized() {
+
+    int employeeId = 1;
+    HttpServletRequest mockRequest = Mockito.mock(HttpServletRequest.class);
+
+    Mockito.doThrow(new IllegalArgumentException()).when(jwtUtil).validateRequest(mockRequest);
+
+    ResponseEntity<?> response = employeeService.getEmployeeById(employeeId, mockRequest);
+
+    assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+    ServerResponse serverResponse = (ServerResponse) response.getBody();
+    assertNotNull(serverResponse);
+    assertEquals("你沒有獲取員工資訊的權限", serverResponse.getMessage());
+    assertNull(serverResponse.getData());
+  }
+
+  /**
    *
    * 測試登入成功
    */
   @Test
   void testLogin_Success() {
-    // Arrange
+
     EmployeeLoginRequest request = new EmployeeLoginRequest(1, "password1");
     Employee mockEmployee = new Employee(1, "aaa@gmail.com", "Alice", "password1", "0911", 1, true, null, mockStatus, mockRoles, mockLoginRecords);
 
@@ -91,10 +172,8 @@ class EmployeeServiceTest {
     Mockito.when(logRecRepository.save(Mockito.any(LoginRecord.class)))
             .thenReturn(new LoginRecord());
 
-    // Act
     ResponseEntity<?> response = employeeService.login(request);
 
-    // Assert
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals("mockJWTToken", response.getBody());
   }
@@ -106,16 +185,14 @@ class EmployeeServiceTest {
    */
   @Test
   void testLogin_InvalidPassword() {
-    // Arrange
+
     EmployeeLoginRequest request = new EmployeeLoginRequest(1, "wrongPassword");
     Employee mockEmployee = new Employee(1, "aaa@gmail.com", "Alice", "password1", "0911", 1, true, null, mockStatus, mockRoles, mockLoginRecords);
 
     Mockito.when(employeeRepository.findById(1)).thenReturn(Optional.of(mockEmployee));
 
-    // Act
     ResponseEntity<?> response = employeeService.login(request);
 
-    // Assert
     assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
 
     // 將回應轉換為 ServerResponse 並驗證
@@ -132,16 +209,14 @@ class EmployeeServiceTest {
    */
   @Test
   void testLogin_UnverifiedAccount() {
-    // Arrange
+
     EmployeeLoginRequest request = new EmployeeLoginRequest(1, "password1");
     Employee mockEmployee = new Employee(1, "aaa@gmail.com", "Alice", "password1", "0911", 1, false, null, mockStatus, mockRoles, mockLoginRecords);
 
     Mockito.when(employeeRepository.findById(1)).thenReturn(Optional.of(mockEmployee));
 
-    // Act
     ResponseEntity<?> response = employeeService.login(request);
 
-    // Assert
     assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
 
     // 修改為處理 ServerResponse
@@ -157,7 +232,7 @@ class EmployeeServiceTest {
    */
   @Test
   void testAddEmployee_Success() {
-    // Arrange
+
     Employee employee = new Employee();
     employee.setName("Alice");
     employee.setEmail("alice@example.com");
@@ -165,10 +240,8 @@ class EmployeeServiceTest {
     Mockito.when(employeeRepository.findMaxEmployeeId()).thenReturn(10);
     Mockito.doNothing().when(emailService).sendVerificationEmail(Mockito.anyString(), Mockito.anyString());
 
-    // Act
     String result = employeeService.addEmployee(employee);
 
-    // Assert
     assertTrue(result.contains("新增員工成功"));
     assertEquals(11, employee.getEmployee_id());
   }
@@ -180,7 +253,7 @@ class EmployeeServiceTest {
    */
   @Test
   void testAddEmployee_EmailSendFail() {
-    // Arrange
+
     Employee employee = new Employee();
     employee.setName("Alice");
     employee.setEmail("alice@example.com");
@@ -188,10 +261,8 @@ class EmployeeServiceTest {
     Mockito.when(employeeRepository.findMaxEmployeeId()).thenReturn(10);
     Mockito.doThrow(new RuntimeException("Email server error")).when(emailService).sendVerificationEmail(Mockito.anyString(), Mockito.anyString());
 
-    // Act
     String result = employeeService.addEmployee(employee);
 
-    // Assert
     assertTrue(result.contains("驗證郵件發送失敗"));
   }
 
@@ -201,7 +272,7 @@ class EmployeeServiceTest {
    */
   @Test
   void testVerifyAccount_Success() {
-    // Arrange
+
     Employee employee = new Employee();
     employee.setEnabled(false);
     employee.setVerificationToken("validToken");
@@ -209,10 +280,8 @@ class EmployeeServiceTest {
     Mockito.when(employeeRepository.findByVerificationToken("validToken"))
             .thenReturn(Optional.of(employee));
 
-    // Act
     String result = employeeService.verifyAccount("validToken");
 
-    // Assert
     assertEquals("帳號驗證成功", result);
     assertTrue(employee.isEnabled());
     assertNull(employee.getVerificationToken());
@@ -225,14 +294,12 @@ class EmployeeServiceTest {
    */
   @Test
   void testVerifyAccount_InvalidToken() {
-    // Arrange
+
     Mockito.when(employeeRepository.findByVerificationToken("invalidToken"))
             .thenReturn(Optional.empty());
-
-    // Act
+    
     String result = employeeService.verifyAccount("invalidToken");
 
-    // Assert
     assertEquals("無效的驗證碼", result);
   }
 
