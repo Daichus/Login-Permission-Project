@@ -5,7 +5,7 @@
 <html id="htmlId">
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
-  <title>Coverage Report > EmailService</title>
+  <title>Coverage Report > WebConfig</title>
   <style type="text/css">
     @import "../../css/coverage.css";
     @import "../../css/idea.min.css";
@@ -19,18 +19,15 @@
 <div class="breadCrumbs">
 Current scope:     <a href="../../index.html">all classes</a>
     <span class="separator">|</span>
-    <a href="../index.html">login.permission.project.classes.service</a>
+    <a href="../index.html">login.permission.project.classes</a>
 </div>
 
-<h1>Coverage Summary for Class: EmailService (login.permission.project.classes.service)</h1>
+<h1>Coverage Summary for Class: WebConfig (login.permission.project.classes)</h1>
 
 <table class="coverageStats">
+
 <tr>
   <th class="name">Class</th>
-<th class="coverageStat 
-">
-  Class, %
-</th>
 <th class="coverageStat 
 ">
   Method, %
@@ -41,33 +38,46 @@ Current scope:     <a href="../../index.html">all classes</a>
 </th>
 </tr>
 <tr>
-  <td class="name">EmailService</td>
+  <td class="name">WebConfig</td>
 <td class="coverageStat">
   <span class="percent">
-    0%
+    100%
   </span>
   <span class="absValue">
-    (0/1)
+    (2/2)
   </span>
 </td>
 <td class="coverageStat">
   <span class="percent">
-    0%
+    100%
   </span>
   <span class="absValue">
-    (0/1)
-  </span>
-</td>
-<td class="coverageStat">
-  <span class="percent">
-    0%
-  </span>
-  <span class="absValue">
-    (0/6)
+    (6/6)
   </span>
 </td>
 </tr>
-
+  <tr>
+    <td class="name">WebConfig$$SpringCGLIB$$0</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+</tr>
 </table>
 
 <br/>
@@ -75,32 +85,23 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 
 <pre>
-<code class="sourceCode" id="sourceCode">&nbsp;package login.permission.project.classes.service;
+<code class="sourceCode" id="sourceCode">&nbsp;package login.permission.project.classes;
 &nbsp;
-&nbsp;import lombok.RequiredArgsConstructor;
-&nbsp;import org.springframework.mail.SimpleMailMessage;
-&nbsp;import org.springframework.mail.javamail.JavaMailSender;
-&nbsp;import org.springframework.stereotype.Service;
 &nbsp;
-&nbsp;@Service
-&nbsp;@RequiredArgsConstructor
-&nbsp;public class EmailService {
-&nbsp;  private final JavaMailSender mailSender;
+&nbsp;import org.springframework.context.annotation.Configuration;
+&nbsp;import org.springframework.web.servlet.config.annotation.CorsRegistry;
+&nbsp;import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 &nbsp;
-&nbsp;  public void sendVerificationEmail(String to, String token) {
-<b class="nc">&nbsp;    SimpleMailMessage message = new SimpleMailMessage();</b>
-<b class="nc">&nbsp;    message.setFrom(&quot;d1204493@o365.fcu.edu.tw&quot;);// 設定寄件者</b>
-<b class="nc">&nbsp;    message.setTo(to);</b>
-<b class="nc">&nbsp;    message.setSubject(&quot;請驗證您的帳號&quot;);</b>
-<b class="nc">&nbsp;    message.setText(&quot;親愛的員工，您好：\n\n&quot;</b>
-&nbsp;            + &quot;請點擊以下連結驗證您的帳號：\n&quot;
-&nbsp;            + &quot;http://localhost:8080/employee/test/verify?token=&quot; + token + &quot;\n\n&quot;
-&nbsp;            + &quot;此連結有效期為24小時，請儘速驗證。\n&quot;
-&nbsp;            + &quot;如果您沒有申請帳號，請忽略此郵件。&quot;);
-&nbsp;
-<b class="nc">&nbsp;    mailSender.send(message);</b>
+&nbsp;@Configuration
+<b class="fc">&nbsp;public class WebConfig implements WebMvcConfigurer {</b>
+&nbsp;  @Override
+&nbsp;  public void addCorsMappings(CorsRegistry registry) {
+<b class="fc">&nbsp;    registry.addMapping(&quot;/**&quot;)</b>
+<b class="fc">&nbsp;            .allowedOrigins(&quot;http://localhost:5173&quot;)  // 您的前端地址</b>
+<b class="fc">&nbsp;            .allowedMethods(&quot;GET&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;DELETE&quot;)</b>
+<b class="fc">&nbsp;            .allowedHeaders(&quot;Authorization&quot;, &quot;Content-Type&quot;)</b>
+<b class="fc">&nbsp;            .allowCredentials(true);</b>
 &nbsp;  }
-&nbsp;
 &nbsp;}
 </code>
 </pre>
@@ -125,7 +126,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 <div class="footer">
     
-    <div style="float:right;">generated on 2024-12-31 09:49</div>
+    <div style="float:right;">generated on 2025-01-02 02:53</div>
 </div>
 </body>
 </html>

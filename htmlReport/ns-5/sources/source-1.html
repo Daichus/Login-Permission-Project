@@ -1,0 +1,218 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > Config</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">login.permission.project.classes.security</a>
+</div>
+
+<h1>Coverage Summary for Class: Config (login.permission.project.classes.security)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Config</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (6/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    89.5%
+  </span>
+  <span class="absValue">
+    (34/38)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">Config$$SpringCGLIB$$0</td>
+  </tr>
+  <tr>
+    <td class="name">Config$$SpringCGLIB$$FastClass$$0</td>
+  </tr>
+  <tr>
+    <td class="name">Config$$SpringCGLIB$$FastClass$$1</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (6/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    89.5%
+  </span>
+  <span class="absValue">
+    (34/38)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package login.permission.project.classes.security;
+&nbsp;import jakarta.servlet.http.HttpServletResponse;
+&nbsp;import login.permission.project.classes.JwtService;
+&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;import org.springframework.context.annotation.Bean;
+&nbsp;import org.springframework.context.annotation.Configuration;
+&nbsp;import org.springframework.http.HttpMethod;
+&nbsp;import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+&nbsp;import org.springframework.security.config.http.SessionCreationPolicy;
+&nbsp;import org.springframework.security.web.SecurityFilterChain;
+&nbsp;import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+&nbsp;import org.springframework.web.cors.CorsConfiguration;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;@Configuration
+<b class="fc">&nbsp;public class Config {</b>
+&nbsp;
+&nbsp;  @Autowired
+&nbsp;  private JwtService jwtService;
+&nbsp;
+&nbsp;    @Bean
+&nbsp;    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
+<b class="fc">&nbsp;        http</b>
+<b class="fc">&nbsp;                .csrf(csrf -&gt; csrf.disable()) // 禁用 CSRF</b>
+<b class="fc">&nbsp;                .cors(cors -&gt; cors.configurationSource(request -&gt; {</b>
+<b class="fc">&nbsp;                    CorsConfiguration config = new CorsConfiguration();</b>
+<b class="fc">&nbsp;                    config.setAllowedOrigins(List.of(&quot;http://localhost:5173&quot;));</b>
+<b class="fc">&nbsp;                    config.setAllowedMethods(List.of(&quot;GET&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;DELETE&quot;));</b>
+&nbsp;//                    config.setAllowedHeaders(List.of(&quot;Authorization&quot;, &quot;Content-Type&quot;));
+<b class="fc">&nbsp;                    config.setAllowedHeaders(List.of(&quot;*&quot;));  // 允許所有 headers</b>
+<b class="fc">&nbsp;                    config.setAllowCredentials(true);</b>
+&nbsp;
+<b class="fc">&nbsp;                    return config;</b>
+&nbsp;                }))
+<b class="fc">&nbsp;                .authorizeHttpRequests(auth -&gt; auth</b>
+&nbsp;
+&nbsp;                        // 允許不需要驗證的端點
+<b class="fc">&nbsp;                        .requestMatchers(</b>
+&nbsp;                      &quot;/employee/test/login&quot;,
+&nbsp;                               &quot;/employee/test/add&quot;,
+&nbsp;                               &quot;/Permission/test/get&quot;,
+&nbsp;                               &quot;/Position/get&quot;,
+&nbsp;                               &quot;/status/test/get&quot;,
+&nbsp;                               &quot;/employee/test/getAllEmployeeInfo&quot;,
+&nbsp;                               &quot;/role/getAll&quot;
+<b class="fc">&nbsp;                        ).permitAll()</b>
+&nbsp;
+&nbsp;
+&nbsp;                        // 部門管理相關權限
+<b class="fc">&nbsp;                        .requestMatchers(HttpMethod.GET, &quot;/department/**&quot;).hasAuthority(&quot;dept_mgt_read&quot;)</b>
+<b class="fc">&nbsp;                        .requestMatchers(HttpMethod.POST, &quot;/department/**&quot;).hasAuthority(&quot;dept_mgt_create&quot;)</b>
+<b class="fc">&nbsp;                        .requestMatchers(HttpMethod.PUT, &quot;/department/**&quot;).hasAuthority(&quot;dept_mgt_update&quot;)</b>
+<b class="fc">&nbsp;                        .requestMatchers(HttpMethod.DELETE, &quot;/department/**&quot;).hasAuthority(&quot;dept_mgt_delete&quot;)</b>
+&nbsp;
+&nbsp;                        // 單位管理相關權限
+<b class="fc">&nbsp;                        .requestMatchers(HttpMethod.GET, &quot;/unit/**&quot;).hasAuthority(&quot;unit_mgt_read&quot;)</b>
+<b class="fc">&nbsp;                        .requestMatchers(HttpMethod.POST, &quot;/unit/**&quot;).hasAuthority(&quot;unit_mgt_create&quot;)</b>
+<b class="fc">&nbsp;                        .requestMatchers(HttpMethod.PUT, &quot;/unit/**&quot;).hasAuthority(&quot;unit_mgt_update&quot;)</b>
+<b class="fc">&nbsp;                        .requestMatchers(HttpMethod.DELETE, &quot;/unit/**&quot;).hasAuthority(&quot;unit_mgt_delete&quot;)</b>
+&nbsp;
+&nbsp;                        // 登入記錄相關權限
+<b class="fc">&nbsp;                        .requestMatchers(HttpMethod.GET, &quot;/loginRecord/**&quot;).hasAnyAuthority(</b>
+&nbsp;                                &quot;login_rec_read&quot;,
+&nbsp;                                &quot;login_rec_read_id&quot;,
+&nbsp;                                &quot;login_rec_read_dept&quot;,
+&nbsp;                                &quot;login_rec_read_unit&quot;
+&nbsp;                        )
+<b class="fc">&nbsp;                        .requestMatchers(HttpMethod.POST, &quot;/loginRecord/**&quot;).hasAuthority(&quot;login_rec_create&quot;)</b>
+<b class="fc">&nbsp;                        .requestMatchers(HttpMethod.PUT, &quot;/loginRecord/**&quot;).hasAuthority(&quot;login_rec_update&quot;)</b>
+<b class="fc">&nbsp;                        .requestMatchers(HttpMethod.DELETE, &quot;/loginRecord/**&quot;).hasAuthority(&quot;login_rec_delete&quot;)</b>
+<b class="fc">&nbsp;                        .requestMatchers(HttpMethod.POST, &quot;/role/**&quot;).hasAuthority(&quot;role_mgt_create&quot;)</b>
+&nbsp;
+&nbsp;                                // 其他請求需要認證
+<b class="fc">&nbsp;                                .anyRequest().authenticated()</b>
+&nbsp;
+&nbsp;//                        .anyRequest().denyAll()
+&nbsp;                )
+&nbsp;                // 1/1 新增
+<b class="fc">&nbsp;                .exceptionHandling(exception -&gt; exception</b>
+<b class="fc">&nbsp;                        .authenticationEntryPoint((request, response, authException) -&gt; {</b>
+<b class="nc">&nbsp;                          response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401</b>
+<b class="nc">&nbsp;                          response.getWriter().write(&quot;Unauthorized: &quot; + authException.getMessage());</b>
+&nbsp;                        })
+<b class="fc">&nbsp;                        .accessDeniedHandler((request, response, accessDeniedException) -&gt; {</b>
+<b class="nc">&nbsp;                          response.setStatus(HttpServletResponse.SC_FORBIDDEN); // 403</b>
+<b class="nc">&nbsp;                          response.getWriter().write(&quot;Access Denied: &quot; + accessDeniedException.getMessage());</b>
+&nbsp;                        })
+&nbsp;                )
+&nbsp;
+<b class="fc">&nbsp;                .addFilterBefore(new JwtAuthFilter(jwtService), UsernamePasswordAuthenticationFilter.class)</b>
+<b class="fc">&nbsp;                .sessionManagement(session -&gt; session</b>
+<b class="fc">&nbsp;                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS));</b>
+&nbsp;
+&nbsp;//                .httpBasic(httpBasic -&gt; httpBasic.disable());
+<b class="fc">&nbsp;        return http.build();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-01-02 02:53</div>
+</div>
+</body>
+</html>

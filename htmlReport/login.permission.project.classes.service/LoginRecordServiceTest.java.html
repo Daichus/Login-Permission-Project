@@ -1,0 +1,487 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LoginRecordServiceTest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">classes in demo Coverage Results</a> &gt; <a href="index.source.html" class="el_package">login.permission.project.classes.service</a> &gt; <span class="el_source">LoginRecordServiceTest.java</span></div><h1>LoginRecordServiceTest.java</h1><pre class="source lang-java linenums">package login.permission.project.classes.service;
+
+import io.jsonwebtoken.Claims;
+import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
+import login.permission.project.classes.JwtService;
+import login.permission.project.classes.model.LoginRecord;
+import login.permission.project.classes.repository.LoginRecordRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+@SpringBootTest
+<span class="fc" id="L26">class LoginRecordServiceTest {</span>
+
+  @InjectMocks
+  private LoginRecordService loginRecordService;
+
+  @Mock
+  private LoginRecordRepository loginRecordRepository;
+
+  @Mock
+  private JwtService jwtService;
+
+  @Mock
+  private HttpServletRequest request;
+
+  @BeforeEach
+   void setUp() {
+<span class="fc" id="L42">    MockitoAnnotations.openMocks(this);</span>
+<span class="fc" id="L43">  }</span>
+
+  /**
+   * 測試：取得所有登入記錄
+   * 驗證 Service 是否正確調用 Repository 並返回結果。
+   */
+  @Test
+  void getAllLoginRecords() {
+    // Arrange
+<span class="fc" id="L52">    List&lt;LoginRecord&gt; records = List.of(</span>
+<span class="fc" id="L53">            new LoginRecord(1, &quot;127.0.0.1&quot;, LocalDateTime.now(), null,&quot;SUCCESS&quot;),</span>
+<span class="fc" id="L54">            new LoginRecord(2, &quot;127.0.0.2&quot;, LocalDateTime.now(), null,&quot;FAIL&quot;)</span>
+    );
+<span class="fc" id="L56">    when(loginRecordRepository.findAll()).thenReturn(records);</span>
+
+    // Act
+<span class="fc" id="L59">    List&lt;LoginRecord&gt; result = loginRecordService.getAllLoginRecords();</span>
+
+    // Assert
+<span class="fc" id="L62">    assertEquals(2, result.size());</span>
+<span class="fc" id="L63">    assertEquals(&quot;127.0.0.1&quot;, result.get(0).getIp_address());</span>
+<span class="fc" id="L64">    assertEquals(&quot;127.0.0.2&quot;, result.get(1).getIp_address());</span>
+<span class="fc" id="L65">    verify(loginRecordRepository, times(1)).findAll();</span>
+<span class="fc" id="L66">  }</span>
+
+
+  /**
+   * 測試：根據權限碼獲取登入記錄（擁有正確權限）
+   * 驗證使用者擁有 'login_rec_read' 權限時，所有記錄都被返回。
+   */
+  @Test
+  void getRecordByPermissionCode_WithPermission() {
+    // Arrange
+<span class="fc" id="L76">    Claims claims = mock(Claims.class);</span>
+<span class="fc" id="L77">    when(jwtService.verifyToken(request)).thenReturn(claims);</span>
+<span class="fc" id="L78">    when(claims.get(&quot;permissionCode&quot;, List.class)).thenReturn(List.of(&quot;login_rec_read&quot;));</span>
+
+<span class="fc" id="L80">    List&lt;LoginRecord&gt; records = List.of(</span>
+<span class="fc" id="L81">            new LoginRecord(1, &quot;127.0.0.1&quot;, LocalDateTime.now(), null, &quot;SUCCESS&quot;)</span>
+    );
+
+<span class="fc" id="L84">    when(loginRecordRepository.findAll()).thenReturn(records);</span>
+
+    // Act
+<span class="fc" id="L87">    ResponseEntity&lt;?&gt; result = loginRecordService.getRecordByPermissionCode(request);</span>
+
+    // Assert
+<span class="fc" id="L90">    assertEquals(HttpStatus.OK, result.getStatusCode());</span>
+<span class="fc" id="L91">    assertEquals(records, result.getBody());</span>
+<span class="fc" id="L92">    verify(loginRecordRepository, times(1)).findAll();</span>
+<span class="fc" id="L93">  }</span>
+
+  /**
+   * 測試：無效權限時，應根據員工ID查詢記錄
+   */
+  @Test
+  void getRecordByPermissionCode_WithInvalidPermission() {
+    // Arrange
+<span class="fc" id="L101">    Claims claims = mock(Claims.class);</span>
+<span class="fc" id="L102">    when(jwtService.verifyToken(request)).thenReturn(claims);</span>
+<span class="fc" id="L103">    when(claims.get(&quot;permissionCode&quot;, List.class)).thenReturn(List.of(&quot;other_permission&quot;));</span>
+<span class="fc" id="L104">    when(claims.getSubject()).thenReturn(&quot;1&quot;);</span>
+
+<span class="fc" id="L106">    List&lt;LoginRecord&gt; records = List.of(</span>
+<span class="fc" id="L107">            new LoginRecord(1, &quot;127.0.0.1&quot;, LocalDateTime.now(), null, &quot;SUCCESS&quot;)</span>
+    );
+<span class="fc" id="L109">    when(loginRecordRepository.findByEmployeeId(1)).thenReturn(records);</span>
+
+    // Act
+<span class="fc" id="L112">    ResponseEntity&lt;?&gt; response = loginRecordService.getRecordByPermissionCode(request);</span>
+
+    // Assert
+<span class="fc" id="L115">    assertEquals(HttpStatus.OK, response.getStatusCode());</span>
+<span class="fc" id="L116">    assertEquals(records, response.getBody());</span>
+<span class="fc" id="L117">    verify(loginRecordRepository, times(1)).findByEmployeeId(1);</span>
+<span class="fc" id="L118">  }</span>
+
+
+  /**
+   * 測試：根據權限碼獲取登入記錄（無權限）
+   * 驗證當使用者無相關權限時，只返回個人記錄。
+   */
+  @Test
+  void getRecordByPermissionCode_WithoutPermission() {
+    // Arrange
+<span class="fc" id="L128">    Claims claims = mock(Claims.class);</span>
+<span class="fc" id="L129">    when(jwtService.verifyToken(request)).thenReturn(claims);</span>
+<span class="fc" id="L130">    when(claims.get(&quot;permissionCode&quot;, List.class)).thenReturn(List.of(&quot;other_permission&quot;));</span>
+<span class="fc" id="L131">    when(claims.getSubject()).thenReturn(&quot;1&quot;);</span>
+
+<span class="fc" id="L133">    List&lt;LoginRecord&gt; records = List.of(</span>
+<span class="fc" id="L134">            new LoginRecord(1, &quot;127.0.0.1&quot;, LocalDateTime.now(), null, &quot;SUCCESS&quot;)</span>
+    );
+
+<span class="fc" id="L137">    when(loginRecordRepository.findByEmployeeId(1)).thenReturn(records);</span>
+
+    // Act
+<span class="fc" id="L140">    ResponseEntity&lt;?&gt; result = loginRecordService.getRecordByPermissionCode(request);</span>
+
+    // Assert
+<span class="fc" id="L143">    assertEquals(HttpStatus.OK, result.getStatusCode());</span>
+<span class="fc" id="L144">    assertEquals(records, result.getBody());</span>
+<span class="fc" id="L145">    verify(loginRecordRepository, times(1)).findByEmployeeId(1);</span>
+<span class="fc" id="L146">  }</span>
+
+  /**
+   * 測試 permissionCode 為空
+   */
+  @Test
+  void getRecordByPermissionCode_EmptyPermissionCode() {
+    // Arrange
+<span class="fc" id="L154">    Claims claims = mock(Claims.class);</span>
+<span class="fc" id="L155">    when(jwtService.verifyToken(request)).thenReturn(claims);</span>
+<span class="fc" id="L156">    when(claims.get(&quot;permissionCode&quot;, List.class)).thenReturn(List.of());</span>
+
+    // Act
+<span class="fc" id="L159">    ResponseEntity&lt;?&gt; response = loginRecordService.getRecordByPermissionCode(request);</span>
+
+    // Assert
+<span class="fc" id="L162">    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());</span>
+<span class="fc" id="L163">    assertEquals(&quot;No permissions found in the token.&quot;, response.getBody());</span>
+<span class="fc" id="L164">    verify(loginRecordRepository, never()).findAll();</span>
+<span class="fc" id="L165">    verify(loginRecordRepository, never()).findByEmployeeId(anyInt());</span>
+<span class="fc" id="L166">  }</span>
+
+  /**
+   * 測試 claims.getSubject() 為 null
+   */
+  @Test
+  void getRecordByPermissionCode_NullSubject() {
+    // Arrange
+<span class="fc" id="L174">    Claims claims = mock(Claims.class);</span>
+<span class="fc" id="L175">    when(jwtService.verifyToken(request)).thenReturn(claims);</span>
+<span class="fc" id="L176">    when(claims.get(&quot;permissionCode&quot;, List.class)).thenReturn(List.of(&quot;other_permission&quot;));</span>
+<span class="fc" id="L177">    when(claims.getSubject()).thenReturn(null);</span>
+
+    // Act
+<span class="fc" id="L180">    ResponseEntity&lt;?&gt; response = loginRecordService.getRecordByPermissionCode(request);</span>
+
+    // Assert
+<span class="fc" id="L183">    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());</span>
+<span class="fc" id="L184">    assertEquals(&quot;Login record not found&quot;, response.getBody());</span>
+<span class="fc" id="L185">    verify(loginRecordRepository, never()).findByEmployeeId(anyInt());</span>
+<span class="fc" id="L186">  }</span>
+
+  /**
+   * 驗證在 JWT Token 解析失敗或 Claims 無效時，系統能正確返回錯誤回應。
+   */
+  @Test
+  void getRecordByPermissionCode_InvalidClaims() {
+    // Arrange
+<span class="fc" id="L194">    when(jwtService.verifyToken(request)).thenReturn(null);</span>
+
+    // Act
+<span class="fc" id="L197">    ResponseEntity&lt;?&gt; response = loginRecordService.getRecordByPermissionCode(request);</span>
+
+    // Assert
+<span class="fc" id="L200">    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());</span>
+<span class="fc" id="L201">    assertEquals(&quot;Login record not found&quot;, response.getBody());</span>
+<span class="fc" id="L202">    verify(loginRecordRepository, never()).findAll();</span>
+<span class="fc" id="L203">    verify(loginRecordRepository, never()).findByEmployeeId(anyInt());</span>
+<span class="fc" id="L204">  }</span>
+
+  /**
+   * 測試：多個有效權限時，應返回所有登入記錄
+   */
+  @Test
+  void getRecordByPermissionCode_WithMultipleValidPermissions() {
+    // Arrange
+<span class="fc" id="L212">    Claims claims = mock(Claims.class);</span>
+<span class="fc" id="L213">    when(jwtService.verifyToken(request)).thenReturn(claims);</span>
+<span class="fc" id="L214">    when(claims.get(&quot;permissionCode&quot;, List.class)).thenReturn(List.of(&quot;login_rec_update&quot;, &quot;other_permission&quot;));</span>
+<span class="fc" id="L215">    when(claims.getSubject()).thenReturn(&quot;1&quot;); // 確保有有效的 subject</span>
+
+<span class="fc" id="L217">    List&lt;LoginRecord&gt; records = List.of(</span>
+<span class="fc" id="L218">            new LoginRecord(1, &quot;127.0.0.1&quot;, LocalDateTime.now(), null, &quot;SUCCESS&quot;)</span>
+    );
+<span class="fc" id="L220">    when(loginRecordRepository.findAll()).thenReturn(records);</span>
+
+    // Act
+<span class="fc" id="L223">    ResponseEntity&lt;?&gt; response = loginRecordService.getRecordByPermissionCode(request);</span>
+
+    // Assert
+<span class="fc" id="L226">    assertEquals(HttpStatus.OK, response.getStatusCode());</span>
+<span class="fc" id="L227">    assertEquals(records, response.getBody());</span>
+<span class="fc" id="L228">    verify(loginRecordRepository, times(1)).findAll();</span>
+<span class="fc" id="L229">    verify(loginRecordRepository, never()).findByEmployeeId(anyInt());</span>
+<span class="fc" id="L230">  }</span>
+
+  /**
+   * 測試：permissionCode 為多個無效權限
+   *
+   */
+  @Test
+  void getRecordByPermissionCode_WithMultipleInvalidPermissions() {
+    // Arrange
+<span class="fc" id="L239">    Claims claims = mock(Claims.class);</span>
+<span class="fc" id="L240">    when(jwtService.verifyToken(request)).thenReturn(claims);</span>
+<span class="fc" id="L241">    when(claims.get(&quot;permissionCode&quot;, List.class)).thenReturn(List.of(&quot;invalid_permission1&quot;, &quot;invalid_permission2&quot;));</span>
+<span class="fc" id="L242">    when(claims.getSubject()).thenReturn(&quot;1&quot;);</span>
+
+<span class="fc" id="L244">    List&lt;LoginRecord&gt; records = List.of(</span>
+<span class="fc" id="L245">            new LoginRecord(1, &quot;127.0.0.1&quot;, LocalDateTime.now(), null, &quot;SUCCESS&quot;)</span>
+    );
+
+<span class="fc" id="L248">    when(loginRecordRepository.findByEmployeeId(1)).thenReturn(records);</span>
+
+    // Act
+<span class="fc" id="L251">    ResponseEntity&lt;?&gt; response = loginRecordService.getRecordByPermissionCode(request);</span>
+
+    // Assert
+<span class="fc" id="L254">    assertEquals(HttpStatus.OK, response.getStatusCode());</span>
+<span class="fc" id="L255">    assertEquals(records, response.getBody());</span>
+<span class="fc" id="L256">    verify(loginRecordRepository, never()).findAll();</span>
+<span class="fc" id="L257">    verify(loginRecordRepository, times(1)).findByEmployeeId(1);</span>
+<span class="fc" id="L258">  }</span>
+
+
+
+  /**
+   * 測試：新增登入記錄
+   * 驗證記錄成功儲存，並返回正確訊息。
+   */
+  @Test
+  void addLoginRecord() {
+    // Arrange
+<span class="fc" id="L269">    LoginRecord record = new LoginRecord(</span>
+<span class="fc" id="L270">            1,         // employee_id</span>
+            &quot;127.0.0.1&quot;,          // ip_address
+<span class="fc" id="L272">            LocalDateTime.now(), // login_time</span>
+            null,                // logout_time
+            &quot;SUCCESS&quot;             // status
+            );
+
+<span class="fc" id="L277">    when(loginRecordRepository.save(record)).thenReturn(record);</span>
+
+    // Act
+<span class="fc" id="L280">    String result = loginRecordService.addLoginRecord(record);</span>
+
+    // Assert
+<span class="fc" id="L283">    assertTrue(result.contains(&quot;新增登入記錄成功&quot;));</span>
+<span class="fc" id="L284">    verify(loginRecordRepository, times(1)).save(record);</span>
+
+<span class="fc" id="L286">  }</span>
+
+  /**
+   * 測試：資料庫異常處理
+   * 目的： 驗證當 addLoginRecord 遇到資料庫異常時，應正確處理異常。
+   */
+  @Test
+  void addLoginRecord_DatabaseException() {
+    // Arrange
+<span class="fc" id="L295">    LoginRecord record = new LoginRecord(1, &quot;127.0.0.1&quot;, LocalDateTime.now(), null, &quot;SUCCESS&quot;);</span>
+<span class="fc" id="L296">    doThrow(new RuntimeException(&quot;Database Error&quot;)).when(loginRecordRepository).save(record);</span>
+
+    // Act &amp; Assert
+<span class="pc" id="L299">    assertThrows(RuntimeException.class, () -&gt; loginRecordService.addLoginRecord(record));</span>
+<span class="fc" id="L300">    verify(loginRecordRepository, times(1)).save(record);</span>
+<span class="fc" id="L301">  }</span>
+
+  /**
+   * 測試：更新登入記錄
+   * 驗證記錄成功更新，並返回正確訊息。
+   */
+  @Test
+  void updateLoginRecord() {
+    // Arrange
+<span class="fc" id="L310">    LoginRecord record = new LoginRecord(</span>
+<span class="fc" id="L311">            1,         // employee_id</span>
+            &quot;127.0.0.1&quot;,          // ip_address
+<span class="fc" id="L313">            LocalDateTime.now(), // login_time</span>
+<span class="fc" id="L314">            LocalDateTime.now(), // logout_time</span>
+            &quot;UPDATED&quot;             // status
+    );
+
+<span class="fc" id="L318">    when(loginRecordRepository.save(record)).thenReturn(record);</span>
+
+    // Act
+<span class="fc" id="L321">    String result = loginRecordService.updateLoginRecord(record);</span>
+
+    // Assert
+<span class="fc" id="L324">    assertEquals(&quot;修改登入記錄資訊完成&quot;, result);</span>
+<span class="fc" id="L325">    verify(loginRecordRepository, times(1)).save(record);</span>
+<span class="fc" id="L326">  }</span>
+
+  /**
+   * 測試：傳入空登入記錄
+   * 目的： 驗證當 updateLoginRecord 接收到 null 記錄時，應返回失敗訊息。
+   */
+  @Test
+  void updateLoginRecord_WithNullRecord() {
+    // Act
+<span class="fc" id="L335">    String result = loginRecordService.updateLoginRecord(null);</span>
+
+    // Assert
+<span class="fc" id="L338">    assertEquals(&quot;更新登入記錄資訊失敗&quot;, result);</span>
+<span class="fc" id="L339">    verify(loginRecordRepository, never()).save(any());</span>
+<span class="fc" id="L340">  }</span>
+
+  /**
+   * 測試 lrr.save 拋出異常
+   */
+  @Test
+  void updateLoginRecord_DatabaseException() {
+    // Arrange
+<span class="fc" id="L348">    LoginRecord record = new LoginRecord(</span>
+<span class="fc" id="L349">            1,</span>
+            &quot;127.0.0.1&quot;,
+<span class="fc" id="L351">            LocalDateTime.now(),</span>
+            null,
+            &quot;SUCCESS&quot;
+    );
+
+<span class="fc" id="L356">    doThrow(new RuntimeException(&quot;Database error&quot;)).when(loginRecordRepository).save(record);</span>
+
+    // Act &amp; Assert
+<span class="pc" id="L359">    assertThrows(RuntimeException.class, () -&gt; loginRecordService.updateLoginRecord(record));</span>
+<span class="fc" id="L360">    verify(loginRecordRepository, times(1)).save(record);</span>
+<span class="fc" id="L361">  }</span>
+
+  /**
+   * 測試：更新登出時間（成功情境）
+   * 驗證在 JWT 合法時，登出時間被正確更新。
+   */
+  @Test
+  void updateLogoutTime_Success() {
+    // Arrange
+<span class="fc" id="L370">    Claims claims = mock(Claims.class);</span>
+<span class="fc" id="L371">    when(jwtService.verifyToken(request)).thenReturn(claims);</span>
+<span class="fc" id="L372">    when(claims.get(&quot;loginRecordId&quot;, Integer.class)).thenReturn(1);</span>
+
+<span class="fc" id="L374">    LoginRecord record = new LoginRecord(</span>
+<span class="fc" id="L375">            1,</span>
+            &quot;127.0.0.1&quot;,
+<span class="fc" id="L377">            LocalDateTime.now(),</span>
+            null,
+            &quot;SUCCESS&quot;
+    );
+
+<span class="fc" id="L382">    when(loginRecordRepository.findById(1)).thenReturn(Optional.of(record));</span>
+
+    // Act
+<span class="fc" id="L385">    ResponseEntity&lt;?&gt; result = loginRecordService.updateLogoutTime(request);</span>
+
+    // Assert
+<span class="fc" id="L388">    assertEquals(HttpStatus.OK, result.getStatusCode());</span>
+<span class="fc" id="L389">    assertEquals(&quot;登出成功&quot;, result.getBody());</span>
+<span class="fc" id="L390">    verify(loginRecordRepository, times(1)).save(record);</span>
+<span class="fc" id="L391">  }</span>
+  /**
+   *測試：JWT 無效時更新登出時間
+   * 驗證當 JWT 無效時，updateLogoutTime 應返回未授權的錯誤。
+   */
+  @Test
+  void updateLogoutTime_Unauthorized() {
+    // Arrange
+<span class="fc" id="L399">    when(jwtService.verifyToken(request)).thenReturn(null);</span>
+
+    // Act
+<span class="fc" id="L402">    ResponseEntity&lt;?&gt; response = loginRecordService.updateLogoutTime(request);</span>
+
+    // Assert
+<span class="fc" id="L405">    assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());</span>
+<span class="fc" id="L406">    assertEquals(&quot;未授權的JWT&quot;, response.getBody());</span>
+<span class="fc" id="L407">    verify(loginRecordRepository, never()).save(any());</span>
+<span class="fc" id="L408">  }</span>
+
+  /**
+   * 測試：JWT 合法但記錄不存在
+   * 目的： 驗證當 JWT 合法但找不到登入記錄時，不進行保存操作。
+   */
+  @Test
+  void updateLogoutTime_RecordNotFound() {
+    // Arrange
+<span class="fc" id="L417">    Claims claims = mock(Claims.class);</span>
+<span class="fc" id="L418">    when(jwtService.verifyToken(request)).thenReturn(claims);</span>
+<span class="fc" id="L419">    when(claims.get(&quot;loginRecordId&quot;, Integer.class)).thenReturn(999); // 記錄不存在</span>
+<span class="fc" id="L420">    when(loginRecordRepository.findById(999)).thenReturn(Optional.empty());</span>
+
+    // Act
+<span class="fc" id="L423">    ResponseEntity&lt;?&gt; response = loginRecordService.updateLogoutTime(request);</span>
+
+    // Assert
+<span class="fc" id="L426">    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());</span>
+<span class="fc" id="L427">    assertEquals(&quot;登入記錄不存在&quot;, response.getBody());</span>
+<span class="fc" id="L428">    verify(loginRecordRepository, never()).save(any());</span>
+<span class="fc" id="L429">  }</span>
+
+  /**
+   * 測試：JWT 無效時，應返回未授權
+   */
+  @Test
+  void updateLogoutTime_InvalidToken() {
+    // Arrange
+<span class="fc" id="L437">    when(jwtService.verifyToken(request)).thenReturn(null);</span>
+
+    // Act
+<span class="fc" id="L440">    ResponseEntity&lt;?&gt; response = loginRecordService.updateLogoutTime(request);</span>
+
+    // Assert
+<span class="fc" id="L443">    assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());</span>
+<span class="fc" id="L444">    assertEquals(&quot;未授權的JWT&quot;, response.getBody());</span>
+<span class="fc" id="L445">    verify(loginRecordRepository, never()).save(any());</span>
+<span class="fc" id="L446">  }</span>
+
+  /**
+   * 測試 loginRecordId 為 null
+   */
+  @Test
+  void updateLogoutTime_NullLoginRecordId() {
+    // Arrange
+<span class="fc" id="L454">    Claims claims = mock(Claims.class);</span>
+<span class="fc" id="L455">    when(jwtService.verifyToken(request)).thenReturn(claims);</span>
+<span class="fc" id="L456">    when(claims.get(&quot;loginRecordId&quot;, Integer.class)).thenReturn(null);</span>
+
+    // Act
+<span class="fc" id="L459">    ResponseEntity&lt;?&gt; response = loginRecordService.updateLogoutTime(request);</span>
+
+    // Assert
+<span class="fc" id="L462">    assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());</span>
+<span class="fc" id="L463">    assertEquals(&quot;未授權的JWT&quot;, response.getBody());</span>
+<span class="fc" id="L464">    verify(loginRecordRepository, never()).findById(anyInt());</span>
+<span class="fc" id="L465">    verify(loginRecordRepository, never()).save(any());</span>
+<span class="fc" id="L466">  }</span>
+
+  /**
+   * 測試：刪除登入記錄
+   * 驗證記錄成功刪除，並返回正確訊息。
+   */
+  @Test
+  void deleteLoginRecord() {
+    // Arrange
+<span class="fc" id="L475">    int recordId = 1;</span>
+<span class="fc" id="L476">    doNothing().when(loginRecordRepository).deleteById(recordId);</span>
+
+    // Act
+<span class="fc" id="L479">    String result = loginRecordService.deleteLoginRecord(recordId);</span>
+
+    // Assert
+<span class="fc" id="L482">    assertEquals(&quot;刪除登入記錄成功&quot;, result);</span>
+<span class="fc" id="L483">    verify(loginRecordRepository, times(1)).deleteById(recordId);</span>
+<span class="fc" id="L484">  }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

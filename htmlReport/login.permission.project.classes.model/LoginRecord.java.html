@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LoginRecord.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">classes in demo Coverage Results</a> &gt; <a href="index.source.html" class="el_package">login.permission.project.classes.model</a> &gt; <span class="el_source">LoginRecord.java</span></div><h1>LoginRecord.java</h1><pre class="source lang-java linenums">package login.permission.project.classes.model;
+
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+import java.util.Date;
+
+@Entity
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
+@Table(name=&quot;Login_Record&quot;)
+public class LoginRecord {
+
+
+    public LoginRecord(Integer employee_id, String ip_address, LocalDateTime login_time,
+<span class="fc" id="L21">                       LocalDateTime logout_time, String status) {</span>
+<span class="fc" id="L22">        this.employee_id = employee_id;</span>
+<span class="fc" id="L23">        this.ip_address = ip_address;</span>
+<span class="fc" id="L24">        this.login_time = login_time;</span>
+<span class="fc" id="L25">        this.logout_time = logout_time;</span>
+<span class="fc" id="L26">        this.status = status;</span>
+<span class="fc" id="L27">    }</span>
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name=&quot;record_id&quot;)
+    private int record_id;   // 保持與資料庫欄位名稱一致
+
+    @Column(name = &quot;employee_id&quot;)
+    private Integer employee_id;
+
+    @Column(name = &quot;ip_address&quot;)
+    private String ip_address;  // 改回符合資料庫的命名
+
+    //LocalDateTime 格式 yyyy-MM-ddTHH:mm:ss
+    @Column(name = &quot;login_time&quot;)
+    private LocalDateTime login_time;  // 改回符合資料庫的命名
+
+    @Column(name = &quot;logout_time&quot;)
+    private LocalDateTime logout_time;  // 改回符合資料庫的命名
+
+    @Column(name = &quot;status&quot;)
+    private String status;
+
+    @ManyToOne
+    @JoinColumn(name = &quot;employee_id&quot;, insertable = false, updatable = false)
+    private Employee employee;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

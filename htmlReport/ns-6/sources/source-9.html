@@ -1,0 +1,162 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > PositionService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">login.permission.project.classes.service</a>
+</div>
+
+<h1>Coverage Summary for Class: PositionService (login.permission.project.classes.service)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PositionService</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    16.7%
+  </span>
+  <span class="absValue">
+    (1/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    7.1%
+  </span>
+  <span class="absValue">
+    (1/14)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package login.permission.project.classes.service;
+&nbsp;
+&nbsp;import login.permission.project.classes.model.Position;
+&nbsp;import login.permission.project.classes.repository.PositionRepository;
+&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;@Service
+<b class="fc">&nbsp;public class PositionService {</b>
+&nbsp;
+&nbsp;    @Autowired
+&nbsp;    PositionRepository pr;
+&nbsp;
+&nbsp;    public List&lt;Position&gt; getAllPositions() {
+<b class="nc">&nbsp;        return pr.findAll();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public List&lt;Position&gt; getPositionById(Integer unitId, Integer positionId) {
+<b class="nc">&nbsp;        return pr.findByUnitIdAndPositionId(unitId, positionId);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String addPosition(Position position){
+<b class="nc">&nbsp;        pr.save(position);</b>
+<b class="nc">&nbsp;        return String.format(&quot;新增職位成功\n職位名稱: %s\n職位id: %s\n科別代號: %s&quot;,</b>
+<b class="nc">&nbsp;                position.getPosition(),</b>
+<b class="nc">&nbsp;                position.getPosition_id(),</b>
+<b class="nc">&nbsp;                position.getUnit_id());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String updatePosition(Position position) {
+<b class="nc">&nbsp;        if (position != null) {</b>
+<b class="nc">&nbsp;            pr.save(position);</b>
+<b class="nc">&nbsp;            return &quot;修改職位資訊完成&quot;;</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            return &quot;更新職位資訊失敗&quot;;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    public String deletePosition(int id) {
+<b class="nc">&nbsp;        pr.deleteById(id);</b>
+<b class="nc">&nbsp;        return &quot;刪除職位成功&quot;;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-01-02 02:53</div>
+</div>
+</body>
+</html>

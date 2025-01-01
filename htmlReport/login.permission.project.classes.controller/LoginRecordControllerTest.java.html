@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LoginRecordControllerTest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">classes in demo Coverage Results</a> &gt; <a href="index.source.html" class="el_package">login.permission.project.classes.controller</a> &gt; <span class="el_source">LoginRecordControllerTest.java</span></div><h1>LoginRecordControllerTest.java</h1><pre class="source lang-java linenums">package login.permission.project.classes.controller;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.impl.DefaultClaims;
+import jakarta.servlet.http.HttpServletRequest;
+import login.permission.project.classes.model.LoginRecord;
+import login.permission.project.classes.service.LoginRecordService;
+import login.permission.project.classes.JwtService;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.web.servlet.MockMvc;
+
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+/**
+ * LoginRecordControllerTest
+ *
+ * 測試 LoginRecordController 的各種 API 端點，涵蓋正常操作、異常處理及權限驗證等場景。
+ */
+@SpringBootTest
+@AutoConfigureMockMvc
+@Import({login.permission.project.classes.security.Config.class})
+<span class="fc" id="L43">public class LoginRecordControllerTest {</span>
+
+  @Autowired
+  private MockMvc mvc;
+
+  @MockBean
+  private LoginRecordService loginRecordService;
+
+  @MockBean
+  private JwtService jwtService;
+
+  @Autowired
+  private ObjectMapper objectMapper;
+
+  /**
+   * 測試：獲取所有登入記錄（具備正確權限）
+   */
+  @Test
+  @WithMockUser(username = &quot;admin&quot;, roles = {&quot;ADMIN&quot;})
+  public void whenGetAllLoginRecords_thenStatus200() throws Exception {
+<span class="fc" id="L63">    List&lt;LoginRecord&gt; records = List.of(</span>
+<span class="fc" id="L64">            new LoginRecord(1, &quot;127.0.0.1&quot;, LocalDateTime.now(), null, &quot;SUCCESS&quot;),</span>
+<span class="fc" id="L65">            new LoginRecord(2, &quot;127.0.0.2&quot;, LocalDateTime.now(), null, &quot;FAIL&quot;)</span>
+    );
+
+<span class="fc" id="L68">    when(loginRecordService.getAllLoginRecords()).thenReturn(records);</span>
+
+<span class="fc" id="L70">    mvc.perform(get(&quot;/api/loginRecord/get&quot;)</span>
+<span class="fc" id="L71">                    .header(&quot;Authorization&quot;, &quot;Bearer mock-token&quot;))</span>
+<span class="fc" id="L72">            .andDo(print())</span>
+<span class="nc" id="L73">            .andExpect(status().isOk())</span>
+<span class="nc" id="L74">            .andExpect(jsonPath(&quot;$[0].employee_id&quot;).value(1))</span>
+<span class="nc" id="L75">            .andExpect(jsonPath(&quot;$[1].employee_id&quot;).value(2));</span>
+<span class="nc" id="L76">  }</span>
+
+  /**
+   * 測試：新增登入記錄（具備正確權限）
+   */
+  @Test
+  @WithMockUser(username = &quot;admin&quot;, roles = {&quot;ADMIN&quot;})
+  public void whenAddLoginRecord_thenStatus200() throws Exception {
+<span class="fc" id="L84">    LoginRecord loginRecord = new LoginRecord(1, &quot;127.0.0.1&quot;, LocalDateTime.now(), null, &quot;SUCCESS&quot;);</span>
+
+<span class="fc" id="L86">    when(loginRecordService.addLoginRecord(any(LoginRecord.class)))</span>
+<span class="fc" id="L87">            .thenReturn(&quot;新增登入記錄成功&quot;);</span>
+
+<span class="fc" id="L89">    mvc.perform(post(&quot;/api/loginRecord/add&quot;)</span>
+<span class="fc" id="L90">                    .header(&quot;Authorization&quot;, &quot;Bearer mock-token&quot;)</span>
+<span class="fc" id="L91">                    .contentType(MediaType.APPLICATION_JSON)</span>
+<span class="fc" id="L92">                    .content(objectMapper.writeValueAsString(loginRecord)))</span>
+<span class="fc" id="L93">            .andDo(print())</span>
+<span class="nc" id="L94">            .andExpect(status().isOk())</span>
+<span class="nc" id="L95">            .andExpect(content().string(&quot;新增登入記錄成功&quot;));</span>
+<span class="nc" id="L96">  }</span>
+
+  /**
+   * 測試：修改登入記錄（具備正確權限）
+   */
+  @Test
+  @WithMockUser(username = &quot;admin&quot;, roles = {&quot;ADMIN&quot;})
+  public void whenUpdateLoginRecord_thenStatus200() throws Exception {
+<span class="fc" id="L104">    LoginRecord loginRecord = new LoginRecord(1, &quot;127.0.0.1&quot;, LocalDateTime.now(), LocalDateTime.now(), &quot;UPDATED&quot;);</span>
+
+<span class="fc" id="L106">    when(loginRecordService.updateLoginRecord(any(LoginRecord.class)))</span>
+<span class="fc" id="L107">            .thenReturn(&quot;修改登入記錄資訊完成&quot;);</span>
+
+<span class="fc" id="L109">    mvc.perform(put(&quot;/api/loginRecord/edit&quot;)</span>
+<span class="fc" id="L110">                    .header(&quot;Authorization&quot;, &quot;Bearer mock-token&quot;)</span>
+<span class="fc" id="L111">                    .contentType(MediaType.APPLICATION_JSON)</span>
+<span class="fc" id="L112">                    .content(objectMapper.writeValueAsString(loginRecord)))</span>
+<span class="fc" id="L113">            .andDo(print())</span>
+<span class="nc" id="L114">            .andExpect(status().isOk())</span>
+<span class="nc" id="L115">            .andExpect(content().string(&quot;修改登入記錄資訊完成&quot;));</span>
+<span class="nc" id="L116">  }</span>
+
+  /**
+   * 測試：刪除登入記錄（具備正確權限）
+   */
+  @Test
+  @WithMockUser(username = &quot;admin&quot;, roles = {&quot;ADMIN&quot;})
+  public void whenDeleteLoginRecord_thenStatus200() throws Exception {
+<span class="fc" id="L124">    when(loginRecordService.deleteLoginRecord(1))</span>
+<span class="fc" id="L125">            .thenReturn(&quot;刪除登入記錄成功&quot;);</span>
+
+<span class="fc" id="L127">    mvc.perform(delete(&quot;/api/loginRecord/delete/1&quot;)</span>
+<span class="fc" id="L128">                    .header(&quot;Authorization&quot;, &quot;Bearer mock-token&quot;))</span>
+<span class="fc" id="L129">            .andDo(print())</span>
+<span class="nc" id="L130">            .andExpect(status().isOk())</span>
+<span class="nc" id="L131">            .andExpect(content().string(&quot;刪除登入記錄成功&quot;));</span>
+<span class="nc" id="L132">  }</span>
+
+  /**
+   * 測試：基於權限碼獲取登入記錄（具備正確權限）
+   */
+  @Test
+  @WithMockUser(username = &quot;admin&quot;, roles = {&quot;ADMIN&quot;})
+  public void whenGetRecordByPermissionCode_thenStatus200() throws Exception {
+<span class="fc" id="L140">    Claims claims = new DefaultClaims();</span>
+<span class="fc" id="L141">    claims.put(&quot;permissionCode&quot;, Arrays.asList(&quot;login_rec_read&quot;));</span>
+
+<span class="fc" id="L143">    when(jwtService.verifyToken(any(HttpServletRequest.class))).thenReturn(claims);</span>
+
+<span class="fc" id="L145">    ResponseEntity&lt;String&gt; response = ResponseEntity.ok(&quot;權限驗證成功&quot;);</span>
+
+    // 使用 doReturn 來避免泛型問題
+
+<span class="fc" id="L149">    doReturn(response).when(loginRecordService).getRecordByPermissionCode(any(HttpServletRequest.class));</span>
+    // Act &amp; Assert
+<span class="fc" id="L151">    mvc.perform(post(&quot;/api/loginRecord/getLoginRecord&quot;)</span>
+<span class="fc" id="L152">                    .header(&quot;Authorization&quot;, &quot;Bearer mock-token&quot;))</span>
+<span class="fc" id="L153">            .andDo(print())</span>
+<span class="fc" id="L154">            .andExpect(status().isOk())</span>
+<span class="fc" id="L155">            .andExpect(content().string(&quot;權限驗證成功&quot;));</span>
+<span class="fc" id="L156">  }</span>
+
+  /**
+   * 測試：未授權訪問 - Token 未提供
+   */
+  @Test
+  public void whenGetAllLoginRecordsWithoutToken_thenStatus401() throws Exception {
+<span class="fc" id="L163">    mvc.perform(get(&quot;/api/loginRecord/get&quot;))</span>
+<span class="fc" id="L164">            .andDo(print())</span>
+<span class="fc" id="L165">            .andExpect(status().isUnauthorized())</span>
+<span class="nc" id="L166">            .andExpect(content().string(&quot;Unauthorized: Full authentication is required to access this resource&quot;));</span>
+<span class="nc" id="L167">  }</span>
+
+  /**
+   * 測試：使用無效 Token 訪問
+   */
+  @Test
+  public void whenGetAllLoginRecordsWithInvalidToken_thenStatus401() throws Exception {
+<span class="fc" id="L174">    when(jwtService.verifyToken(any(HttpServletRequest.class))).thenReturn(null);</span>
+
+<span class="fc" id="L176">    mvc.perform(get(&quot;/api/loginRecord/get&quot;)</span>
+<span class="fc" id="L177">                    .header(&quot;Authorization&quot;, &quot;Bearer invalid-token&quot;))</span>
+<span class="fc" id="L178">            .andDo(print())</span>
+<span class="fc" id="L179">            .andExpect(status().isUnauthorized())</span>
+<span class="nc" id="L180">            .andExpect(content().string(&quot;Unauthorized: Invalid Token&quot;));</span>
+
+<span class="nc" id="L182">  }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

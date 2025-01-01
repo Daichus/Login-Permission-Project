@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JwtService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">classes in demo Coverage Results</a> &gt; <a href="index.source.html" class="el_package">login.permission.project.classes</a> &gt; <span class="el_source">JwtService.java</span></div><h1>JwtService.java</h1><pre class="source lang-java linenums">package login.permission.project.classes;
+
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.stereotype.Component;
+import java.security.Key;
+import java.util.*;
+
+
+/**
+ * JwtService 類負責處理與 JWT Token相關的操作 。
+
+ * 本類主要功能包括：
+ * 1. 生成 JWT Token，包含自定義的 Payload。
+ * 2. 驗證前端請求中的 JWT Token，並提取 Payload 部分。
+ * 3. 提供簽名密鑰生成方法，確保 JWT Token 的安全性。
+
+ * 使用場景：
+ * - 生成 Token 時，後端可將必要的使用者資訊（如登錄紀錄 ID、權限碼等）封裝至 Token 的 Payload，並返回給前端。
+ * - 驗證 Token 時，後端可檢查 Token 的合法性及其內容，並提取相關的使用者資訊進行後續操作。
+
+ * 注意：
+ * - 簽名密鑰（KEY）僅能由後端擁有，不會暴露給前端或第三方。
+ * - Token 的過期時間由 EXPIRATION_TIME 定義，需根據應用場景調整。
+ */
+@Component
+<span class="fc" id="L29">public class JwtService {</span>
+
+    /**
+     * 用途：加密用字串
+     */
+    private static final String KEY = &quot;5gk4g4j5i32k7ru8auu4m4ul4t6su3ah9j14i2l4g45k4g4bu4ke7rul4kmpv4cl391j4cl3&quot;;
+
+    /**
+     * 用途：設定Token有效時間, 以毫秒為單位,每小時使用者需重新登錄
+     */
+    private static final long EXPIRATION_TIME = 3_600_000;
+
+    /**
+     * 用途：產生JWT Token
+     * 說明：
+     * 1.JWT包含Header,Payload,Signature三個部分
+     * 2.方法中需要手動設定JWT的Payload以定義要傳送回前端的訊息
+     */
+    public String generateToken(String employeeId,int recordId) {
+
+<span class="fc" id="L49">        Map&lt;String, Object&gt; userData = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L50">        userData.put(&quot;loginRecordId&quot;,recordId);</span>
+<span class="fc" id="L51">        userData.put(&quot;permissionCode&quot;,new String[]{});</span>
+
+<span class="fc" id="L53">        Date expDate = new Date(System.currentTimeMillis() + EXPIRATION_TIME);</span>
+
+<span class="fc" id="L55">        return Jwts.builder()</span>
+<span class="fc" id="L56">                .setClaims(userData)</span>
+<span class="fc" id="L57">                .setIssuer(&quot;Fcu 113-1 CSIE Team 2&quot;)</span>
+<span class="fc" id="L58">                .setSubject(employeeId )</span>
+<span class="fc" id="L59">                .setIssuedAt(new Date())</span>
+<span class="fc" id="L60">                .setExpiration(expDate)</span>
+<span class="fc" id="L61">                .signWith(getSigningKey(), SignatureAlgorithm.HS256)</span>
+<span class="fc" id="L62">                .compact();</span>
+    }
+
+    // 獲取簽名的 Key,Key僅為後端所擁有
+    private Key getSigningKey() {
+<span class="fc" id="L67">        return Keys.hmacShaKeyFor(Decoders.BASE64.decode(KEY));</span>
+    }
+
+    /**
+     * 抽取使用者傳過來的
+     * token中的payload部分並進行驗證
+     * 並還原成Claims物件
+     */
+    public Claims verifyToken(HttpServletRequest request) {
+        Claims claims;
+        try{
+<span class="fc" id="L78">            String authHeader = request.getHeader(&quot;Authorization&quot;);</span>
+<span class="fc bfc" id="L79" title="All 4 branches covered.">            if (authHeader == null || !authHeader.startsWith(&quot;Bearer &quot;)) {</span>
+<span class="fc" id="L80">                return null;</span>
+            }
+<span class="fc" id="L82">            String token = authHeader.substring(7);</span>
+<span class="fc" id="L83">            claims =  Jwts.parserBuilder()</span>
+<span class="fc" id="L84">                    .setSigningKey(getSigningKey())</span>
+<span class="fc" id="L85">                    .requireIssuer(&quot;Fcu 113-1 CSIE Team 2&quot;)</span>
+<span class="fc" id="L86">                    .build()</span>
+<span class="fc" id="L87">                    .parseClaimsJws(token)</span>
+<span class="fc" id="L88">                    .getBody();</span>
+<span class="fc" id="L89">        } catch(JwtException e) {</span>
+<span class="fc" id="L90">            claims =  null;</span>
+<span class="fc" id="L91">        }</span>
+<span class="fc" id="L92">        return claims;</span>
+    }
+
+
+
+
+
+
+
+}
+
+
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

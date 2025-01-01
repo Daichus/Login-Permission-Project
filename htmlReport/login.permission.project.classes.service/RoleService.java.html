@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RoleService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">classes in demo Coverage Results</a> &gt; <a href="index.source.html" class="el_package">login.permission.project.classes.service</a> &gt; <span class="el_source">RoleService.java</span></div><h1>RoleService.java</h1><pre class="source lang-java linenums">package login.permission.project.classes.service;
+
+
+import jakarta.servlet.http.HttpServletRequest;
+
+
+import login.permission.project.classes.model.*;
+import login.permission.project.classes.model.dto.RoleDTO;
+import login.permission.project.classes.model.util.JwtUtil;
+import login.permission.project.classes.repository.PermissionRepository;
+import login.permission.project.classes.repository.RoleRepository;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+@Service
+<span class="fc" id="L23">public class RoleService {</span>
+
+    @Autowired
+    RoleRepository roleRepository;
+
+    @Autowired
+    PermissionRepository permissionRepository;
+
+    @Autowired
+    JwtUtil jwtUtil;
+
+
+    public ResponseEntity&lt;ServerResponse&gt; getAllRole() {
+<span class="fc" id="L36">        List&lt;Role&gt; roles =  roleRepository.findAll();</span>
+<span class="fc" id="L37">        return ResponseEntity.status(HttpStatus.OK).body(new ServerResponse(&quot;查詢所有角色成功&quot;, roles));</span>
+
+    }
+
+
+    /**
+     *創建新角色的方法,前端必須傳一個包含jwt token的HttpServletRequest,
+     * 和一個包含結構為{
+     *     role_id:&quot;1&quot;,
+     *     roleName:&quot;Admin&quot;,
+     *     permission_id:[&quot;1&quot;,&quot;2&quot;,&quot;3&quot;]
+     * }資料的body,這筆資料需要用於創建新的Role
+     */
+    public ResponseEntity&lt;ServerResponse&gt; createRole (RoleDTO roleDto, HttpServletRequest request) {
+        try {
+<span class="fc" id="L52">            jwtUtil.validateRequest(request);</span>
+<span class="fc" id="L53">            Role role = new Role();</span>
+<span class="fc" id="L54">            setupRole(role, roleDto);</span>
+<span class="fc" id="L55">            roleRepository.save(role);</span>
+<span class="fc" id="L56">            return  ResponseEntity.status(HttpStatus.OK).body(new ServerResponse(&quot;新增角色成功&quot;, &quot;&quot;));</span>
+<span class="fc" id="L57">        } catch ( IllegalArgumentException e) {</span>
+<span class="fc" id="L58">            return  ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ServerResponse(&quot;你沒有新增角色的權限&quot;, &quot;&quot;));</span>
+        }
+
+    }
+
+
+    /**
+     *  此方法用於更新角色, 接受一個包含jwt token的HttpServletRequest,
+     *  與要用於更新角色的相關資料做為參數,同樣需要前端傳送一個
+     *  結構為{
+     *        role_id:&quot;1&quot;,
+     *        roleName:&quot;Admin&quot;,
+     *        permission_id:[&quot;1&quot;,&quot;2&quot;,&quot;3&quot;]
+     *        }
+     *      的資料
+     */
+    public ResponseEntity&lt;ServerResponse&gt; updateRole(RoleDTO roleDto, HttpServletRequest request) {
+        try{
+<span class="fc" id="L76">            jwtUtil.validateRequest(request);</span>
+<span class="fc" id="L77">            Optional&lt;Role&gt; roleOption = roleRepository.findById(roleDto.getRole_id());</span>
+<span class="fc bfc" id="L78" title="All 2 branches covered.">            if(roleOption.isPresent()) {</span>
+<span class="fc" id="L79">                Role role = roleOption.get();</span>
+<span class="fc" id="L80">                setupRole(role, roleDto);</span>
+<span class="fc" id="L81">                roleRepository.save(role);</span>
+<span class="fc" id="L82">                return  ResponseEntity.status(HttpStatus.OK).body(new ServerResponse(&quot;修改角色成功&quot;, &quot;&quot;));</span>
+
+            } else {
+<span class="fc" id="L85">                return  ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ServerResponse(&quot;找不到指定id的角色&quot;, &quot;&quot;));</span>
+
+            }
+<span class="fc" id="L88">        } catch (IllegalArgumentException e) {</span>
+<span class="fc" id="L89">            return  ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ServerResponse(&quot;你沒有修改角色的權限&quot;, &quot;&quot;));</span>
+
+        }
+    }
+
+
+    /**
+     *  更新Role(角色)的方法,設定Role名稱與Role的多對多關聯
+     */
+    private void setupRole(Role role, RoleDTO roleDto) {
+<span class="fc" id="L99">        role.setRole(roleDto.getRoleName());</span>
+<span class="fc" id="L100">        role.setPermissions(getPermissionsFromIds(roleDto.getPermission_id()));</span>
+<span class="fc" id="L101">    }</span>
+
+
+    /**
+     *  設定Role多對多關聯時需要傳入一個Set&lt;Permission&gt;
+     *  此方法根據用戶傳來的權限id, 查找並回傳相應的權限set,屬於setupRole方法的一部分
+     */
+    private Set&lt;Permission&gt; getPermissionsFromIds(String[] permissionIdsString) {
+        try{
+<span class="fc" id="L110">            Set&lt;Integer&gt; permissionIds = Arrays.stream(permissionIdsString)</span>
+<span class="fc" id="L111">                    .map(Integer::parseInt)</span>
+<span class="fc" id="L112">                    .collect(Collectors.toSet());</span>
+<span class="fc" id="L113">            List&lt;Permission&gt; permissions = permissionRepository.findAllById(permissionIds);</span>
+<span class="fc" id="L114">            return new HashSet&lt;&gt;(permissions);</span>
+<span class="fc" id="L115">        } catch (NumberFormatException e) {</span>
+<span class="fc" id="L116">            throw new IllegalArgumentException(&quot;權限 ID 格式錯誤,必須為阿拉伯數字&quot;, e);</span>
+        }
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

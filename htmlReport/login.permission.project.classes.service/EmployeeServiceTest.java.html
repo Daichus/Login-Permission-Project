@@ -1,0 +1,814 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EmployeeServiceTest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">classes in demo Coverage Results</a> &gt; <a href="index.source.html" class="el_package">login.permission.project.classes.service</a> &gt; <span class="el_source">EmployeeServiceTest.java</span></div><h1>EmployeeServiceTest.java</h1><pre class="source lang-java linenums">package login.permission.project.classes.service;
+
+import jakarta.servlet.http.HttpServletRequest;
+import login.permission.project.classes.JwtService;
+import login.permission.project.classes.model.*;
+import login.permission.project.classes.model.Employee;
+import login.permission.project.classes.model.Role;
+import login.permission.project.classes.model.dto.EmployeeRoleDto;
+import login.permission.project.classes.model.util.JwtUtil;
+import login.permission.project.classes.repository.EmployeeRepository;
+import login.permission.project.classes.repository.LoginRecordRepository;
+import login.permission.project.classes.repository.RoleRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import java.util.*;
+import static org.junit.jupiter.api.Assertions.*;
+import login.permission.project.classes.model.ServerResponse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.Mockito.*;
+
+
+@ExtendWith(MockitoExtension.class)
+<span class="fc" id="L38">class EmployeeServiceTest {</span>
+
+  @Mock
+  private EmployeeRepository employeeRepository;
+
+  @Mock
+  private JwtUtil jwtUtil; // Mock Jwt 工具類
+
+  @Mock
+  private JwtService jwtService;
+
+  @Mock
+  private LoginRecordRepository logRecRepository;  // 加入這行
+
+  @Mock
+  private EmailService emailService;
+
+    @Mock
+    private RoleRepository roleRepository;
+
+  @InjectMocks
+  private EmployeeService employeeService; // 被測試的類別
+
+<span class="fc" id="L61">  Status mockStatus = new Status(); // 根據實際類型初始化</span>
+<span class="fc" id="L62">  Set&lt;Role&gt; mockRoles = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L63">  Set&lt;LoginRecord&gt; mockLoginRecords = new HashSet&lt;&gt;();</span>
+
+//  @BeforeEach
+//  void setUp() {
+//    MockitoAnnotations.openMocks(this);
+//
+//    //jwtUtil.validateRequest是檢驗jwt token是否合法的函式, 由於不回傳任何值因此利用doNothing跳過
+//    doNothing().when(jwtUtil).validateRequest(any(HttpServletRequest.class));
+//  }
+  /**
+   * 測試設對象：設定員工角色的方法 setEmployeeRole 是否可以正確設定員工的角色
+   * 測試重點：
+   * 1. 測試該方法必須提供 EmployeeRoleDto 類別物件，以及一個至少包含一個 RoleId 的陣列作為參數。
+   *    測試員工 ID 為 1，角色 ID 為 [&quot;1&quot;, &quot;2&quot;, &quot;3&quot;] 的正常情況。
+   * 2. 測試需要模擬 setEmployeeRole 中會使用到的 employeeRepository 與 roleRepository 介面的行為。
+   *    由於這些介面會直接連接到資料庫，為避免真實的數據庫操作，使用 Mock 介面模擬其行為，並返回測試所需的數據。
+   * 測試步驟：
+   * 1. 初始化測試數據，包括 EmployeeRoleDto、Employee 和 Role 對象。
+   * 2. 模擬 jwtUtil.validateRequest 方法，跳過 JWT 驗證邏輯。
+   * 3. 模擬 employeeRepository 和 roleRepository 的查詢與保存行為，返回設置的測試數據。
+   * 4. 調用 setEmployeeRole 方法，並驗證返回的 Response 是否為 200（操作成功）。
+   * 5. 使用 verify 驗證 save 和 findAllById 方法是否被正確調用，且僅調用一次。
+   */
+  @Test
+  @DisplayName(&quot;測試setEmployeeRole執行成功時的情況&quot;)
+  void testSetRole () {
+    //先設定一個EmployeeRoleDto物件, 提供一個員工id以及一組角色的類別id
+<span class="fc" id="L90">    EmployeeRoleDto dto = new EmployeeRoleDto();</span>
+<span class="fc" id="L91">    dto.setEmployee_id(1);</span>
+<span class="fc" id="L92">    dto.setRoleIds(new String[]{&quot;1&quot;, &quot;2&quot;, &quot;3&quot;});</span>
+
+    //設定一個employee物件以供employeeRepository模擬用
+<span class="fc" id="L95">    Employee employee = new Employee();</span>
+<span class="fc" id="L96">    employee.setEmployee_id(1);</span>
+
+    //設定三個Role物件以供roleRepository模擬用
+<span class="fc" id="L99">    Role role1 = new Role();</span>
+<span class="fc" id="L100">    Role role2 = new Role();</span>
+<span class="fc" id="L101">    Role role3 = new Role();</span>
+<span class="fc" id="L102">    Set&lt;Role&gt; roles = new HashSet&lt;&gt;(Arrays.asList(role1, role2, role3));</span>
+
+    //模擬employeeRepository調用findById(1)時返回這裡創建的employee物件
+<span class="fc" id="L105">    when(employeeRepository.findById(1)).thenReturn(Optional.of(employee));</span>
+
+    //模擬employeeRepository調用findAllById時返回這裡創建的roles Set
+<span class="fc" id="L108">    when(roleRepository.findAllById(anySet())).thenReturn(new ArrayList&lt;&gt;(roles));</span>
+
+    //模擬employeeRepository.save時返回這裡創建的employee物件
+<span class="fc" id="L111">    when(employeeRepository.save(any(Employee.class))).thenReturn(employee);</span>
+
+    //開始測試方法
+<span class="fc" id="L114">    ResponseEntity&lt;?&gt; response = employeeService.setEmployeeRole(dto, mock(HttpServletRequest.class));</span>
+
+    // 驗證Response結果是不是200
+<span class="fc" id="L117">    assertEquals(HttpStatus.OK, response.getStatusCode());</span>
+
+    //驗證employeeRepository的save方法有沒有被調用
+<span class="fc" id="L120">    verify(employeeRepository, times(1)).save(employee);</span>
+
+    //驗證roleRepository的findAllById方法有沒有被調用
+<span class="fc" id="L123">    verify(roleRepository, times(1)).findAllById(anySet());</span>
+<span class="fc" id="L124">  }</span>
+
+  @Test
+  @DisplayName(&quot;模擬找不到員工的情形&quot;)
+  void testSetEmployeeId_Employee_not_found() {
+<span class="fc" id="L129">    EmployeeRoleDto dto = new EmployeeRoleDto();</span>
+<span class="fc" id="L130">    dto.setEmployee_id(1);</span>
+<span class="fc" id="L131">    dto.setRoleIds(new String[]{&quot;1&quot;,&quot;2&quot;});</span>
+
+<span class="fc" id="L133">    when(employeeRepository.findById(1)).thenReturn(Optional.empty());</span>
+
+<span class="fc" id="L135">    ResponseEntity&lt;?&gt; response = employeeService.setEmployeeRole(dto, mock(HttpServletRequest.class));</span>
+
+<span class="fc" id="L137">    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());</span>
+<span class="fc" id="L138">  }</span>
+
+
+  @Test
+  @DisplayName(&quot;測試驗證Jwt token不通過的情形&quot;)
+  void testSetEmployeeRole_InvalidToken() {
+<span class="fc" id="L144">    EmployeeRoleDto dto = new EmployeeRoleDto();</span>
+<span class="fc" id="L145">    dto.setEmployee_id(1);</span>
+<span class="fc" id="L146">    dto.setRoleIds(new String[]{&quot;1&quot;, &quot;2&quot;});</span>
+<span class="fc" id="L147">    doThrow(new IllegalArgumentException(&quot;JWT格式不正確&quot;))</span>
+<span class="fc" id="L148">            .when(jwtUtil).validateRequest(any(HttpServletRequest.class));</span>
+
+<span class="fc" id="L150">    ResponseEntity&lt;?&gt; response = employeeService.setEmployeeRole(dto, mock(HttpServletRequest.class));</span>
+
+<span class="fc" id="L152">    assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());</span>
+<span class="fc" id="L153">    assertNotNull(response.getBody());</span>
+<span class="fc" id="L154">    System.out.println(response.getBody());</span>
+<span class="fc" id="L155">  }</span>
+
+  @ParameterizedTest
+  @DisplayName(&quot;測驗Role Id格式錯誤的情形&quot;)
+  @CsvSource({
+          &quot;'1,abc,3'&quot;,
+          &quot;'1,-2,3'&quot;,
+          &quot;'-1,-2,-3'&quot;,
+          &quot;'#1,2,3'&quot;,
+          &quot;'1 1,2,3'&quot;,
+          &quot;''&quot;
+  })
+  void testSetEmployeeRole_InvalidRoleId (String roleIdsCsv) {
+<span class="fc" id="L168">    EmployeeRoleDto dto = new EmployeeRoleDto();</span>
+<span class="fc" id="L169">    dto.setEmployee_id(1);</span>
+<span class="fc bfc" id="L170" title="All 2 branches covered.">    if (!roleIdsCsv.isEmpty()) {</span>
+<span class="fc" id="L171">      dto.setRoleIds(roleIdsCsv.split(&quot;,&quot;));</span>
+    } else {
+<span class="fc" id="L173">      dto.setRoleIds(null);</span>
+    }
+<span class="fc" id="L175">    ResponseEntity&lt;?&gt; response = employeeService.setEmployeeRole(dto, mock(HttpServletRequest.class));</span>
+<span class="fc" id="L176">    System.out.println(&quot;Response Body: &quot; + response.getBody());</span>
+<span class="fc" id="L177">    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());</span>
+<span class="fc" id="L178">  }</span>
+
+
+
+  /**
+   *
+   * 測試獲取全部員工資訊成功
+   */
+  @Test
+  @DisplayName(&quot;測試獲取全部員工資訊&quot;)
+  void getAllEmployees_Success() {
+    // 1. 測試數據 -放兩筆員工資料
+<span class="fc" id="L190">    List&lt;Employee&gt; mockEmployees = Arrays.asList(</span>
+<span class="fc" id="L191">            new Employee(1, &quot;aaa@gmail.com&quot;, &quot;Alice&quot;, &quot;password1&quot;, &quot;0911&quot;, 1, true, null, mockStatus, mockRoles, mockLoginRecords),</span>
+<span class="fc" id="L192">    new Employee(2, &quot;bob@gmail.com&quot;, &quot;Bob&quot;, &quot;password2&quot;, &quot;0912&quot;, 2, true, null, mockStatus, mockRoles, mockLoginRecords)</span>
+    );
+    // 2. 設置 Mock 行為 -當..這個方法被呼叫時，就返回..預設的資料
+<span class="fc" id="L195">    Mockito.when(employeeRepository.findAll()).thenReturn(mockEmployees);</span>
+
+    // 3. 模擬 HTTP 請求和 JWT 驗證
+    // 這個 mock 物件模擬了 HttpServletRequest 的行為
+<span class="fc" id="L199">    HttpServletRequest mockRequest = Mockito.mock(HttpServletRequest.class);</span>
+    //  -doNothing(): 表示不執行任何動作
+    //  -when(jwtUtil): 當使用 jwtUtil 時
+    //  -validateRequest(mockRequest): 呼叫驗證請求的方法
+    //  當呼叫 JWT 驗證時，直接通過，不做任何檢查。
+<span class="fc" id="L204">    Mockito.doNothing().when(jwtUtil).validateRequest(mockRequest);</span>
+
+    // 4. 執行測試目標方法
+<span class="fc" id="L207">    ResponseEntity&lt;?&gt; response = employeeService.getAllEmployees(mockRequest);</span>
+
+    // 5. 驗證結果 -確認回應狀態碼是 200 OK
+<span class="fc" id="L210">    assertEquals(HttpStatus.OK, response.getStatusCode());</span>
+    // ServerResponse 是一個封裝了 API 響應的統一格式，使得前後端交互更加規範和方便
+<span class="fc" id="L212">    ServerResponse serverResponse = (ServerResponse) response.getBody();</span>
+<span class="fc" id="L213">    assertNotNull(serverResponse);</span>
+
+<span class="fc" id="L215">    List&lt;Employee&gt; employees = (List&lt;Employee&gt;) serverResponse.getData();  // 假設 ServerResponse 有 getData 方法</span>
+<span class="fc" id="L216">    assertNotNull(employees);</span>
+<span class="fc" id="L217">    assertEquals(2, employees.size());</span>
+    // -確認密碼已被正確遮蔽為 &quot;NaN&quot;
+<span class="fc" id="L219">    assertEquals(&quot;NaN&quot;, employees.get(0).getPassword());</span>
+<span class="fc" id="L220">    assertEquals(&quot;NaN&quot;, employees.get(1).getPassword());</span>
+
+    // 驗證 findAll() 是否被呼叫
+<span class="fc" id="L223">    Mockito.verify(employeeRepository).findAll();</span>
+    // 驗證方法是否被呼叫
+<span class="fc" id="L225">    Mockito.verify(jwtUtil).validateRequest(mockRequest);</span>
+<span class="fc" id="L226">  }</span>
+
+  /**
+   * 測試獲取全部員工資訊
+   * 無權限訪問
+   */
+  @Test
+  void getAllEmployees_Unauthorized() {
+    // Arrange
+<span class="fc" id="L235">    HttpServletRequest mockRequest = Mockito.mock(HttpServletRequest.class);</span>
+<span class="fc" id="L236">    Mockito.doThrow(new IllegalArgumentException()).when(jwtUtil).validateRequest(mockRequest);</span>
+
+    // Act
+<span class="fc" id="L239">    ResponseEntity&lt;?&gt; response = employeeService.getAllEmployees(mockRequest);</span>
+
+    // Assert
+<span class="fc" id="L242">    assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());</span>
+<span class="fc" id="L243">    ServerResponse serverResponse = (ServerResponse) response.getBody();</span>
+<span class="fc" id="L244">    assertNotNull(serverResponse);</span>
+<span class="fc" id="L245">    assertEquals(&quot;你沒有獲取員工資訊的權限&quot;, serverResponse.getMessage());</span>
+<span class="fc" id="L246">    assertNull(serverResponse.getData());</span>
+<span class="fc" id="L247">  }</span>
+
+  /**
+   * 測試獲取全部員工資訊
+   * 空列表
+   */
+  @Test
+  void getAllEmployees_EmptyList() {
+    // Arrange
+<span class="fc" id="L256">    List&lt;Employee&gt; mockEmployees = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L257">    HttpServletRequest mockRequest = Mockito.mock(HttpServletRequest.class);</span>
+
+<span class="fc" id="L259">    Mockito.when(employeeRepository.findAll()).thenReturn(mockEmployees);</span>
+<span class="fc" id="L260">    Mockito.doNothing().when(jwtUtil).validateRequest(mockRequest);</span>
+
+    // Act
+<span class="fc" id="L263">    ResponseEntity&lt;?&gt; response = employeeService.getAllEmployees(mockRequest);</span>
+
+    // Assert
+<span class="fc" id="L266">    assertEquals(HttpStatus.OK, response.getStatusCode());</span>
+<span class="fc" id="L267">    ServerResponse serverResponse = (ServerResponse) response.getBody();</span>
+<span class="fc" id="L268">    assertNotNull(serverResponse);</span>
+<span class="fc" id="L269">    assertEquals(&quot;獲取員工資訊成功&quot;, serverResponse.getMessage());</span>
+
+<span class="fc" id="L271">    List&lt;Employee&gt; employees = (List&lt;Employee&gt;) serverResponse.getData();</span>
+    // empty but not null
+<span class="fc" id="L273">    assertNotNull(employees);</span>
+<span class="fc" id="L274">    assertTrue(employees.isEmpty());</span>
+<span class="fc" id="L275">  }</span>
+
+  /**
+   * 測試根據ID獲取員工資訊成功
+   */
+  @Test
+  void getEmployeeById_Success() {
+
+<span class="fc" id="L283">    int employeeId = 1;</span>
+<span class="fc" id="L284">    Employee mockEmployee = new Employee(</span>
+            employeeId,
+            &quot;test@gmail.com&quot;,
+            &quot;Test User&quot;,
+            &quot;password123&quot;,
+            &quot;0912345678&quot;,
+<span class="fc" id="L290">            1,</span>
+            true,
+            null,
+            mockStatus,
+            mockRoles,
+            mockLoginRecords
+    );
+
+<span class="fc" id="L298">    HttpServletRequest mockRequest = Mockito.mock(HttpServletRequest.class);</span>
+<span class="fc" id="L299">    Mockito.when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(mockEmployee));</span>
+<span class="fc" id="L300">    Mockito.doNothing().when(jwtUtil).validateRequest(mockRequest);</span>
+
+<span class="fc" id="L302">    ResponseEntity&lt;?&gt; response = employeeService.getEmployeeById(employeeId, mockRequest);</span>
+
+<span class="fc" id="L304">    assertEquals(HttpStatus.OK, response.getStatusCode());</span>
+<span class="fc" id="L305">    ServerResponse serverResponse = (ServerResponse) response.getBody();</span>
+<span class="fc" id="L306">    assertNotNull(serverResponse);</span>
+<span class="fc" id="L307">    assertEquals(&quot;獲取員工資訊成功&quot;, serverResponse.getMessage());</span>
+
+<span class="fc" id="L309">    Employee returnedEmployee = (Employee) serverResponse.getData();</span>
+<span class="fc" id="L310">    assertNotNull(returnedEmployee);</span>
+<span class="fc" id="L311">    assertEquals(employeeId, returnedEmployee.getEmployee_id());</span>
+<span class="fc" id="L312">    assertEquals(&quot;NaN&quot;, returnedEmployee.getPassword());</span>
+<span class="fc" id="L313">  }</span>
+
+  /**
+   * 測試根據ID獲取員工資訊
+   * 找不到指定員工
+   */
+  @Test
+  void getEmployeeById_NotFound() {
+
+<span class="fc" id="L322">    int nonExistentEmployeeId = 999;</span>
+<span class="fc" id="L323">    HttpServletRequest mockRequest = Mockito.mock(HttpServletRequest.class);</span>
+
+<span class="fc" id="L325">    Mockito.when(employeeRepository.findById(nonExistentEmployeeId)).thenReturn(Optional.empty());</span>
+<span class="fc" id="L326">    Mockito.doNothing().when(jwtUtil).validateRequest(mockRequest);</span>
+
+<span class="fc" id="L328">    ResponseEntity&lt;?&gt; response = employeeService.getEmployeeById(nonExistentEmployeeId, mockRequest);</span>
+
+<span class="fc" id="L330">    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());</span>
+<span class="fc" id="L331">    ServerResponse serverResponse = (ServerResponse) response.getBody();</span>
+<span class="fc" id="L332">    assertNotNull(serverResponse);</span>
+<span class="fc" id="L333">    assertEquals(&quot;找不到指定的員工&quot;, serverResponse.getMessage());</span>
+<span class="fc" id="L334">    assertNull(serverResponse.getData());</span>
+<span class="fc" id="L335">  }</span>
+
+  /**
+   * 測試根據ID獲取員工資訊
+   * 無權限訪問
+   */
+  @Test
+  void getEmployeeById_Unauthorized() {
+
+<span class="fc" id="L344">    int employeeId = 1;</span>
+<span class="fc" id="L345">    HttpServletRequest mockRequest = Mockito.mock(HttpServletRequest.class);</span>
+
+<span class="fc" id="L347">    Mockito.doThrow(new IllegalArgumentException()).when(jwtUtil).validateRequest(mockRequest);</span>
+
+<span class="fc" id="L349">    ResponseEntity&lt;?&gt; response = employeeService.getEmployeeById(employeeId, mockRequest);</span>
+
+<span class="fc" id="L351">    assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());</span>
+<span class="fc" id="L352">    ServerResponse serverResponse = (ServerResponse) response.getBody();</span>
+<span class="fc" id="L353">    assertNotNull(serverResponse);</span>
+<span class="fc" id="L354">    assertEquals(&quot;你沒有獲取員工資訊的權限&quot;, serverResponse.getMessage());</span>
+<span class="fc" id="L355">    assertNull(serverResponse.getData());</span>
+<span class="fc" id="L356">  }</span>
+
+  /**
+   *
+   * 測試登入成功
+   */
+  @Test
+  void testLogin_Success() {
+
+<span class="fc" id="L365">    EmployeeLoginRequest request = new EmployeeLoginRequest(1, &quot;password1&quot;);</span>
+<span class="fc" id="L366">    Employee mockEmployee = new Employee(1, &quot;aaa@gmail.com&quot;, &quot;Alice&quot;, &quot;password1&quot;, &quot;0911&quot;, 1, true, null, mockStatus, mockRoles, mockLoginRecords);</span>
+
+<span class="fc" id="L368">    Mockito.when(employeeRepository.findById(1)).thenReturn(Optional.of(mockEmployee));</span>
+<span class="fc" id="L369">    Mockito.when(jwtService.generateToken(Mockito.anyString(), Mockito.anyInt()))</span>
+<span class="fc" id="L370">            .thenReturn(&quot;mockJWTToken&quot;);</span>
+
+<span class="fc" id="L372">    Mockito.when(logRecRepository.save(Mockito.any(LoginRecord.class)))</span>
+<span class="fc" id="L373">            .thenReturn(new LoginRecord());</span>
+
+<span class="fc" id="L375">    ResponseEntity&lt;?&gt; response = employeeService.login(request);</span>
+
+<span class="fc" id="L377">    assertEquals(HttpStatus.OK, response.getStatusCode());</span>
+<span class="fc" id="L378">    assertEquals(&quot;mockJWTToken&quot;, response.getBody());</span>
+<span class="fc" id="L379">  }</span>
+
+  /**
+   *
+   * 測試登入
+   * 無效的密碼
+   */
+  @Test
+  void testLogin_InvalidPassword() {
+
+<span class="fc" id="L389">    EmployeeLoginRequest request = new EmployeeLoginRequest(1, &quot;wrongPassword&quot;);</span>
+<span class="fc" id="L390">    Employee mockEmployee = new Employee(1, &quot;aaa@gmail.com&quot;, &quot;Alice&quot;, &quot;password1&quot;, &quot;0911&quot;, 1, true, null, mockStatus, mockRoles, mockLoginRecords);</span>
+
+<span class="fc" id="L392">    Mockito.when(employeeRepository.findById(1)).thenReturn(Optional.of(mockEmployee));</span>
+
+<span class="fc" id="L394">    ResponseEntity&lt;?&gt; response = employeeService.login(request);</span>
+
+<span class="fc" id="L396">    assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());</span>
+
+    // 將回應轉換為 ServerResponse 並驗證
+<span class="fc" id="L399">    ServerResponse serverResponse = (ServerResponse) response.getBody();</span>
+<span class="fc" id="L400">    assertNotNull(serverResponse);</span>
+<span class="fc" id="L401">    assertEquals(&quot;密碼錯誤&quot;, serverResponse.getMessage());</span>
+<span class="fc" id="L402">    assertNull(serverResponse.getData());</span>
+<span class="fc" id="L403">  }</span>
+
+  /**
+   *
+   * 測試登入
+   * 電子郵件沒有驗證
+   */
+  @Test
+  void testLogin_UnverifiedAccount() {
+
+<span class="fc" id="L413">    EmployeeLoginRequest request = new EmployeeLoginRequest(1, &quot;password1&quot;);</span>
+<span class="fc" id="L414">    Employee mockEmployee = new Employee(1, &quot;aaa@gmail.com&quot;, &quot;Alice&quot;, &quot;password1&quot;, &quot;0911&quot;, 1, false, null, mockStatus, mockRoles, mockLoginRecords);</span>
+
+<span class="fc" id="L416">    Mockito.when(employeeRepository.findById(1)).thenReturn(Optional.of(mockEmployee));</span>
+
+<span class="fc" id="L418">    ResponseEntity&lt;?&gt; response = employeeService.login(request);</span>
+
+<span class="fc" id="L420">    assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());</span>
+
+<span class="fc" id="L422">    ServerResponse serverResponse = (ServerResponse) response.getBody();</span>
+<span class="fc" id="L423">    assertNotNull(serverResponse);</span>
+<span class="fc" id="L424">    assertEquals(&quot;請先驗證您的電子郵件&quot;, serverResponse.getMessage());</span>
+<span class="fc" id="L425">    assertNull(serverResponse.getData());</span>
+<span class="fc" id="L426">  }</span>
+
+  /**
+   * 測試登入
+   * 找不到用戶
+   */
+  @Test
+  void testLogin_UserNotFound() {
+    // Arrange
+<span class="fc" id="L435">    EmployeeLoginRequest request = new EmployeeLoginRequest(999, &quot;password1&quot;);</span>
+<span class="fc" id="L436">    Mockito.when(employeeRepository.findById(999)).thenReturn(Optional.empty());</span>
+
+    // Act
+<span class="fc" id="L439">    ResponseEntity&lt;?&gt; response = employeeService.login(request);</span>
+
+    // Assert
+<span class="fc" id="L442">    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());</span>
+<span class="fc" id="L443">    ServerResponse serverResponse = (ServerResponse) response.getBody();</span>
+<span class="fc" id="L444">    assertNotNull(serverResponse);</span>
+<span class="fc" id="L445">    assertEquals(&quot;找不到用戶&quot;, serverResponse.getMessage());</span>
+<span class="fc" id="L446">    assertNull(serverResponse.getData());</span>
+
+    // 驗證沒有創建登入記錄
+<span class="fc" id="L449">    Mockito.verify(logRecRepository, Mockito.never()).save(Mockito.any(LoginRecord.class));</span>
+<span class="fc" id="L450">  }</span>
+
+  /**
+   * 測試登入失敗
+   * 測試當保存登入記錄時發生資料庫錯誤的情況
+   */
+  @Test
+  void testLogin_SaveLoginRecordError() {
+    // Arrange
+<span class="fc" id="L459">    EmployeeLoginRequest request = new EmployeeLoginRequest(1, &quot;password1&quot;);</span>
+<span class="fc" id="L460">    Employee mockEmployee = new Employee(1, &quot;test@gmail.com&quot;, &quot;Test&quot;, &quot;password1&quot;, &quot;0911&quot;, 1, true, null, mockStatus, mockRoles, mockLoginRecords);</span>
+
+<span class="fc" id="L462">    Mockito.when(employeeRepository.findById(1)).thenReturn(Optional.of(mockEmployee));</span>
+<span class="fc" id="L463">    Mockito.when(logRecRepository.save(Mockito.any(LoginRecord.class)))</span>
+<span class="fc" id="L464">            .thenThrow(new RuntimeException(&quot;Database error&quot;));</span>
+
+    // Act &amp; Assert
+<span class="fc" id="L467">    Exception exception = assertThrows(RuntimeException.class, () -&gt; {</span>
+<span class="nc" id="L468">      employeeService.login(request);</span>
+<span class="nc" id="L469">    });</span>
+<span class="fc" id="L470">    assertTrue(exception.getMessage().contains(&quot;Database error&quot;));</span>
+<span class="fc" id="L471">  }</span>
+
+  /**
+   * 測試登入失敗
+   * JWT 生成異常
+   */
+  @Test
+  void testLogin_JwtGenerationError() {
+    // Arrange
+<span class="fc" id="L480">    EmployeeLoginRequest request = new EmployeeLoginRequest(1, &quot;password1&quot;);</span>
+<span class="fc" id="L481">    Employee mockEmployee = new Employee(1, &quot;test@gmail.com&quot;, &quot;Test&quot;, &quot;password1&quot;, &quot;0911&quot;, 1, true, null, mockStatus, mockRoles, mockLoginRecords);</span>
+
+<span class="fc" id="L483">    Mockito.when(employeeRepository.findById(1)).thenReturn(Optional.of(mockEmployee));</span>
+<span class="fc" id="L484">    Mockito.when(logRecRepository.save(Mockito.any(LoginRecord.class)))</span>
+<span class="fc" id="L485">            .thenReturn(new LoginRecord());</span>
+<span class="fc" id="L486">    Mockito.when(jwtService.generateToken(Mockito.anyString(), Mockito.anyInt()))</span>
+<span class="fc" id="L487">            .thenThrow(new RuntimeException(&quot;JWT generation error&quot;));</span>
+
+    // Act &amp; Assert
+<span class="fc" id="L490">    Exception exception = assertThrows(RuntimeException.class, () -&gt; {</span>
+<span class="nc" id="L491">      employeeService.login(request);</span>
+<span class="nc" id="L492">    });</span>
+<span class="fc" id="L493">    assertTrue(exception.getMessage().contains(&quot;JWT generation error&quot;));</span>
+<span class="fc" id="L494">  }</span>
+
+  /**
+   * 測試登入失敗
+   * 密碼錯誤時的登入記錄
+   */
+  @Test
+  void testLogin_InvalidPasswordLoginRecord() {
+    // 創建一個帶有錯誤密碼的登入請求
+<span class="fc" id="L503">    EmployeeLoginRequest request = new EmployeeLoginRequest(1, &quot;wrongPassword&quot;);</span>
+    // 模擬資料庫中存在的員工資料
+<span class="fc" id="L505">    Employee mockEmployee = new Employee(1, &quot;test@gmail.com&quot;, &quot;Test&quot;, &quot;correctPassword&quot;, &quot;0911&quot;, 1, true, null, mockStatus, mockRoles, mockLoginRecords);</span>
+    // 設置模擬行為：當查詢 ID=1 的員工時，返回我們準備的模擬員工資料
+<span class="fc" id="L507">    Mockito.when(employeeRepository.findById(1)).thenReturn(Optional.of(mockEmployee));</span>
+
+    // 調用登入
+<span class="fc" id="L510">    ResponseEntity&lt;?&gt; response = employeeService.login(request);</span>
+
+    // 驗證回應狀態碼為未授權
+<span class="fc" id="L513">    assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());</span>
+
+    // 驗證保存失敗的登入記錄
+<span class="fc" id="L516">    ArgumentCaptor&lt;LoginRecord&gt; loginRecordCaptor = ArgumentCaptor.forClass(LoginRecord.class);</span>
+<span class="fc" id="L517">    Mockito.verify(logRecRepository).save(loginRecordCaptor.capture());</span>
+
+<span class="fc" id="L519">    LoginRecord savedRecord = loginRecordCaptor.getValue();</span>
+<span class="fc" id="L520">    assertEquals(1, savedRecord.getEmployee_id());</span>
+<span class="fc" id="L521">    assertEquals(&quot;testIpAddress&quot;, savedRecord.getIp_address());</span>
+<span class="fc" id="L522">    assertEquals(&quot;失敗&quot;, savedRecord.getStatus());</span>
+<span class="fc" id="L523">    assertNotNull(savedRecord.getLogin_time());</span>
+<span class="fc" id="L524">  }</span>
+
+  /**
+   *
+   * 測試新增員工成功
+   */
+  @Test
+  void testAddEmployee_Success() {
+
+<span class="fc" id="L533">    Employee employee = new Employee();</span>
+<span class="fc" id="L534">    employee.setName(&quot;Alice&quot;);</span>
+<span class="fc" id="L535">    employee.setEmail(&quot;alice@example.com&quot;);</span>
+
+<span class="fc" id="L537">    Mockito.when(employeeRepository.findMaxEmployeeId()).thenReturn(10);</span>
+<span class="fc" id="L538">    Mockito.doNothing().when(emailService).sendVerificationEmail(Mockito.anyString(), Mockito.anyString());</span>
+
+<span class="fc" id="L540">    String result = employeeService.addEmployee(employee);</span>
+
+<span class="fc" id="L542">    assertTrue(result.contains(&quot;新增員工成功&quot;));</span>
+<span class="fc" id="L543">    assertEquals(11, employee.getEmployee_id());</span>
+<span class="fc" id="L544">  }</span>
+
+  /**
+   * 測試新增員工
+   * 空值測試
+   */
+  @Test
+  void testAddEmployee_NullEmployee() {
+    // Arrange
+<span class="fc" id="L553">    Employee employee = null;</span>
+
+    // Act
+<span class="fc" id="L556">    String result = employeeService.addEmployee(employee);</span>
+
+    // Assert
+<span class="fc" id="L559">    assertEquals(&quot;添加員工失敗&quot;, result);</span>
+<span class="fc" id="L560">    Mockito.verify(employeeRepository, Mockito.never()).save(Mockito.any());</span>
+<span class="fc" id="L561">    Mockito.verify(emailService, Mockito.never()).sendVerificationEmail(Mockito.anyString(), Mockito.anyString());</span>
+<span class="fc" id="L562">  }</span>
+
+  /**
+   * 測試新增員工
+   * 首筆資料測試 (maxId 為 null)
+   */
+  @Test
+  void testAddEmployee_FirstRecord() {
+    // Arrange
+<span class="fc" id="L571">    Employee employee = new Employee();</span>
+<span class="fc" id="L572">    employee.setName(&quot;First Employee&quot;);</span>
+<span class="fc" id="L573">    employee.setEmail(&quot;first@example.com&quot;);</span>
+
+<span class="fc" id="L575">    Mockito.when(employeeRepository.findMaxEmployeeId()).thenReturn(null);</span>
+<span class="fc" id="L576">    Mockito.when(employeeRepository.save(Mockito.any(Employee.class))).thenAnswer(invocation -&gt; {</span>
+<span class="fc" id="L577">      Employee savedEmployee = invocation.getArgument(0);</span>
+<span class="fc" id="L578">      return savedEmployee;</span>
+    });
+<span class="fc" id="L580">    Mockito.doNothing().when(emailService).sendVerificationEmail(Mockito.anyString(), Mockito.anyString());</span>
+
+    // Act
+<span class="fc" id="L583">    String result = employeeService.addEmployee(employee);</span>
+
+    // Assert
+<span class="fc" id="L586">    assertTrue(result.contains(&quot;新增員工成功&quot;));</span>
+<span class="fc" id="L587">    assertEquals(1, employee.getEmployee_id());</span>
+<span class="fc" id="L588">    assertNotNull(employee.getVerificationToken());</span>
+<span class="fc" id="L589">    assertFalse(employee.isEnabled());</span>
+<span class="fc" id="L590">    Mockito.verify(employeeRepository).save(employee);</span>
+<span class="fc" id="L591">  }</span>
+
+  /**
+   * 測試新增員工
+   * 儲存失敗測試
+   */
+  @Test
+  void testAddEmployee_SaveFailed() {
+    // Arrange
+<span class="fc" id="L600">    Employee employee = new Employee();</span>
+<span class="fc" id="L601">    employee.setName(&quot;Test Employee&quot;);</span>
+<span class="fc" id="L602">    employee.setEmail(&quot;test@example.com&quot;);</span>
+
+<span class="fc" id="L604">    Mockito.when(employeeRepository.findMaxEmployeeId()).thenReturn(5);</span>
+<span class="fc" id="L605">    Mockito.when(employeeRepository.save(Mockito.any(Employee.class)))</span>
+<span class="fc" id="L606">            .thenThrow(new RuntimeException(&quot;Database error&quot;));</span>
+
+    // Act &amp; Assert
+<span class="fc" id="L609">    Exception exception = assertThrows(RuntimeException.class, () -&gt; {</span>
+<span class="nc" id="L610">      employeeService.addEmployee(employee);</span>
+<span class="nc" id="L611">    });</span>
+<span class="fc" id="L612">    assertTrue(exception.getMessage().contains(&quot;Database error&quot;));</span>
+<span class="fc" id="L613">    Mockito.verify(emailService, Mockito.never()).sendVerificationEmail(Mockito.anyString(), Mockito.anyString());</span>
+<span class="fc" id="L614">  }</span>
+
+  /**
+   * 測試新增員工
+   * 完整資料驗證測試
+   */
+  @Test
+  void testAddEmployee_FullDataValidation() {
+    // Arrange
+<span class="fc" id="L623">    Employee employee = new Employee();</span>
+<span class="fc" id="L624">    employee.setName(&quot;Complete Employee&quot;);</span>
+<span class="fc" id="L625">    employee.setEmail(&quot;complete@example.com&quot;);</span>
+<span class="fc" id="L626">    employee.setPhoneNumber(&quot;0912345678&quot;);</span>
+<span class="fc" id="L627">    employee.setStatus_id(1);</span>
+<span class="fc" id="L628">    employee.setRoles(mockRoles);</span>
+
+<span class="fc" id="L630">    Mockito.when(employeeRepository.findMaxEmployeeId()).thenReturn(20);</span>
+<span class="fc" id="L631">    Mockito.when(employeeRepository.save(Mockito.any(Employee.class))).thenAnswer(invocation -&gt; {</span>
+<span class="fc" id="L632">      Employee savedEmployee = invocation.getArgument(0);</span>
+<span class="fc" id="L633">      return savedEmployee;</span>
+    });
+<span class="fc" id="L635">    Mockito.doNothing().when(emailService).sendVerificationEmail(Mockito.anyString(), Mockito.anyString());</span>
+
+    // Act
+<span class="fc" id="L638">    String result = employeeService.addEmployee(employee);</span>
+
+    // Assert
+<span class="fc" id="L641">    assertTrue(result.contains(&quot;新增員工成功&quot;));</span>
+<span class="fc" id="L642">    assertEquals(21, employee.getEmployee_id());</span>
+<span class="fc" id="L643">    assertNotNull(employee.getVerificationToken());</span>
+<span class="fc" id="L644">    assertFalse(employee.isEnabled());</span>
+<span class="fc" id="L645">    assertEquals(&quot;Complete Employee&quot;, employee.getName());</span>
+<span class="fc" id="L646">    assertEquals(&quot;complete@example.com&quot;, employee.getEmail());</span>
+<span class="fc" id="L647">    assertEquals(&quot;0912345678&quot;, employee.getPhoneNumber());</span>
+<span class="fc" id="L648">    assertEquals(Integer.valueOf(1), employee.getStatus_id());</span>
+<span class="fc" id="L649">    assertEquals(mockRoles, employee.getRoles());</span>
+<span class="fc" id="L650">  }</span>
+
+  /**
+   *
+   * 測試新增員工
+   * 寄Email
+   */
+  @Test
+  void testAddEmployee_EmailSendFail() {
+
+<span class="fc" id="L660">    Employee employee = new Employee();</span>
+<span class="fc" id="L661">    employee.setName(&quot;Alice&quot;);</span>
+<span class="fc" id="L662">    employee.setEmail(&quot;alice@example.com&quot;);</span>
+
+<span class="fc" id="L664">    Mockito.when(employeeRepository.findMaxEmployeeId()).thenReturn(10);</span>
+<span class="fc" id="L665">    Mockito.doThrow(new RuntimeException(&quot;Email server error&quot;)).when(emailService).sendVerificationEmail(Mockito.anyString(), Mockito.anyString());</span>
+
+<span class="fc" id="L667">    String result = employeeService.addEmployee(employee);</span>
+
+<span class="fc" id="L669">    assertTrue(result.contains(&quot;驗證郵件發送失敗&quot;));</span>
+<span class="fc" id="L670">  }</span>
+
+  /**
+   *
+   * 測試驗證碼成功
+   */
+  @Test
+  void testVerifyAccount_Success() {
+
+<span class="fc" id="L679">    Employee employee = new Employee();</span>
+<span class="fc" id="L680">    employee.setEnabled(false);</span>
+<span class="fc" id="L681">    employee.setVerificationToken(&quot;validToken&quot;);</span>
+
+<span class="fc" id="L683">    Mockito.when(employeeRepository.findByVerificationToken(&quot;validToken&quot;))</span>
+<span class="fc" id="L684">            .thenReturn(Optional.of(employee));</span>
+
+<span class="fc" id="L686">    String result = employeeService.verifyAccount(&quot;validToken&quot;);</span>
+
+<span class="fc" id="L688">    assertEquals(&quot;帳號驗證成功&quot;, result);</span>
+<span class="fc" id="L689">    assertTrue(employee.isEnabled());</span>
+<span class="fc" id="L690">    assertNull(employee.getVerificationToken());</span>
+<span class="fc" id="L691">  }</span>
+
+  /**
+   *
+   * 測試驗證碼
+   * 無效的Token
+   */
+  @Test
+  void testVerifyAccount_InvalidToken() {
+
+<span class="fc" id="L701">    Mockito.when(employeeRepository.findByVerificationToken(&quot;invalidToken&quot;))</span>
+<span class="fc" id="L702">            .thenReturn(Optional.empty());</span>
+    
+<span class="fc" id="L704">    String result = employeeService.verifyAccount(&quot;invalidToken&quot;);</span>
+
+<span class="fc" id="L706">    assertEquals(&quot;無效的驗證碼&quot;, result);</span>
+<span class="fc" id="L707">  }</span>
+
+  /**
+   * 測試更新員工資訊成功
+   */
+  @Test
+  void testUpdateEmployee_Success() {
+    // Arrange
+<span class="fc" id="L715">    Employee employee = new Employee(</span>
+            1,
+            &quot;updated@gmail.com&quot;,
+            &quot;Updated Name&quot;,
+            &quot;password123&quot;,
+            &quot;0987654321&quot;,
+<span class="fc" id="L721">            1,</span>
+            true,
+            null,
+            mockStatus,
+            mockRoles,
+            mockLoginRecords
+    );
+
+<span class="fc" id="L729">    Mockito.when(employeeRepository.save(Mockito.any(Employee.class)))</span>
+<span class="fc" id="L730">            .thenReturn(employee);</span>
+
+    // Act
+<span class="fc" id="L733">    String result = employeeService.updateEmployee(employee);</span>
+
+    // Assert
+<span class="fc" id="L736">    assertEquals(&quot;更新員工資訊完成&quot;, result);</span>
+<span class="fc" id="L737">    Mockito.verify(employeeRepository).save(employee);</span>
+<span class="fc" id="L738">  }</span>
+
+  /**
+   * 測試更新員工資訊
+   * 空值測試
+   */
+  @Test
+  void testUpdateEmployee_NullEmployee() {
+    // Arrange
+<span class="fc" id="L747">    Employee employee = null;</span>
+
+    // Act
+<span class="fc" id="L750">    String result = employeeService.updateEmployee(employee);</span>
+
+    // Assert
+<span class="fc" id="L753">    assertEquals(&quot;更新員工資訊失敗&quot;, result);</span>
+<span class="fc" id="L754">    Mockito.verify(employeeRepository, Mockito.never()).save(Mockito.any());</span>
+<span class="fc" id="L755">  }</span>
+
+  /**
+   * 測試更新員工資訊
+   * 資料庫異常
+   */
+  @Test
+  void testUpdateEmployee_DatabaseError() {
+    // Arrange
+<span class="fc" id="L764">    Employee employee = new Employee();</span>
+<span class="fc" id="L765">    employee.setEmployee_id(1);</span>
+<span class="fc" id="L766">    employee.setName(&quot;Test Employee&quot;);</span>
+
+<span class="fc" id="L768">    Mockito.when(employeeRepository.save(Mockito.any(Employee.class)))</span>
+<span class="fc" id="L769">            .thenThrow(new RuntimeException(&quot;Database error&quot;));</span>
+
+    // Act &amp; Assert
+<span class="fc" id="L772">    Exception exception = assertThrows(RuntimeException.class, () -&gt; {</span>
+<span class="nc" id="L773">      employeeService.updateEmployee(employee);</span>
+<span class="nc" id="L774">    });</span>
+<span class="fc" id="L775">    assertTrue(exception.getMessage().contains(&quot;Database error&quot;));</span>
+<span class="fc" id="L776">  }</span>
+
+  /**
+   * 測試刪除員工成功
+   */
+  @Test
+  void testDeleteEmployee_Success() {
+    // Arrange
+<span class="fc" id="L784">    int employeeId = 1;</span>
+<span class="fc" id="L785">    Mockito.doNothing().when(employeeRepository).deleteById(employeeId);</span>
+
+    // Act
+<span class="fc" id="L788">    String result = employeeService.deleteEmployee(employeeId);</span>
+
+    // Assert
+<span class="fc" id="L791">    assertEquals(&quot;刪除員工成功&quot;, result);</span>
+<span class="fc" id="L792">    Mockito.verify(employeeRepository).deleteById(employeeId);</span>
+<span class="fc" id="L793">  }</span>
+
+  /**
+   * 測試刪除員工
+   * 員工不存在
+   */
+  @Test
+  void testDeleteEmployee_NotFound() {
+    // Arrange
+<span class="fc" id="L802">    int nonExistentId = 999;</span>
+<span class="fc" id="L803">    Mockito.doThrow(new RuntimeException(&quot;Employee not found&quot;))</span>
+<span class="fc" id="L804">            .when(employeeRepository).deleteById(nonExistentId);</span>
+
+    // Act &amp; Assert
+<span class="fc" id="L807">    Exception exception = assertThrows(RuntimeException.class, () -&gt; {</span>
+<span class="nc" id="L808">      employeeService.deleteEmployee(nonExistentId);</span>
+<span class="nc" id="L809">    });</span>
+<span class="fc" id="L810">    assertTrue(exception.getMessage().contains(&quot;Employee not found&quot;));</span>
+<span class="fc" id="L811">  }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

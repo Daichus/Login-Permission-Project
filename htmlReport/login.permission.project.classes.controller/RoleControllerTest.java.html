@@ -1,0 +1,526 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RoleControllerTest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">classes in demo Coverage Results</a> &gt; <a href="index.source.html" class="el_package">login.permission.project.classes.controller</a> &gt; <span class="el_source">RoleControllerTest.java</span></div><h1>RoleControllerTest.java</h1><pre class="source lang-java linenums">package login.permission.project.classes.controller;
+
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.impl.DefaultClaims;
+import jakarta.servlet.http.HttpServletRequest;
+import login.permission.project.classes.JwtService;
+import login.permission.project.classes.model.Permission;
+import login.permission.project.classes.model.Role;
+import login.permission.project.classes.model.ServerResponse;
+import login.permission.project.classes.model.dto.RoleDTO;
+import login.permission.project.classes.security.Config;
+import login.permission.project.classes.service.RoleService;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.web.context.WebApplicationContext;
+
+import java.util.*;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+/**
+ * RoleControllerTest
+ *
+ * 此測試類別驗證 RoleController api endpoint 的功能，
+ * 包括角色的建立、查詢和更新操作，
+ * 以及各種身份驗證和授權場景的測試。
+ */
+@SpringBootTest
+@Import({Config.class})
+@ComponentScan(basePackages = &quot;login.permission.project.classes.controller&quot;)
+@AutoConfigureMockMvc
+<span class="fc" id="L52">public class RoleControllerTest {</span>
+
+  @Autowired
+  private MockMvc mvc;
+
+  @MockBean
+  private RoleService roleService;
+
+  @MockBean
+  private JwtService jwtService;
+
+
+  @Autowired
+  private WebApplicationContext context;
+
+  @Autowired
+  private ObjectMapper objectMapper;
+
+
+  /**
+   * 測試成功獲取所有角色（具有正確身份驗證）
+   * 預期結果：
+   * - 狀態碼：200
+   * - 返回：角色列表
+   */
+  @Test
+  @WithMockUser(username = &quot;admin&quot;, roles = {&quot;ADMIN&quot;})
+  public void whenGetRole_thenStatus200() throws Exception {
+<span class="fc" id="L80">    Set&lt;Permission&gt; permissions = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L81">    permissions.add(new Permission(1, &quot;READ_USER&quot;, &quot;category&quot;, &quot;READ_USER&quot;));</span>
+<span class="fc" id="L82">    permissions.add(new Permission(2, &quot;WRITE_USER&quot;, &quot;category&quot;, &quot;WRITE_USER&quot;));</span>
+
+<span class="fc" id="L84">    List&lt;Role&gt; roles = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L85">    roles.add(new Role(1, &quot;ADMIN&quot;, permissions));</span>
+<span class="fc" id="L86">    roles.add(new Role(2, &quot;USER&quot;, new HashSet&lt;&gt;()));</span>
+
+<span class="fc" id="L88">    Claims mockClaims = new DefaultClaims();</span>
+<span class="fc" id="L89">    mockClaims.setSubject(&quot;admin&quot;);</span>
+<span class="fc" id="L90">    mockClaims.put(&quot;permissionCode&quot;, Arrays.asList(&quot;ADMIN&quot;, &quot;role_mgt_read&quot;));</span>
+<span class="fc" id="L91">    mockClaims.setIssuedAt(new Date());</span>
+<span class="fc" id="L92">    mockClaims.setExpiration(new Date(System.currentTimeMillis() + 3600000));</span>
+
+<span class="fc" id="L94">    when(jwtService.verifyToken(any(HttpServletRequest.class))).thenReturn(mockClaims);</span>
+
+<span class="fc" id="L96">    when(roleService.getAllRole()).thenReturn(ResponseEntity</span>
+<span class="fc" id="L97">            .status(HttpStatus.OK)</span>
+<span class="fc" id="L98">            .body(new ServerResponse(</span>
+                    &quot;Success&quot;,
+                    roles
+            )));
+
+<span class="fc" id="L103">    mvc.perform(get(&quot;/role/getAll&quot;)</span>
+<span class="fc" id="L104">            .header(&quot;Authorization&quot;, &quot;Bearer mock-token&quot;))</span>
+<span class="fc" id="L105">            .andDo(print())</span>
+<span class="fc" id="L106">            .andExpect(status().isOk())</span>
+<span class="fc" id="L107">            .andExpect(jsonPath(&quot;$.message&quot;).value(&quot;Success&quot;))</span>
+<span class="fc" id="L108">            .andExpect(jsonPath(&quot;$.data[0].role_id&quot;).value(1))</span>
+<span class="fc" id="L109">            .andExpect(jsonPath(&quot;$.data[0].role&quot;).value(&quot;ADMIN&quot;))</span>
+<span class="fc" id="L110">            .andExpect(jsonPath(&quot;$.data[0].permissions&quot;).isArray())</span>
+<span class="fc" id="L111">            .andExpect(jsonPath(&quot;$.data[1].role_id&quot;).value(2))</span>
+<span class="fc" id="L112">            .andExpect(jsonPath(&quot;$.data[1].role&quot;).value(&quot;USER&quot;))</span>
+<span class="fc" id="L113">            .andExpect(jsonPath(&quot;$.data[1].permissions&quot;).isEmpty());</span>
+<span class="fc" id="L114">  }</span>
+
+  /**
+   * 測試成功建立角色（具有正確的身份驗證和權限）
+   * 預期結果：
+   * - 狀態碼：200
+   * - 返回：成功訊息
+   */
+  @Test
+  @WithMockUser(username = &quot;admin&quot;, roles = {&quot;ADMIN&quot;})
+  public void whenCreateRole_thenStatus200() throws Exception {
+<span class="fc" id="L125">    RoleDTO roleDto = new RoleDTO();</span>
+<span class="fc" id="L126">    roleDto.setRole_id(1);</span>
+<span class="fc" id="L127">    roleDto.setRoleName(&quot;NEW_ROLE&quot;);</span>
+<span class="fc" id="L128">    roleDto.setPermission_id(new String[]{&quot;1&quot;, &quot;2&quot;});</span>
+
+<span class="fc" id="L130">    Claims mockClaims = new DefaultClaims();</span>
+<span class="fc" id="L131">    mockClaims.put(&quot;loginRecordId&quot;, 1);</span>
+<span class="fc" id="L132">    mockClaims.put(&quot;permissionCode&quot;, Arrays.asList(&quot;ADMIN&quot;, &quot;role_mgt_create&quot;));</span>
+<span class="fc" id="L133">    mockClaims.setSubject(&quot;admin&quot;);</span>
+<span class="fc" id="L134">    mockClaims.setIssuedAt(new Date());</span>
+<span class="fc" id="L135">    mockClaims.setExpiration(new Date(System.currentTimeMillis() + 3600000));</span>
+
+<span class="fc" id="L137">    when(jwtService.verifyToken(any(HttpServletRequest.class))).thenReturn(mockClaims);</span>
+
+<span class="fc" id="L139">    when(roleService.createRole(any(RoleDTO.class), any(HttpServletRequest.class)))</span>
+<span class="fc" id="L140">            .thenReturn(ResponseEntity.ok(new ServerResponse(&quot;Success&quot;, &quot;&quot;)));</span>
+
+<span class="fc" id="L142">    mvc.perform(post(&quot;/role/create&quot;)</span>
+<span class="fc" id="L143">            .header(&quot;Authorization&quot;, &quot;Bearer mock-token&quot;)</span>
+<span class="fc" id="L144">            .contentType(MediaType.APPLICATION_JSON)</span>
+<span class="fc" id="L145">            .content(objectMapper.writeValueAsString(roleDto)))</span>
+<span class="fc" id="L146">            .andDo(print())</span>
+<span class="fc" id="L147">            .andExpect(status().isOk())</span>
+<span class="fc" id="L148">            .andExpect(jsonPath(&quot;$.message&quot;).value(&quot;Success&quot;));</span>
+<span class="fc" id="L149">  }</span>
+
+  /**
+   * 測試在未提供身份驗證令牌的情況下嘗試建立角色
+   * 預期結果：
+   * - 狀態碼：401 未授權
+   * - 返回：錯誤訊息
+   */
+  @Test
+  public void whenCreateRole_TokenNotProvided_ThenStatus401() throws Exception {
+<span class="fc" id="L159">    RoleDTO roleDto = new RoleDTO();</span>
+<span class="fc" id="L160">    roleDto.setRole_id(1);</span>
+<span class="fc" id="L161">    roleDto.setRoleName(&quot;NEW_ROLE&quot;);</span>
+<span class="fc" id="L162">    roleDto.setPermission_id(new String[]{&quot;1&quot;, &quot;2&quot;});</span>
+
+<span class="fc" id="L164">    when(jwtService.verifyToken(any(HttpServletRequest.class))).thenReturn(null);</span>
+
+<span class="fc" id="L166">    mvc.perform(post(&quot;/role/create&quot;)</span>
+<span class="fc" id="L167">      .contentType(MediaType.APPLICATION_JSON)</span>
+<span class="fc" id="L168">      .content(objectMapper.writeValueAsString(roleDto)))</span>
+<span class="fc" id="L169">      .andDo(print())</span>
+<span class="fc" id="L170">      .andExpect(status().isUnauthorized())</span>
+<span class="fc" id="L171">      .andExpect(jsonPath(&quot;$.message&quot;).value(&quot;Token not provided.&quot;));</span>
+<span class="fc" id="L172">  }</span>
+
+  /**
+   * 測試使用無效的身份驗證令牌嘗試建立角色
+   * 預期結果：
+   * - 狀態碼：401 未授權
+   * - 返回：錯誤訊息
+   */
+  @Test
+  public void whenCreateRole_InvalidToken_ThenStatus401() throws Exception {
+<span class="fc" id="L182">    RoleDTO roleDto = new RoleDTO();</span>
+<span class="fc" id="L183">    roleDto.setRole_id(1);</span>
+<span class="fc" id="L184">    roleDto.setRoleName(&quot;NEW_ROLE&quot;);</span>
+<span class="fc" id="L185">    roleDto.setPermission_id(new String[]{&quot;1&quot;, &quot;2&quot;});</span>
+
+<span class="fc" id="L187">    mvc.perform(post(&quot;/role/create&quot;)</span>
+<span class="fc" id="L188">            .header(&quot;Authorization&quot;, &quot;Bearer invalid-token&quot;)</span>
+<span class="fc" id="L189">            .contentType(MediaType.APPLICATION_JSON)</span>
+<span class="fc" id="L190">            .content(objectMapper.writeValueAsString(roleDto)))</span>
+<span class="fc" id="L191">            .andDo(print())</span>
+<span class="fc" id="L192">            .andExpect(status().isUnauthorized())</span>
+<span class="fc" id="L193">            .andExpect(jsonPath(&quot;$.message&quot;).value(&quot;Invalid token.&quot;));</span>
+<span class="fc" id="L194">  }</span>
+
+  /**
+   * 測試成功更新角色（具有正確的身份驗證和權限）
+   * 預期結果：
+   * - 狀態碼：200
+   * - 返回：成功訊息
+   */
+  @Test
+  @WithMockUser(username = &quot;admin&quot;, roles = {&quot;ADMIN&quot;})
+  public void whenUpdateRole_thenStatus200() throws Exception {
+<span class="fc" id="L205">    RoleDTO roleDto = new RoleDTO();</span>
+<span class="fc" id="L206">    roleDto.setRole_id(1);</span>
+<span class="fc" id="L207">    roleDto.setRoleName(&quot;UPDATED_ROLE&quot;);</span>
+<span class="fc" id="L208">    roleDto.setPermission_id(new String[]{&quot;1&quot;, &quot;2&quot;, &quot;3&quot;});</span>
+
+<span class="fc" id="L210">    Claims mockClaims = new DefaultClaims();</span>
+<span class="fc" id="L211">    mockClaims.put(&quot;loginRecordId&quot;, 1);</span>
+<span class="fc" id="L212">    mockClaims.put(&quot;permissionCode&quot;, Arrays.asList(&quot;ADMIN&quot;, &quot;role_mgt_update&quot;));</span>
+<span class="fc" id="L213">    mockClaims.setSubject(&quot;admin&quot;);</span>
+<span class="fc" id="L214">    mockClaims.setIssuedAt(new Date());</span>
+<span class="fc" id="L215">    mockClaims.setExpiration(new Date(System.currentTimeMillis() + 3600000));</span>
+
+<span class="fc" id="L217">    when(jwtService.verifyToken(any(HttpServletRequest.class))).thenReturn(mockClaims);</span>
+
+<span class="fc" id="L219">    when(roleService.updateRole(any(RoleDTO.class), any(HttpServletRequest.class)))</span>
+<span class="fc" id="L220">            .thenReturn(ResponseEntity.ok(new ServerResponse(&quot;Success&quot;, &quot;&quot;)));</span>
+
+<span class="fc" id="L222">    mvc.perform(put(&quot;/role/edit&quot;)</span>
+<span class="fc" id="L223">                    .header(&quot;Authorization&quot;, &quot;Bearer mock-token&quot;)</span>
+<span class="fc" id="L224">                    .contentType(MediaType.APPLICATION_JSON)</span>
+<span class="fc" id="L225">                    .content(objectMapper.writeValueAsString(roleDto)))</span>
+<span class="fc" id="L226">            .andDo(print())</span>
+<span class="fc" id="L227">            .andExpect(status().isOk())</span>
+<span class="fc" id="L228">            .andExpect(jsonPath(&quot;$.message&quot;).value(&quot;Success&quot;));</span>
+<span class="fc" id="L229">  }</span>
+
+  /**
+   * 測試使用無效的角色ID嘗試更新角色
+   * 預期結果：
+   * - 狀態碼：400 錯誤請求
+   * - 返回：錯誤訊息
+   */
+  @Test
+  @WithMockUser(username = &quot;admin&quot;, roles = {&quot;ADMIN&quot;})
+  public void whenUpdateRole_withInvalidRoleId_thenStatus400() throws Exception {
+<span class="fc" id="L240">    RoleDTO roleDto = new RoleDTO();</span>
+<span class="fc" id="L241">    roleDto.setRole_id(-1);</span>
+<span class="fc" id="L242">    roleDto.setRoleName(&quot;INVALID_ROLE&quot;);</span>
+<span class="fc" id="L243">    roleDto.setPermission_id(new String[]{&quot;1&quot;, &quot;2&quot;});</span>
+
+<span class="fc" id="L245">    Claims mockClaims = new DefaultClaims();</span>
+<span class="fc" id="L246">    mockClaims.put(&quot;loginRecordId&quot;, 1);</span>
+<span class="fc" id="L247">    mockClaims.put(&quot;permissionCode&quot;, Arrays.asList(&quot;ADMIN&quot;, &quot;role_mgt_update&quot;));</span>
+<span class="fc" id="L248">    mockClaims.setSubject(&quot;admin&quot;);</span>
+<span class="fc" id="L249">    mockClaims.setIssuedAt(new Date());</span>
+<span class="fc" id="L250">    mockClaims.setExpiration(new Date(System.currentTimeMillis() + 3600000));</span>
+
+<span class="fc" id="L252">    when(jwtService.verifyToken(any(HttpServletRequest.class))).thenReturn(mockClaims);</span>
+
+<span class="fc" id="L254">    when(roleService.updateRole(any(RoleDTO.class), any(HttpServletRequest.class)))</span>
+<span class="fc" id="L255">            .thenReturn(ResponseEntity</span>
+<span class="fc" id="L256">                    .status(HttpStatus.BAD_REQUEST)</span>
+<span class="fc" id="L257">                    .body(new ServerResponse(&quot;Invalid role ID&quot;, null)));</span>
+
+<span class="fc" id="L259">    mvc.perform(put(&quot;/role/edit&quot;)</span>
+<span class="fc" id="L260">                    .header(&quot;Authorization&quot;, &quot;Bearer mock-token&quot;)</span>
+<span class="fc" id="L261">                    .contentType(MediaType.APPLICATION_JSON)</span>
+<span class="fc" id="L262">                    .content(objectMapper.writeValueAsString(roleDto)))</span>
+<span class="fc" id="L263">            .andDo(print())</span>
+<span class="fc" id="L264">            .andExpect(status().isBadRequest())</span>
+<span class="fc" id="L265">            .andExpect(jsonPath(&quot;$.message&quot;).value(&quot;Invalid role ID&quot;));</span>
+<span class="fc" id="L266">  }</span>
+
+  /**
+   * 測試在未提供身份驗證令牌的情況下嘗試更新角色
+   * 預期結果：
+   * - 狀態碼：401 未授權
+   * - 返回：錯誤訊息
+   */
+  @Test
+  public void whenUpdateRole_TokenNotProvided_ThenStatus401() throws Exception {
+<span class="fc" id="L276">    RoleDTO roleDto = new RoleDTO();</span>
+<span class="fc" id="L277">    roleDto.setRole_id(1);</span>
+<span class="fc" id="L278">    roleDto.setRoleName(&quot;UPDATED_ROLE&quot;);</span>
+<span class="fc" id="L279">    roleDto.setPermission_id(new String[]{&quot;1&quot;, &quot;2&quot;});</span>
+
+<span class="fc" id="L281">    when(jwtService.verifyToken(any(HttpServletRequest.class))).thenReturn(null);</span>
+
+<span class="fc" id="L283">    mvc.perform(put(&quot;/role/edit&quot;)</span>
+<span class="fc" id="L284">                    .contentType(MediaType.APPLICATION_JSON)</span>
+<span class="fc" id="L285">                    .content(objectMapper.writeValueAsString(roleDto)))</span>
+<span class="fc" id="L286">            .andDo(print())</span>
+<span class="fc" id="L287">            .andExpect(status().isUnauthorized())</span>
+<span class="fc" id="L288">            .andExpect(jsonPath(&quot;$.message&quot;).value(&quot;Token not provided.&quot;));</span>
+<span class="fc" id="L289">  }</span>
+
+  /**
+   * 測試使用無效的身份驗證令牌嘗試更新角色
+   * 預期結果：
+   * - 狀態碼：401 未授權
+   * - 返回：錯誤訊息
+   */
+  @Test
+  public void whenUpdateRole_InvalidToken_ThenStatus401() throws Exception {
+<span class="fc" id="L299">    RoleDTO roleDto = new RoleDTO();</span>
+<span class="fc" id="L300">    roleDto.setRole_id(1);</span>
+<span class="fc" id="L301">    roleDto.setRoleName(&quot;UPDATED_ROLE&quot;);</span>
+<span class="fc" id="L302">    roleDto.setPermission_id(new String[]{&quot;1&quot;, &quot;2&quot;});</span>
+
+<span class="fc" id="L304">    mvc.perform(put(&quot;/role/edit&quot;)</span>
+<span class="fc" id="L305">                    .header(&quot;Authorization&quot;, &quot;Bearer invalid-token&quot;)</span>
+<span class="fc" id="L306">                    .contentType(MediaType.APPLICATION_JSON)</span>
+<span class="fc" id="L307">                    .content(objectMapper.writeValueAsString(roleDto)))</span>
+<span class="fc" id="L308">            .andDo(print())</span>
+<span class="fc" id="L309">            .andExpect(status().isUnauthorized())</span>
+<span class="fc" id="L310">            .andExpect(jsonPath(&quot;$.message&quot;).value(&quot;Invalid token.&quot;));</span>
+<span class="fc" id="L311">  }</span>
+
+  /**
+   * 測試使用權限不足的帳號嘗試更新角色
+   * 預期結果：
+   * - 狀態碼：403 禁止訪問
+   * - 返回：權限不足訊息
+   */
+  @Test
+  @WithMockUser(username = &quot;user&quot;, roles = {&quot;USER&quot;})
+  public void whenUpdateRole_InsufficientPermissions_ThenStatus403() throws Exception {
+<span class="fc" id="L322">    RoleDTO roleDto = new RoleDTO();</span>
+<span class="fc" id="L323">    roleDto.setRole_id(1);</span>
+<span class="fc" id="L324">    roleDto.setRoleName(&quot;UPDATED_ROLE&quot;);</span>
+<span class="fc" id="L325">    roleDto.setPermission_id(new String[]{&quot;1&quot;, &quot;2&quot;});</span>
+
+<span class="fc" id="L327">    Claims mockClaims = new DefaultClaims();</span>
+<span class="fc" id="L328">    mockClaims.put(&quot;loginRecordId&quot;, 2);</span>
+<span class="fc" id="L329">    mockClaims.put(&quot;permissionCode&quot;, Arrays.asList(&quot;USER&quot;));</span>
+<span class="fc" id="L330">    mockClaims.setSubject(&quot;user&quot;);</span>
+<span class="fc" id="L331">    mockClaims.setIssuedAt(new Date());</span>
+<span class="fc" id="L332">    mockClaims.setExpiration(new Date(System.currentTimeMillis() + 3600000));</span>
+
+<span class="fc" id="L334">    when(jwtService.verifyToken(any(HttpServletRequest.class))).thenReturn(mockClaims);</span>
+
+<span class="fc" id="L336">    when(roleService.updateRole(any(RoleDTO.class), any(HttpServletRequest.class)))</span>
+<span class="fc" id="L337">            .thenReturn(ResponseEntity</span>
+<span class="fc" id="L338">                    .status(HttpStatus.FORBIDDEN)</span>
+<span class="fc" id="L339">                    .body(new ServerResponse(&quot;Insufficient permissions&quot;, null)));</span>
+
+<span class="fc" id="L341">    mvc.perform(put(&quot;/role/edit&quot;)</span>
+<span class="fc" id="L342">                    .header(&quot;Authorization&quot;, &quot;Bearer mock-token&quot;)</span>
+<span class="fc" id="L343">                    .contentType(MediaType.APPLICATION_JSON)</span>
+<span class="fc" id="L344">                    .content(objectMapper.writeValueAsString(roleDto)))</span>
+<span class="fc" id="L345">            .andDo(print())</span>
+<span class="fc" id="L346">            .andExpect(status().isForbidden())</span>
+<span class="fc" id="L347">            .andExpect(jsonPath(&quot;$.message&quot;).value(&quot;Insufficient permissions&quot;));</span>
+<span class="fc" id="L348">  }</span>
+
+  /**
+   * 測試更新角色時使用重複的角色名稱
+   * 預期結果：
+   * - 狀態碼：400 錯誤請求
+   * - 返回：錯誤訊息指出角色名稱已存在
+   */
+  @Test
+  @WithMockUser(username = &quot;admin&quot;, roles = {&quot;ADMIN&quot;})
+  public void whenUpdateRole_DuplicateRoleName_thenStatus400() throws Exception {
+<span class="fc" id="L359">    RoleDTO roleDto = new RoleDTO();</span>
+<span class="fc" id="L360">    roleDto.setRole_id(1);</span>
+<span class="fc" id="L361">    roleDto.setRoleName(&quot;EXISTING_ROLE&quot;);</span>
+<span class="fc" id="L362">    roleDto.setPermission_id(new String[]{&quot;1&quot;, &quot;2&quot;});</span>
+
+<span class="fc" id="L364">    Claims mockClaims = new DefaultClaims();</span>
+<span class="fc" id="L365">    mockClaims.put(&quot;loginRecordId&quot;, 1);</span>
+<span class="fc" id="L366">    mockClaims.put(&quot;permissionCode&quot;, Arrays.asList(&quot;ADMIN&quot;, &quot;role_mgt_update&quot;));</span>
+<span class="fc" id="L367">    mockClaims.setSubject(&quot;admin&quot;);</span>
+<span class="fc" id="L368">    mockClaims.setIssuedAt(new Date());</span>
+<span class="fc" id="L369">    mockClaims.setExpiration(new Date(System.currentTimeMillis() + 3600000));</span>
+
+<span class="fc" id="L371">    when(jwtService.verifyToken(any(HttpServletRequest.class))).thenReturn(mockClaims);</span>
+
+<span class="fc" id="L373">    when(roleService.updateRole(any(RoleDTO.class), any(HttpServletRequest.class)))</span>
+<span class="fc" id="L374">            .thenReturn(ResponseEntity</span>
+<span class="fc" id="L375">                    .status(HttpStatus.BAD_REQUEST)</span>
+<span class="fc" id="L376">                    .body(new ServerResponse(&quot;Role name already exists&quot;, null)));</span>
+
+<span class="fc" id="L378">    mvc.perform(put(&quot;/role/edit&quot;)</span>
+<span class="fc" id="L379">                    .header(&quot;Authorization&quot;, &quot;Bearer mock-token&quot;)</span>
+<span class="fc" id="L380">                    .contentType(MediaType.APPLICATION_JSON)</span>
+<span class="fc" id="L381">                    .content(objectMapper.writeValueAsString(roleDto)))</span>
+<span class="fc" id="L382">            .andDo(print())</span>
+<span class="fc" id="L383">            .andExpect(status().isBadRequest())</span>
+<span class="fc" id="L384">            .andExpect(jsonPath(&quot;$.message&quot;).value(&quot;Role name already exists&quot;));</span>
+<span class="fc" id="L385">  }</span>
+
+  /**
+   * 測試使用無效的權限ID更新角色
+   * 預期結果：
+   * - 狀態碼：400 錯誤請求
+   * - 返回：錯誤訊息指出無效的權限ID
+   */
+  @Test
+  @WithMockUser(username = &quot;admin&quot;, roles = {&quot;ADMIN&quot;})
+  public void whenUpdateRole_InvalidPermissionId_thenStatus400() throws Exception {
+<span class="fc" id="L396">    RoleDTO roleDto = new RoleDTO();</span>
+<span class="fc" id="L397">    roleDto.setRole_id(1);</span>
+<span class="fc" id="L398">    roleDto.setRoleName(&quot;VALID_ROLE&quot;);</span>
+<span class="fc" id="L399">    roleDto.setPermission_id(new String[]{&quot;999&quot;});</span>
+
+<span class="fc" id="L401">    Claims mockClaims = new DefaultClaims();</span>
+<span class="fc" id="L402">    mockClaims.put(&quot;loginRecordId&quot;, 1);</span>
+<span class="fc" id="L403">    mockClaims.put(&quot;permissionCode&quot;, Arrays.asList(&quot;ADMIN&quot;, &quot;role_mgt_update&quot;));</span>
+<span class="fc" id="L404">    mockClaims.setSubject(&quot;admin&quot;);</span>
+<span class="fc" id="L405">    mockClaims.setIssuedAt(new Date());</span>
+<span class="fc" id="L406">    mockClaims.setExpiration(new Date(System.currentTimeMillis() + 3600000));</span>
+
+<span class="fc" id="L408">    when(jwtService.verifyToken(any(HttpServletRequest.class))).thenReturn(mockClaims);</span>
+
+<span class="fc" id="L410">    when(roleService.updateRole(any(RoleDTO.class), any(HttpServletRequest.class)))</span>
+<span class="fc" id="L411">            .thenReturn(ResponseEntity</span>
+<span class="fc" id="L412">                    .status(HttpStatus.BAD_REQUEST)</span>
+<span class="fc" id="L413">                    .body(new ServerResponse(&quot;Invalid permission ID&quot;, null)));</span>
+
+<span class="fc" id="L415">    mvc.perform(put(&quot;/role/edit&quot;)</span>
+<span class="fc" id="L416">                    .header(&quot;Authorization&quot;, &quot;Bearer mock-token&quot;)</span>
+<span class="fc" id="L417">                    .contentType(MediaType.APPLICATION_JSON)</span>
+<span class="fc" id="L418">                    .content(objectMapper.writeValueAsString(roleDto)))</span>
+<span class="fc" id="L419">            .andDo(print())</span>
+<span class="fc" id="L420">            .andExpect(status().isBadRequest())</span>
+<span class="fc" id="L421">            .andExpect(jsonPath(&quot;$.message&quot;).value(&quot;Invalid permission ID&quot;));</span>
+<span class="fc" id="L422">  }</span>
+
+  /**
+   * 測試使用無效的請求體格式更新角色
+   * 預期結果：
+   * - 狀態碼：400 錯誤請求
+   * - 返回：錯誤請求訊息
+   */
+  @Test
+  @WithMockUser(username = &quot;admin&quot;, roles = {&quot;ADMIN&quot;})
+  public void whenUpdateRole_InvalidRequestBody_thenStatus400() throws Exception {
+<span class="fc" id="L433">    String invalidJson = &quot;{\&quot;role_id\&quot;: 1, \&quot;roleName\&quot;: Invalid JSON}&quot;;</span>
+
+<span class="fc" id="L435">    Claims mockClaims = new DefaultClaims();</span>
+<span class="fc" id="L436">    mockClaims.put(&quot;loginRecordId&quot;, 1);</span>
+<span class="fc" id="L437">    mockClaims.put(&quot;permissionCode&quot;, Arrays.asList(&quot;ADMIN&quot;, &quot;role_mgt_update&quot;));</span>
+<span class="fc" id="L438">    mockClaims.setSubject(&quot;admin&quot;);</span>
+<span class="fc" id="L439">    mockClaims.setIssuedAt(new Date());</span>
+<span class="fc" id="L440">    mockClaims.setExpiration(new Date(System.currentTimeMillis() + 3600000));</span>
+
+<span class="fc" id="L442">    when(jwtService.verifyToken(any(HttpServletRequest.class))).thenReturn(mockClaims);</span>
+
+<span class="fc" id="L444">    mvc.perform(put(&quot;/role/edit&quot;)</span>
+<span class="fc" id="L445">                    .header(&quot;Authorization&quot;, &quot;Bearer mock-token&quot;)</span>
+<span class="fc" id="L446">                    .contentType(MediaType.APPLICATION_JSON)</span>
+<span class="fc" id="L447">                    .content(invalidJson))</span>
+<span class="fc" id="L448">            .andDo(print())</span>
+<span class="fc" id="L449">            .andExpect(status().isBadRequest());</span>
+<span class="fc" id="L450">  }</span>
+
+  /**
+   * 測試更新角色時缺少必填欄位
+   * 預期結果：
+   * - 狀態碼：400 錯誤請求
+   * - 返回：錯誤訊息指出缺少必填欄位
+   */
+  @Test
+  @WithMockUser(username = &quot;admin&quot;, roles = {&quot;ADMIN&quot;})
+  public void whenUpdateRole_MissingRequiredFields_thenStatus400() throws Exception {
+<span class="fc" id="L461">    RoleDTO roleDto = new RoleDTO();</span>
+<span class="fc" id="L462">    roleDto.setRole_id(1);</span>
+
+<span class="fc" id="L464">    Claims mockClaims = new DefaultClaims();</span>
+<span class="fc" id="L465">    mockClaims.put(&quot;loginRecordId&quot;, 1);</span>
+<span class="fc" id="L466">    mockClaims.put(&quot;permissionCode&quot;, Arrays.asList(&quot;ADMIN&quot;, &quot;role_mgt_update&quot;));</span>
+<span class="fc" id="L467">    mockClaims.setSubject(&quot;admin&quot;);</span>
+<span class="fc" id="L468">    mockClaims.setIssuedAt(new Date());</span>
+<span class="fc" id="L469">    mockClaims.setExpiration(new Date(System.currentTimeMillis() + 3600000));</span>
+
+<span class="fc" id="L471">    when(jwtService.verifyToken(any(HttpServletRequest.class))).thenReturn(mockClaims);</span>
+
+<span class="fc" id="L473">    when(roleService.updateRole(any(RoleDTO.class), any(HttpServletRequest.class)))</span>
+<span class="fc" id="L474">            .thenReturn(ResponseEntity</span>
+<span class="fc" id="L475">                    .status(HttpStatus.BAD_REQUEST)</span>
+<span class="fc" id="L476">                    .body(new ServerResponse(&quot;Missing required fields&quot;, null)));</span>
+
+<span class="fc" id="L478">    mvc.perform(put(&quot;/role/edit&quot;)</span>
+<span class="fc" id="L479">                    .header(&quot;Authorization&quot;, &quot;Bearer mock-token&quot;)</span>
+<span class="fc" id="L480">                    .contentType(MediaType.APPLICATION_JSON)</span>
+<span class="fc" id="L481">                    .content(objectMapper.writeValueAsString(roleDto)))</span>
+<span class="fc" id="L482">            .andDo(print())</span>
+<span class="fc" id="L483">            .andExpect(status().isBadRequest())</span>
+<span class="fc" id="L484">            .andExpect(jsonPath(&quot;$.message&quot;).value(&quot;Missing required fields&quot;));</span>
+<span class="fc" id="L485">  }</span>
+
+  /**
+   * 測試嘗試更新不存在的角色
+   * 預期結果：
+   * - 狀態碼：404 找不到資源
+   * - 返回：錯誤訊息指出找不到角色
+   */
+  @Test
+  @WithMockUser(username = &quot;admin&quot;, roles = {&quot;ADMIN&quot;})
+  public void whenUpdateRole_RoleNotFound_thenStatus404() throws Exception {
+<span class="fc" id="L496">    RoleDTO roleDto = new RoleDTO();</span>
+<span class="fc" id="L497">    roleDto.setRole_id(999);</span>
+<span class="fc" id="L498">    roleDto.setRoleName(&quot;NON_EXISTENT_ROLE&quot;);</span>
+<span class="fc" id="L499">    roleDto.setPermission_id(new String[]{&quot;1&quot;, &quot;2&quot;});</span>
+
+<span class="fc" id="L501">    Claims mockClaims = new DefaultClaims();</span>
+<span class="fc" id="L502">    mockClaims.put(&quot;loginRecordId&quot;, 1);</span>
+<span class="fc" id="L503">    mockClaims.put(&quot;permissionCode&quot;, Arrays.asList(&quot;ADMIN&quot;, &quot;role_mgt_update&quot;));</span>
+<span class="fc" id="L504">    mockClaims.setSubject(&quot;admin&quot;);</span>
+<span class="fc" id="L505">    mockClaims.setIssuedAt(new Date());</span>
+<span class="fc" id="L506">    mockClaims.setExpiration(new Date(System.currentTimeMillis() + 3600000));</span>
+
+<span class="fc" id="L508">    when(jwtService.verifyToken(any(HttpServletRequest.class))).thenReturn(mockClaims);</span>
+
+<span class="fc" id="L510">    when(roleService.updateRole(any(RoleDTO.class), any(HttpServletRequest.class)))</span>
+<span class="fc" id="L511">            .thenReturn(ResponseEntity</span>
+<span class="fc" id="L512">                    .status(HttpStatus.NOT_FOUND)</span>
+<span class="fc" id="L513">                    .body(new ServerResponse(&quot;Role not found&quot;, null)));</span>
+
+<span class="fc" id="L515">    mvc.perform(put(&quot;/role/edit&quot;)</span>
+<span class="fc" id="L516">                    .header(&quot;Authorization&quot;, &quot;Bearer mock-token&quot;)</span>
+<span class="fc" id="L517">                    .contentType(MediaType.APPLICATION_JSON)</span>
+<span class="fc" id="L518">                    .content(objectMapper.writeValueAsString(roleDto)))</span>
+<span class="fc" id="L519">            .andDo(print())</span>
+<span class="fc" id="L520">            .andExpect(status().isNotFound())</span>
+<span class="fc" id="L521">            .andExpect(jsonPath(&quot;$.message&quot;).value(&quot;Role not found&quot;));</span>
+<span class="fc" id="L522">  }</span>
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

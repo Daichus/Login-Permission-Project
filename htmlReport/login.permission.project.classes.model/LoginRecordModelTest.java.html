@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LoginRecordModelTest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">classes in demo Coverage Results</a> &gt; <a href="index.source.html" class="el_package">login.permission.project.classes.model</a> &gt; <span class="el_source">LoginRecordModelTest.java</span></div><h1>LoginRecordModelTest.java</h1><pre class="source lang-java linenums">package login.permission.project.classes.model;
+
+import org.junit.jupiter.api.Test;
+
+import java.time.LocalDateTime;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+/**
+ * LoginRecord 模型的單元測試類
+ * 測試 LoginRecord 實體的基本功能、屬性、關聯關係和資料完整性
+ */
+<span class="fc" id="L13">public class LoginRecordModelTest {</span>
+
+  /**
+   * 測試 LoginRecord 實體的建構函數和基本屬性
+   */
+  @Test
+  public void testLoginRecordConstructorAndGetters() {
+    // Arrange
+<span class="fc" id="L21">    LocalDateTime loginTime = LocalDateTime.now();</span>
+<span class="fc" id="L22">    LocalDateTime logoutTime = LocalDateTime.now();</span>
+<span class="fc" id="L23">    LoginRecord loginRecord = new LoginRecord(1, &quot;127.0.0.1&quot;, loginTime, logoutTime, &quot;SUCCESS&quot;);</span>
+
+    // Assert
+<span class="fc" id="L26">    assertEquals(1, loginRecord.getEmployee_id());</span>
+<span class="fc" id="L27">    assertEquals(&quot;127.0.0.1&quot;, loginRecord.getIp_address());</span>
+<span class="fc" id="L28">    assertEquals(loginTime, loginRecord.getLogin_time());</span>
+<span class="fc" id="L29">    assertEquals(logoutTime, loginRecord.getLogout_time());</span>
+<span class="fc" id="L30">    assertEquals(&quot;SUCCESS&quot;, loginRecord.getStatus());</span>
+<span class="fc" id="L31">  }</span>
+
+  /**
+   * 測試 LoginRecord 實體的 setter 方法
+   */
+  @Test
+  public void testLoginRecordSetters() {
+    // Arrange
+<span class="fc" id="L39">    LoginRecord loginRecord = new LoginRecord();</span>
+<span class="fc" id="L40">    LocalDateTime loginTime = LocalDateTime.now();</span>
+<span class="fc" id="L41">    LocalDateTime logoutTime = LocalDateTime.now();</span>
+
+    // Act
+<span class="fc" id="L44">    loginRecord.setEmployee_id(2);</span>
+<span class="fc" id="L45">    loginRecord.setIp_address(&quot;192.168.0.1&quot;);</span>
+<span class="fc" id="L46">    loginRecord.setLogin_time(loginTime);</span>
+<span class="fc" id="L47">    loginRecord.setLogout_time(logoutTime);</span>
+<span class="fc" id="L48">    loginRecord.setStatus(&quot;FAILED&quot;);</span>
+
+    // Assert
+<span class="fc" id="L51">    assertEquals(2, loginRecord.getEmployee_id());</span>
+<span class="fc" id="L52">    assertEquals(&quot;192.168.0.1&quot;, loginRecord.getIp_address());</span>
+<span class="fc" id="L53">    assertEquals(loginTime, loginRecord.getLogin_time());</span>
+<span class="fc" id="L54">    assertEquals(logoutTime, loginRecord.getLogout_time());</span>
+<span class="fc" id="L55">    assertEquals(&quot;FAILED&quot;, loginRecord.getStatus());</span>
+<span class="fc" id="L56">  }</span>
+
+  /**
+   * 測試 equals 和 hashCode 方法
+   */
+  @Test
+  public void testEqualsAndHashCode() {
+    // Arrange
+<span class="fc" id="L64">    LocalDateTime loginTime = LocalDateTime.now();</span>
+<span class="fc" id="L65">    LocalDateTime logoutTime = LocalDateTime.now();</span>
+
+<span class="fc" id="L67">    LoginRecord loginRecord1 = new LoginRecord(1, &quot;127.0.0.1&quot;, loginTime, logoutTime, &quot;SUCCESS&quot;);</span>
+<span class="fc" id="L68">    LoginRecord loginRecord2 = new LoginRecord(1, &quot;127.0.0.1&quot;, loginTime, logoutTime, &quot;SUCCESS&quot;);</span>
+<span class="fc" id="L69">    LoginRecord loginRecord3 = new LoginRecord(2, &quot;192.168.0.1&quot;, loginTime, logoutTime, &quot;FAILED&quot;);</span>
+
+    // Assert
+<span class="fc" id="L72">    assertEquals(loginRecord1, loginRecord2);</span>
+<span class="fc" id="L73">    assertNotEquals(loginRecord1, loginRecord3);</span>
+
+<span class="fc" id="L75">    assertEquals(loginRecord1.hashCode(), loginRecord2.hashCode());</span>
+<span class="fc" id="L76">    assertNotEquals(loginRecord1.hashCode(), loginRecord3.hashCode());</span>
+<span class="fc" id="L77">  }</span>
+
+  /**
+   * 測試 toString 方法
+   */
+  @Test
+  public void testToString() {
+    // Arrange
+<span class="fc" id="L85">    LocalDateTime loginTime = LocalDateTime.now();</span>
+<span class="fc" id="L86">    LoginRecord loginRecord = new LoginRecord(1, &quot;127.0.0.1&quot;, loginTime, null, &quot;SUCCESS&quot;);</span>
+
+    // Act
+<span class="fc" id="L89">    String toString = loginRecord.toString();</span>
+
+    // Assert
+<span class="fc" id="L92">    assertTrue(toString.contains(&quot;employee_id=1&quot;));</span>
+<span class="fc" id="L93">    assertTrue(toString.contains(&quot;ip_address=127.0.0.1&quot;));</span>
+<span class="fc" id="L94">    assertTrue(toString.contains(&quot;status=SUCCESS&quot;));</span>
+<span class="fc" id="L95">  }</span>
+
+  /**
+   * 測試無參數建構函數
+   */
+  @Test
+  public void testNoArgsConstructor() {
+    // Arrange
+<span class="fc" id="L103">    LoginRecord loginRecord = new LoginRecord();</span>
+
+    // Assert
+<span class="fc" id="L106">    assertEquals(0, loginRecord.getRecord_id());</span>
+<span class="fc" id="L107">    assertNull(loginRecord.getIp_address());</span>
+<span class="fc" id="L108">    assertNull(loginRecord.getLogin_time());</span>
+<span class="fc" id="L109">    assertNull(loginRecord.getLogout_time());</span>
+<span class="fc" id="L110">    assertNull(loginRecord.getStatus());</span>
+<span class="fc" id="L111">  }</span>
+
+  /**
+   * 測試 Employee 關聯
+   */
+  @Test
+  public void testEmployeeAssociation() {
+    // Arrange
+<span class="fc" id="L119">    Employee employee = new Employee();</span>
+<span class="fc" id="L120">    employee.setEmployee_id(1);</span>
+<span class="fc" id="L121">    employee.setName(&quot;Test Employee&quot;);</span>
+
+<span class="fc" id="L123">    LoginRecord loginRecord = new LoginRecord();</span>
+<span class="fc" id="L124">    loginRecord.setEmployee(employee);</span>
+
+    // Assert
+<span class="fc" id="L127">    assertNotNull(loginRecord.getEmployee());</span>
+<span class="fc" id="L128">    assertEquals(1, loginRecord.getEmployee().getEmployee_id());</span>
+<span class="fc" id="L129">    assertEquals(&quot;Test Employee&quot;, loginRecord.getEmployee().getName());</span>
+<span class="fc" id="L130">  }</span>
+
+  /**
+   * 測試狀態欄位的邊界條件
+   */
+  @Test
+  public void testStatusFieldValidation() {
+    // Arrange
+<span class="fc" id="L138">    LoginRecord loginRecord = new LoginRecord();</span>
+
+    // Act &amp; Assert
+<span class="fc" id="L141">    loginRecord.setStatus(&quot;SUCCESS&quot;);</span>
+<span class="fc" id="L142">    assertEquals(&quot;SUCCESS&quot;, loginRecord.getStatus());</span>
+
+<span class="fc" id="L144">    loginRecord.setStatus(&quot;FAILED&quot;);</span>
+<span class="fc" id="L145">    assertEquals(&quot;FAILED&quot;, loginRecord.getStatus());</span>
+
+<span class="fc" id="L147">    loginRecord.setStatus(&quot;&quot;);</span>
+<span class="fc" id="L148">    assertEquals(&quot;&quot;, loginRecord.getStatus());</span>
+
+<span class="fc" id="L150">    loginRecord.setStatus(null);</span>
+<span class="fc" id="L151">    assertNull(loginRecord.getStatus());</span>
+<span class="fc" id="L152">  }</span>
+
+  /**
+   * 測試記錄時間的合法性
+   */
+  @Test
+  public void testLoginAndLogoutTimeValidation() {
+    // Arrange
+<span class="fc" id="L160">    LocalDateTime now = LocalDateTime.now();</span>
+<span class="fc" id="L161">    LocalDateTime future = now.plusHours(1);</span>
+
+<span class="fc" id="L163">    LoginRecord loginRecord = new LoginRecord();</span>
+
+    // Act
+<span class="fc" id="L166">    loginRecord.setLogin_time(now);</span>
+<span class="fc" id="L167">    loginRecord.setLogout_time(future);</span>
+
+    // Assert
+<span class="fc" id="L170">    assertEquals(now, loginRecord.getLogin_time());</span>
+<span class="fc" id="L171">    assertEquals(future, loginRecord.getLogout_time());</span>
+<span class="fc" id="L172">    assertTrue(loginRecord.getLogout_time().isAfter(loginRecord.getLogin_time()));</span>
+<span class="fc" id="L173">  }</span>
+
+  /**
+   * 測試登入登出時間為 null 的情況
+   */
+  @Test
+  public void testNullLoginAndLogoutTime() {
+    // Arrange
+<span class="fc" id="L181">    LoginRecord loginRecord = new LoginRecord();</span>
+
+    // Act
+<span class="fc" id="L184">    loginRecord.setLogin_time(null);</span>
+<span class="fc" id="L185">    loginRecord.setLogout_time(null);</span>
+
+    // Assert
+<span class="fc" id="L188">    assertNull(loginRecord.getLogin_time());</span>
+<span class="fc" id="L189">    assertNull(loginRecord.getLogout_time());</span>
+<span class="fc" id="L190">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

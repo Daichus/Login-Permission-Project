@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JwtServiceTest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">classes in demo Coverage Results</a> &gt; <a href="index.source.html" class="el_package">login.permission.project.classes</a> &gt; <span class="el_source">JwtServiceTest.java</span></div><h1>JwtServiceTest.java</h1><pre class="source lang-java linenums">package login.permission.project.classes;
+
+import io.jsonwebtoken.Claims;
+
+import jakarta.servlet.http.HttpServletRequest;
+
+//import login.permission.project.classes.security.JwtAuthFilter;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+<span class="fc" id="L16">class JwtServiceTest {</span>
+
+    //    static JwtAuthFilter filter;
+    static JwtService jwtService;
+
+    @BeforeEach
+    void setUp() {
+<span class="fc" id="L23">        jwtService = new JwtService();</span>
+<span class="fc" id="L24">    }</span>
+
+    //測試jwt基礎解析的功能
+    //透過mockito模擬http請求
+    //檢查檢析後的claims是否與指定的參數相符
+    @Test
+    @DisplayName(&quot;測試Jwt基礎解析&quot;)
+    void testParseJwtToken () {
+<span class="fc" id="L32">        HttpServletRequest request = mock(HttpServletRequest.class);</span>
+<span class="fc" id="L33">        String token  = jwtService.generateToken(&quot;1&quot;, 1);</span>
+<span class="fc" id="L34">        when(request.getHeader(&quot;Authorization&quot;)).thenReturn(&quot;Bearer &quot; + token);</span>
+<span class="fc" id="L35">        Claims claims = jwtService.verifyToken(request);</span>
+
+<span class="fc" id="L37">        assertEquals(&quot;1&quot;, claims.getSubject());</span>
+<span class="fc" id="L38">        assertEquals(1,claims.get(&quot;loginRecordId&quot;));</span>
+<span class="fc" id="L39">        assertEquals(&quot;Fcu 113-1 CSIE Team 2&quot;, claims.getIssuer());</span>
+
+<span class="fc" id="L41">        String token2  = jwtService.generateToken(&quot;101&quot;, 101);</span>
+<span class="fc" id="L42">        when(request.getHeader(&quot;Authorization&quot;)).thenReturn(&quot;Bearer &quot; + token2);</span>
+<span class="fc" id="L43">        Claims claims2 = jwtService.verifyToken(request);</span>
+<span class="fc" id="L44">        assertEquals(&quot;101&quot;, claims2.getSubject());</span>
+<span class="fc" id="L45">        assertEquals(101,claims2.get(&quot;loginRecordId&quot;));</span>
+<span class="fc" id="L46">        assertEquals(&quot;Fcu 113-1 CSIE Team 2&quot;, claims.getIssuer());</span>
+<span class="fc" id="L47">    }</span>
+
+    //測試接收到無效的Jwt token時的情況
+    //無效的token經解析後應為null
+    //此為測試不符合格式的token的情形
+    @Test
+    @DisplayName(&quot;測試Jwt解析無效的Jwt token&quot;)
+    void testInvalidJwtToken() {
+<span class="fc" id="L55">        HttpServletRequest request = mock(HttpServletRequest.class);</span>
+<span class="fc" id="L56">        when(request.getHeader(&quot;Authorization&quot;)).thenReturn(&quot;Bearer 1234567890abc&quot;);</span>
+<span class="fc" id="L57">        Claims claims = jwtService.verifyToken(request);</span>
+
+<span class="fc" id="L59">        assertNull(claims);</span>
+<span class="fc" id="L60">    }</span>
+
+    //此為測試header為null的情形
+    //同樣claims應為null
+    @Test
+    @DisplayName(&quot;測試Jwt解析無效的Jwt token, header為null&quot;)
+    void testInvalidJwtToken_nullHeader() {
+<span class="fc" id="L67">        HttpServletRequest request = mock(HttpServletRequest.class);</span>
+<span class="fc" id="L68">        when(request.getHeader(&quot;Authorization&quot;)).thenReturn(null);</span>
+<span class="fc" id="L69">        Claims claims = jwtService.verifyToken(request);</span>
+
+<span class="fc" id="L71">        assertNull(claims);</span>
+<span class="fc" id="L72">    }</span>
+
+    //此為測試header格式無效的情形
+    @Test
+    @DisplayName(&quot;測試Jwt解析無效的Jwt token, header未包含Bearer字串&quot;)
+    void testInvalidJwtToken_invalidHeader() {
+<span class="fc" id="L78">        HttpServletRequest request = mock(HttpServletRequest.class);</span>
+<span class="fc" id="L79">        when(request.getHeader(&quot;Authorization&quot;)).thenReturn(&quot;Hello World&quot;);</span>
+<span class="fc" id="L80">        Claims claims = jwtService.verifyToken(request);</span>
+
+<span class="fc" id="L82">        assertNull(claims);</span>
+<span class="fc" id="L83">    }</span>
+
+    // 測試對樣: 解析token時遇到 Bearer 前綴格式錯誤的情況
+    @Test
+    @DisplayName(&quot;測試Jwt解析無效的Jwt token, header Bearer字串格式錯誤&quot;)
+    void testIsTokenValid_withMalformedBearerPrefix() {
+<span class="fc" id="L89">        HttpServletRequest request = mock(HttpServletRequest.class);</span>
+<span class="fc" id="L90">        when(request.getHeader(&quot;Authorization&quot;)).thenReturn(&quot;Bear er&quot;);</span>
+
+<span class="fc" id="L92">        Claims claims = jwtService.verifyToken(request);</span>
+<span class="fc" id="L93">        assertNull(claims);</span>
+<span class="fc" id="L94">    }</span>
+
+
+
+    //  測試對樣: GenerateToken在不同的record_id輸入值時的產生結果
+    //---------------------------------------------
+    //#此方法測是參數符合條件的情況
+    @Test
+    @DisplayName(&quot;測試Jwt解析Jwt token, 登錄紀錄id符合標準的情形&quot;)
+    void testGenerateToken_record_id_value(){
+<span class="fc" id="L104">        String token2 = jwtService.generateToken(&quot;1&quot;,0);</span>
+<span class="fc" id="L105">        String token3 = jwtService.generateToken(&quot;1&quot;,1);</span>
+<span class="fc" id="L106">        String token4 = jwtService.generateToken(&quot;1&quot;,101);</span>
+<span class="fc" id="L107">        String token5 = jwtService.generateToken(&quot;1&quot;,Integer.MAX_VALUE);</span>
+<span class="fc" id="L108">        String token6 = jwtService.generateToken(&quot;1&quot;,Integer.MAX_VALUE - 1);</span>
+<span class="fc" id="L109">        assertNotNull(token2);</span>
+<span class="fc" id="L110">        assertNotNull(token3);</span>
+<span class="fc" id="L111">        assertNotNull(token4);</span>
+<span class="fc" id="L112">        assertNotNull(token5);</span>
+<span class="fc" id="L113">        assertNotNull(token6);</span>
+<span class="fc" id="L114">    }</span>
+
+
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

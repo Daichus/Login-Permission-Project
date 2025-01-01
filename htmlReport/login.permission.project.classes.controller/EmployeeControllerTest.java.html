@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EmployeeControllerTest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">classes in demo Coverage Results</a> &gt; <a href="index.source.html" class="el_package">login.permission.project.classes.controller</a> &gt; <span class="el_source">EmployeeControllerTest.java</span></div><h1>EmployeeControllerTest.java</h1><pre class="source lang-java linenums">package login.permission.project.classes.controller;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.impl.DefaultClaims;
+import jakarta.servlet.http.HttpServletRequest;
+import login.permission.project.classes.JwtService;
+import login.permission.project.classes.model.*;
+import login.permission.project.classes.security.Config;
+import login.permission.project.classes.service.EmployeeService;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.web.context.WebApplicationContext;
+
+import java.util.*;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@SpringBootTest
+@Import({Config.class})
+@ComponentScan(basePackages = &quot;login.permission.project.classes.controller&quot;)
+@AutoConfigureMockMvc
+<span class="fc" id="L41">public class EmployeeControllerTest {</span>
+
+  @Autowired
+  private MockMvc mvc;
+
+  @MockBean
+  private EmployeeService employeeService;
+
+  @MockBean
+  private JwtService jwtService;
+
+  @Autowired
+  private WebApplicationContext context;
+
+  @Autowired
+  private ObjectMapper objectMapper;
+
+<span class="fc" id="L58">  Status mockStatus = new Status();</span>
+<span class="fc" id="L59">  Set&lt;Role&gt; mockRoles = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L60">  Set&lt;LoginRecord&gt; mockLoginRecords = new HashSet&lt;&gt;();</span>
+
+  @Test
+  @DisplayName(&quot;獲取全部員工資訊，成功狀態碼 200&quot;)
+  @WithMockUser(username = &quot;admin&quot;, roles = {&quot;ADMIN&quot;})
+  public void whenGetAllEmployees_thenStatus200() throws Exception {
+<span class="fc" id="L66">    List&lt;Employee&gt; employees = Arrays.asList(</span>
+<span class="fc" id="L67">            new Employee(1, &quot;aaa@gmail.com&quot;, &quot;Alice&quot;, &quot;password1&quot;, &quot;0911111111&quot;, 1, true, null, mockStatus, mockRoles, mockLoginRecords),</span>
+<span class="fc" id="L68">            new Employee(2, &quot;jjj@gmail.com&quot;, &quot;Jon&quot;, &quot;password2&quot;, &quot;0922222222&quot;, 1, true, null, mockStatus, mockRoles, mockLoginRecords)</span>
+    );
+
+<span class="fc" id="L71">    Claims mockClaims = new DefaultClaims();</span>
+<span class="fc" id="L72">    mockClaims.setSubject(&quot;admin&quot;);</span>
+<span class="fc" id="L73">    mockClaims.put(&quot;permissionCode&quot;, Arrays.asList(&quot;ADMIN&quot;, &quot;employee_read&quot;));</span>
+<span class="fc" id="L74">    mockClaims.setIssuedAt(new Date());</span>
+<span class="fc" id="L75">    mockClaims.setExpiration(new Date(System.currentTimeMillis() + 3600000));</span>
+
+<span class="fc" id="L77">    when(jwtService.verifyToken(any())).thenReturn(mockClaims);</span>
+<span class="fc" id="L78">    when(employeeService.getAllEmployees(any(HttpServletRequest.class)))</span>
+<span class="fc" id="L79">            .thenReturn((ResponseEntity) ResponseEntity.ok(new ServerResponse(&quot;Success&quot;, employees)));</span>
+
+<span class="fc" id="L81">    mvc.perform(get(&quot;/employee/test/get&quot;)</span>
+<span class="fc" id="L82">                    .header(&quot;Authorization&quot;, &quot;Bearer mock-token&quot;))</span>
+<span class="fc" id="L83">            .andDo(print())</span>
+<span class="fc" id="L84">            .andExpect(status().isOk())</span>
+<span class="fc" id="L85">            .andExpect(jsonPath(&quot;$.message&quot;).value(&quot;Success&quot;))</span>
+<span class="fc" id="L86">            .andExpect(jsonPath(&quot;$.data[0].employee_id&quot;).value(1))</span>
+<span class="fc" id="L87">            .andExpect(jsonPath(&quot;$.data[0].name&quot;).value(&quot;Alice&quot;))</span>
+<span class="fc" id="L88">            .andExpect(jsonPath(&quot;$.data[1].employee_id&quot;).value(2))</span>
+<span class="fc" id="L89">            .andExpect(jsonPath(&quot;$.data[1].name&quot;).value(&quot;Jon&quot;));</span>
+<span class="fc" id="L90">  }</span>
+
+  @Test
+  @DisplayName(&quot;獲取全部員工資訊，沒有權杖，未授權狀態碼 401&quot;)
+  public void whenGetAllEmployees_noToken_thenStatus401() throws Exception {
+<span class="fc" id="L95">    mvc.perform(get(&quot;/employee/test/get&quot;))</span>
+<span class="fc" id="L96">            .andDo(print())</span>
+<span class="fc" id="L97">            .andExpect(status().isUnauthorized())</span>
+<span class="fc" id="L98">            .andExpect(jsonPath(&quot;$.message&quot;).value(&quot;Token not provided.&quot;));</span>
+<span class="fc" id="L99">  }</span>
+
+  @Test
+  @DisplayName(&quot;獲取全部員工資訊，提供無效權杖，未授權狀態碼 401&quot;)
+  public void whenGetAllEmployees_invalidToken_thenStatus401() throws Exception {
+<span class="fc" id="L104">    when(jwtService.verifyToken(any())).thenReturn(null);</span>
+
+<span class="fc" id="L106">    mvc.perform(get(&quot;/employee/test/get&quot;)</span>
+<span class="fc" id="L107">                    .header(&quot;Authorization&quot;, &quot;Bearer invalid-token&quot;))</span>
+<span class="fc" id="L108">            .andDo(print())</span>
+<span class="fc" id="L109">            .andExpect(status().isUnauthorized())</span>
+<span class="fc" id="L110">            .andExpect(jsonPath(&quot;$.message&quot;).value(&quot;Invalid token.&quot;));</span>
+<span class="fc" id="L111">  }</span>
+
+  @Test
+  @DisplayName(&quot;用 ID 獲取該員工資訊，成功狀態碼 200&quot;)
+  @WithMockUser(username = &quot;admin&quot;, roles = {&quot;ADMIN&quot;})
+  public void whenGetEmployeeById_thenStatus200() throws Exception {
+<span class="fc" id="L117">    int employeeId = 1;</span>
+<span class="fc" id="L118">    Employee employee = new Employee(</span>
+            employeeId,
+            &quot;test@gmail.com&quot;,
+            &quot;Test User&quot;,
+            &quot;password123&quot;,
+            &quot;0912345678&quot;,
+<span class="fc" id="L124">            1,</span>
+            true,
+            null,
+            mockStatus,
+            mockRoles,
+            mockLoginRecords
+    );
+
+<span class="fc" id="L132">    Claims mockClaims = new DefaultClaims();</span>
+<span class="fc" id="L133">    mockClaims.setSubject(&quot;admin&quot;);</span>
+<span class="fc" id="L134">    mockClaims.put(&quot;permissionCode&quot;, Arrays.asList(&quot;ADMIN&quot;, &quot;employee_read&quot;));</span>
+
+<span class="fc" id="L136">    when(jwtService.verifyToken(any())).thenReturn(mockClaims);</span>
+<span class="fc" id="L137">    when(employeeService.getEmployeeById(ArgumentMatchers.eq(employeeId), any(HttpServletRequest.class)))</span>
+<span class="fc" id="L138">            .thenReturn((ResponseEntity) ResponseEntity.ok(new ServerResponse(&quot;獲取員工資訊成功&quot;, employee)));</span>
+
+<span class="fc" id="L140">    mvc.perform(post(&quot;/employee/test/getEmployeeById/&quot; + employeeId)</span>
+<span class="fc" id="L141">                    .header(&quot;Authorization&quot;, &quot;Bearer mock-token&quot;))</span>
+<span class="fc" id="L142">            .andDo(print())</span>
+<span class="fc" id="L143">            .andExpect(status().isOk())</span>
+<span class="fc" id="L144">            .andExpect(jsonPath(&quot;$.message&quot;).value(&quot;獲取員工資訊成功&quot;))</span>
+<span class="fc" id="L145">            .andExpect(jsonPath(&quot;$.data.employee_id&quot;).value(employeeId))</span>
+<span class="fc" id="L146">            .andExpect(jsonPath(&quot;$.data.name&quot;).value(&quot;Test User&quot;));</span>
+<span class="fc" id="L147">  }</span>
+
+  @Test
+  @DisplayName(&quot;用 ID 獲取該員工資訊，找不到 ID，找不到資源狀態碼 404&quot;)
+  @WithMockUser(username = &quot;admin&quot;, roles = {&quot;ADMIN&quot;})
+  public void whenGetEmployeeById_notFound_thenStatus404() throws Exception {
+<span class="fc" id="L153">    int employeeId = 999;</span>
+
+<span class="fc" id="L155">    Claims mockClaims = new DefaultClaims();</span>
+<span class="fc" id="L156">    mockClaims.setSubject(&quot;admin&quot;);</span>
+<span class="fc" id="L157">    mockClaims.put(&quot;permissionCode&quot;, Arrays.asList(&quot;ADMIN&quot;, &quot;employee_read&quot;));</span>
+
+<span class="fc" id="L159">    when(jwtService.verifyToken(any())).thenReturn(mockClaims);</span>
+<span class="fc" id="L160">    when(employeeService.getEmployeeById(ArgumentMatchers.eq(employeeId), any(HttpServletRequest.class)))</span>
+<span class="fc" id="L161">            .thenReturn((ResponseEntity) ResponseEntity.status(HttpStatus.NOT_FOUND)</span>
+<span class="fc" id="L162">                    .body(new ServerResponse(&quot;找不到指定的員工&quot;, null)));</span>
+
+<span class="fc" id="L164">    mvc.perform(post(&quot;/employee/test/getEmployeeById/&quot; + employeeId)</span>
+<span class="fc" id="L165">                    .header(&quot;Authorization&quot;, &quot;Bearer mock-token&quot;))</span>
+<span class="fc" id="L166">            .andDo(print())</span>
+<span class="fc" id="L167">            .andExpect(status().isNotFound())</span>
+<span class="fc" id="L168">            .andExpect(jsonPath(&quot;$.message&quot;).value(&quot;找不到指定的員工&quot;));</span>
+<span class="fc" id="L169">  }</span>
+
+  @Test
+  @DisplayName(&quot;用 ID 獲取該員工資訊，無效 ID，失敗狀態碼 400&quot;)
+  @WithMockUser(username = &quot;admin&quot;, roles = {&quot;ADMIN&quot;})
+  public void whenGetEmployeeById_invalidId_thenStatus400() throws Exception {
+<span class="fc" id="L175">    Claims mockClaims = new DefaultClaims();</span>
+<span class="fc" id="L176">    mockClaims.setSubject(&quot;admin&quot;);</span>
+<span class="fc" id="L177">    mockClaims.put(&quot;permissionCode&quot;, Arrays.asList(&quot;ADMIN&quot;, &quot;employee_read&quot;));</span>
+
+<span class="fc" id="L179">    when(jwtService.verifyToken(any())).thenReturn(mockClaims);</span>
+
+<span class="fc" id="L181">    mvc.perform(post(&quot;/employee/test/getEmployeeById/invalid-id&quot;)</span>
+<span class="fc" id="L182">                    .header(&quot;Authorization&quot;, &quot;Bearer mock-token&quot;))</span>
+<span class="fc" id="L183">            .andDo(print())</span>
+<span class="fc" id="L184">            .andExpect(status().isBadRequest());</span>
+<span class="fc" id="L185">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

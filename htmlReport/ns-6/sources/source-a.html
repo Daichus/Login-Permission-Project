@@ -1,0 +1,236 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > RoleService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">login.permission.project.classes.service</a>
+</div>
+
+<h1>Coverage Summary for Class: RoleService (login.permission.project.classes.service)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">RoleService</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (29/29)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package login.permission.project.classes.service;
+&nbsp;
+&nbsp;
+&nbsp;import jakarta.servlet.http.HttpServletRequest;
+&nbsp;
+&nbsp;
+&nbsp;import login.permission.project.classes.model.*;
+&nbsp;import login.permission.project.classes.model.dto.RoleDTO;
+&nbsp;import login.permission.project.classes.model.util.JwtUtil;
+&nbsp;import login.permission.project.classes.repository.PermissionRepository;
+&nbsp;import login.permission.project.classes.repository.RoleRepository;
+&nbsp;
+&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;import org.springframework.http.HttpStatus;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;
+&nbsp;
+&nbsp;import java.util.*;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;@Service
+<b class="fc">&nbsp;public class RoleService {</b>
+&nbsp;
+&nbsp;    @Autowired
+&nbsp;    RoleRepository roleRepository;
+&nbsp;
+&nbsp;    @Autowired
+&nbsp;    PermissionRepository permissionRepository;
+&nbsp;
+&nbsp;    @Autowired
+&nbsp;    JwtUtil jwtUtil;
+&nbsp;
+&nbsp;
+&nbsp;    public ResponseEntity&lt;ServerResponse&gt; getAllRole() {
+<b class="fc">&nbsp;        List&lt;Role&gt; roles =  roleRepository.findAll();</b>
+<b class="fc">&nbsp;        return ResponseEntity.status(HttpStatus.OK).body(new ServerResponse(&quot;查詢所有角色成功&quot;, roles));</b>
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    /**
+&nbsp;     *創建新角色的方法,前端必須傳一個包含jwt token的HttpServletRequest,
+&nbsp;     * 和一個包含結構為{
+&nbsp;     *     role_id:&quot;1&quot;,
+&nbsp;     *     roleName:&quot;Admin&quot;,
+&nbsp;     *     permission_id:[&quot;1&quot;,&quot;2&quot;,&quot;3&quot;]
+&nbsp;     * }資料的body,這筆資料需要用於創建新的Role
+&nbsp;     */
+&nbsp;    public ResponseEntity&lt;ServerResponse&gt; createRole (RoleDTO roleDto, HttpServletRequest request) {
+&nbsp;        try {
+<b class="fc">&nbsp;            jwtUtil.validateRequest(request);</b>
+<b class="fc">&nbsp;            Role role = new Role();</b>
+<b class="fc">&nbsp;            setupRole(role, roleDto);</b>
+<b class="fc">&nbsp;            roleRepository.save(role);</b>
+<b class="fc">&nbsp;            return  ResponseEntity.status(HttpStatus.OK).body(new ServerResponse(&quot;新增角色成功&quot;, &quot;&quot;));</b>
+<b class="fc">&nbsp;        } catch ( IllegalArgumentException e) {</b>
+<b class="fc">&nbsp;            return  ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ServerResponse(&quot;你沒有新增角色的權限&quot;, &quot;&quot;));</b>
+&nbsp;        }
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    /**
+&nbsp;     *  此方法用於更新角色, 接受一個包含jwt token的HttpServletRequest,
+&nbsp;     *  與要用於更新角色的相關資料做為參數,同樣需要前端傳送一個
+&nbsp;     *  結構為{
+&nbsp;     *        role_id:&quot;1&quot;,
+&nbsp;     *        roleName:&quot;Admin&quot;,
+&nbsp;     *        permission_id:[&quot;1&quot;,&quot;2&quot;,&quot;3&quot;]
+&nbsp;     *        }
+&nbsp;     *      的資料
+&nbsp;     */
+&nbsp;    public ResponseEntity&lt;ServerResponse&gt; updateRole(RoleDTO roleDto, HttpServletRequest request) {
+&nbsp;        try{
+<b class="fc">&nbsp;            jwtUtil.validateRequest(request);</b>
+<b class="fc">&nbsp;            Optional&lt;Role&gt; roleOption = roleRepository.findById(roleDto.getRole_id());</b>
+<b class="fc">&nbsp;            if(roleOption.isPresent()) {</b>
+<b class="fc">&nbsp;                Role role = roleOption.get();</b>
+<b class="fc">&nbsp;                setupRole(role, roleDto);</b>
+<b class="fc">&nbsp;                roleRepository.save(role);</b>
+<b class="fc">&nbsp;                return  ResponseEntity.status(HttpStatus.OK).body(new ServerResponse(&quot;修改角色成功&quot;, &quot;&quot;));</b>
+&nbsp;
+&nbsp;            } else {
+<b class="fc">&nbsp;                return  ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ServerResponse(&quot;找不到指定id的角色&quot;, &quot;&quot;));</b>
+&nbsp;
+&nbsp;            }
+<b class="fc">&nbsp;        } catch (IllegalArgumentException e) {</b>
+<b class="fc">&nbsp;            return  ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ServerResponse(&quot;你沒有修改角色的權限&quot;, &quot;&quot;));</b>
+&nbsp;
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    /**
+&nbsp;     *  更新Role(角色)的方法,設定Role名稱與Role的多對多關聯
+&nbsp;     */
+&nbsp;    private void setupRole(Role role, RoleDTO roleDto) {
+<b class="fc">&nbsp;        role.setRole(roleDto.getRoleName());</b>
+<b class="fc">&nbsp;        role.setPermissions(getPermissionsFromIds(roleDto.getPermission_id()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    /**
+&nbsp;     *  設定Role多對多關聯時需要傳入一個Set&lt;Permission&gt;
+&nbsp;     *  此方法根據用戶傳來的權限id, 查找並回傳相應的權限set,屬於setupRole方法的一部分
+&nbsp;     */
+&nbsp;    private Set&lt;Permission&gt; getPermissionsFromIds(String[] permissionIdsString) {
+&nbsp;        try{
+<b class="fc">&nbsp;            Set&lt;Integer&gt; permissionIds = Arrays.stream(permissionIdsString)</b>
+<b class="fc">&nbsp;                    .map(Integer::parseInt)</b>
+<b class="fc">&nbsp;                    .collect(Collectors.toSet());</b>
+<b class="fc">&nbsp;            List&lt;Permission&gt; permissions = permissionRepository.findAllById(permissionIds);</b>
+<b class="fc">&nbsp;            return new HashSet&lt;&gt;(permissions);</b>
+<b class="fc">&nbsp;        } catch (NumberFormatException e) {</b>
+<b class="fc">&nbsp;            throw new IllegalArgumentException(&quot;權限 ID 格式錯誤,必須為阿拉伯數字&quot;, e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-01-02 02:53</div>
+</div>
+</body>
+</html>

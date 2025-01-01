@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PositionService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">classes in demo Coverage Results</a> &gt; <a href="index.source.html" class="el_package">login.permission.project.classes.service</a> &gt; <span class="el_source">PositionService.java</span></div><h1>PositionService.java</h1><pre class="source lang-java linenums">package login.permission.project.classes.service;
+
+import login.permission.project.classes.model.Position;
+import login.permission.project.classes.repository.PositionRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+<span class="fc" id="L12">public class PositionService {</span>
+
+    @Autowired
+    PositionRepository pr;
+
+    public List&lt;Position&gt; getAllPositions() {
+<span class="nc" id="L18">        return pr.findAll();</span>
+    }
+
+    public List&lt;Position&gt; getPositionById(Integer unitId, Integer positionId) {
+<span class="nc" id="L22">        return pr.findByUnitIdAndPositionId(unitId, positionId);</span>
+    }
+
+    public String addPosition(Position position){
+<span class="nc" id="L26">        pr.save(position);</span>
+<span class="nc" id="L27">        return String.format(&quot;新增職位成功\n職位名稱: %s\n職位id: %s\n科別代號: %s&quot;,</span>
+<span class="nc" id="L28">                position.getPosition(),</span>
+<span class="nc" id="L29">                position.getPosition_id(),</span>
+<span class="nc" id="L30">                position.getUnit_id());</span>
+    }
+
+    public String updatePosition(Position position) {
+<span class="nc bnc" id="L34" title="All 2 branches missed.">        if (position != null) {</span>
+<span class="nc" id="L35">            pr.save(position);</span>
+<span class="nc" id="L36">            return &quot;修改職位資訊完成&quot;;</span>
+        } else {
+<span class="nc" id="L38">            return &quot;更新職位資訊失敗&quot;;</span>
+        }
+    }
+
+    public String deletePosition(int id) {
+<span class="nc" id="L43">        pr.deleteById(id);</span>
+<span class="nc" id="L44">        return &quot;刪除職位成功&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LoginRecordService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">classes in demo Coverage Results</a> &gt; <a href="index.source.html" class="el_package">login.permission.project.classes.service</a> &gt; <span class="el_source">LoginRecordService.java</span></div><h1>LoginRecordService.java</h1><pre class="source lang-java linenums">package login.permission.project.classes.service;
+
+import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.HttpServletRequest;
+import login.permission.project.classes.JwtService;
+import login.permission.project.classes.model.LoginRecord;
+import login.permission.project.classes.repository.LoginRecordRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+@Service
+<span class="fc" id="L19">public class LoginRecordService {</span>
+
+    @Autowired
+    LoginRecordRepository lrr;
+
+    @Autowired
+    JwtService js;
+
+    public List&lt;LoginRecord&gt; getAllLoginRecords() {
+<span class="fc" id="L28">        return lrr.findAll();</span>
+    }
+
+    public String addLoginRecord(LoginRecord loginRecord) {
+<span class="fc" id="L32">        lrr.save(loginRecord);</span>
+<span class="fc" id="L33">        return String.format(&quot;新增登入記錄成功\n登入代號: %s\n員工代號: %s\n登入時間: %s\n登出時間: %s\nip位址: %s\n狀態: %s&quot;,</span>
+<span class="fc" id="L34">                loginRecord.getRecord_id(),</span>
+<span class="fc" id="L35">                loginRecord.getEmployee_id(),</span>
+<span class="fc" id="L36">                loginRecord.getLogin_time(),</span>
+<span class="fc" id="L37">                loginRecord.getLogout_time(),</span>
+<span class="fc" id="L38">                loginRecord.getIp_address(),</span>
+<span class="fc" id="L39">                loginRecord.getStatus());</span>
+    }
+
+    //登入代號	員工代號	登入時間	登出時間	ip位址	狀態(成功或失敗)
+
+    public String updateLoginRecord (LoginRecord empPositionMap) {
+<span class="fc bfc" id="L45" title="All 2 branches covered.">        if(empPositionMap != null) {</span>
+<span class="fc" id="L46">            lrr.save(empPositionMap);</span>
+<span class="fc" id="L47">            return &quot;修改登入記錄資訊完成&quot;;</span>
+        } else {
+<span class="fc" id="L49">            return &quot;更新登入記錄資訊失敗&quot;;</span>
+        }
+    }
+
+    public String deleteLoginRecord (int id) {
+<span class="fc" id="L54">        lrr.deleteById(id);</span>
+<span class="fc" id="L55">        return &quot;刪除登入記錄成功&quot;;</span>
+    }
+
+    public ResponseEntity&lt;?&gt; updateLogoutTime (HttpServletRequest request) {
+<span class="fc" id="L59">        Claims claims = js.verifyToken(request);</span>
+
+<span class="fc bfc" id="L61" title="All 2 branches covered.">        if(claims != null) {</span>
+<span class="fc" id="L62">            Integer loginRecordId = claims.get(&quot;loginRecordId&quot;, Integer.class);</span>
+
+            // 新增檢查 loginRecordId 是否為 null
+<span class="fc bfc" id="L65" title="All 2 branches covered.">            if (loginRecordId == null) {</span>
+<span class="fc" id="L66">                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(&quot;未授權的JWT&quot;);</span>
+            }
+
+<span class="fc" id="L69">            Optional&lt;LoginRecord&gt; loginRecordOp = lrr.findById(loginRecordId);</span>
+
+<span class="fc bfc" id="L71" title="All 2 branches covered.">            if (loginRecordOp.isPresent()) {</span>
+<span class="fc" id="L72">                LoginRecord loginRecord = loginRecordOp.get();</span>
+<span class="fc" id="L73">                loginRecord.setLogout_time(LocalDateTime.now());  // 設置登出時間</span>
+<span class="fc" id="L74">                lrr.save(loginRecord);</span>
+<span class="fc" id="L75">                return ResponseEntity.ok(&quot;登出成功&quot;);</span>
+            }
+<span class="fc" id="L77">            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(&quot;登入記錄不存在&quot;);</span>
+        } else {
+<span class="fc" id="L79">            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(&quot;未授權的JWT&quot;);</span>
+        }
+    }
+
+    public  ResponseEntity&lt;?&gt; getRecordByPermissionCode(HttpServletRequest request) {
+<span class="fc" id="L84">        Claims claims = js.verifyToken(request);</span>
+<span class="fc" id="L85">        List&lt;LoginRecord&gt; loginRecords = null;</span>
+
+<span class="fc bfc" id="L87" title="All 2 branches covered.">        if (claims != null) {</span>
+<span class="fc" id="L88">            List&lt;String&gt; permissionCode = claims.get(&quot;permissionCode&quot;, List.class);</span>
+<span class="pc bpc" id="L89" title="1 of 4 branches missed.">            if (permissionCode != null &amp;&amp; !permissionCode.isEmpty()) {</span>
+<span class="fc bfc" id="L90" title="All 2 branches covered.">                if (permissionCode.stream().anyMatch(code -&gt;</span>
+<span class="fc bfc" id="L91" title="All 2 branches covered.">                        code.equals(&quot;login_rec_read&quot;) ||</span>
+<span class="fc bfc" id="L92" title="All 2 branches covered.">                                code.equals(&quot;login_rec_update&quot;) ||</span>
+<span class="pc bpc" id="L93" title="1 of 2 branches missed.">                                code.equals(&quot;login_rec_create&quot;) ||</span>
+<span class="pc bpc" id="L94" title="1 of 2 branches missed.">                                code.equals(&quot;login_rec_delete&quot;))) {</span>
+<span class="fc" id="L95">                    loginRecords = lrr.findAll();</span>
+                } else {
+<span class="fc" id="L97">                    String subject = claims.getSubject();</span>
+<span class="fc bfc" id="L98" title="All 2 branches covered.">                    if (subject == null) {</span>
+<span class="fc" id="L99">                        return ResponseEntity.status(HttpStatus.NOT_FOUND)</span>
+<span class="fc" id="L100">                                .body(&quot;Login record not found&quot;);</span>
+                    }
+                    try {
+<span class="fc" id="L103">                        int employeeId = Integer.parseInt(subject);</span>
+<span class="fc" id="L104">                        loginRecords = lrr.findByEmployeeId(employeeId);</span>
+<span class="nc" id="L105">                    } catch (NumberFormatException e) {</span>
+<span class="nc" id="L106">                        return ResponseEntity.status(HttpStatus.BAD_REQUEST)</span>
+<span class="nc" id="L107">                                .body(&quot;Invalid employee ID format in token subject.&quot;);</span>
+<span class="fc" id="L108">                    }</span>
+<span class="fc" id="L109">                }</span>
+            } else {
+<span class="fc" id="L111">                return ResponseEntity.status(HttpStatus.FORBIDDEN)</span>
+<span class="fc" id="L112">                        .body(&quot;No permissions found in the token.&quot;);</span>
+            }
+<span class="fc" id="L114">        } else {</span>
+<span class="fc" id="L115">            return ResponseEntity.status(HttpStatus.NOT_FOUND)</span>
+<span class="fc" id="L116">                    .body(&quot;Login record not found&quot;);</span>
+        }
+
+<span class="fc" id="L119">        return ResponseEntity.ok()</span>
+<span class="fc" id="L120">                .contentType(MediaType.APPLICATION_JSON)</span>
+<span class="fc" id="L121">                .body(loginRecords);</span>
+    }
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Config.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">classes in demo Coverage Results</a> &gt; <a href="index.source.html" class="el_package">login.permission.project.classes.security</a> &gt; <span class="el_source">Config.java</span></div><h1>Config.java</h1><pre class="source lang-java linenums">package login.permission.project.classes.security;
+import jakarta.servlet.http.HttpServletResponse;
+import login.permission.project.classes.JwtService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+
+import java.util.List;
+
+@Configuration
+<span class="fc" id="L17">public class Config {</span>
+
+  @Autowired
+  private JwtService jwtService;
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
+<span class="fc" id="L24">        http</span>
+<span class="fc" id="L25">                .csrf(csrf -&gt; csrf.disable()) // 禁用 CSRF</span>
+<span class="fc" id="L26">                .cors(cors -&gt; cors.configurationSource(request -&gt; {</span>
+<span class="fc" id="L27">                    CorsConfiguration config = new CorsConfiguration();</span>
+<span class="fc" id="L28">                    config.setAllowedOrigins(List.of(&quot;http://localhost:5173&quot;));</span>
+<span class="fc" id="L29">                    config.setAllowedMethods(List.of(&quot;GET&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;DELETE&quot;));</span>
+//                    config.setAllowedHeaders(List.of(&quot;Authorization&quot;, &quot;Content-Type&quot;));
+<span class="fc" id="L31">                    config.setAllowedHeaders(List.of(&quot;*&quot;));  // 允許所有 headers</span>
+<span class="fc" id="L32">                    config.setAllowCredentials(true);</span>
+
+<span class="fc" id="L34">                    return config;</span>
+                }))
+<span class="fc" id="L36">                .authorizeHttpRequests(auth -&gt; auth</span>
+
+                        // 允許不需要驗證的端點
+<span class="fc" id="L39">                        .requestMatchers(</span>
+                      &quot;/employee/test/login&quot;,
+                               &quot;/employee/test/add&quot;,
+                               &quot;/Permission/test/get&quot;,
+                               &quot;/Position/get&quot;,
+                               &quot;/status/test/get&quot;,
+                               &quot;/employee/test/getAllEmployeeInfo&quot;,
+                               &quot;/role/getAll&quot;
+<span class="fc" id="L47">                        ).permitAll()</span>
+
+
+                        // 部門管理相關權限
+<span class="fc" id="L51">                        .requestMatchers(HttpMethod.GET, &quot;/department/**&quot;).hasAuthority(&quot;dept_mgt_read&quot;)</span>
+<span class="fc" id="L52">                        .requestMatchers(HttpMethod.POST, &quot;/department/**&quot;).hasAuthority(&quot;dept_mgt_create&quot;)</span>
+<span class="fc" id="L53">                        .requestMatchers(HttpMethod.PUT, &quot;/department/**&quot;).hasAuthority(&quot;dept_mgt_update&quot;)</span>
+<span class="fc" id="L54">                        .requestMatchers(HttpMethod.DELETE, &quot;/department/**&quot;).hasAuthority(&quot;dept_mgt_delete&quot;)</span>
+
+                        // 單位管理相關權限
+<span class="fc" id="L57">                        .requestMatchers(HttpMethod.GET, &quot;/unit/**&quot;).hasAuthority(&quot;unit_mgt_read&quot;)</span>
+<span class="fc" id="L58">                        .requestMatchers(HttpMethod.POST, &quot;/unit/**&quot;).hasAuthority(&quot;unit_mgt_create&quot;)</span>
+<span class="fc" id="L59">                        .requestMatchers(HttpMethod.PUT, &quot;/unit/**&quot;).hasAuthority(&quot;unit_mgt_update&quot;)</span>
+<span class="fc" id="L60">                        .requestMatchers(HttpMethod.DELETE, &quot;/unit/**&quot;).hasAuthority(&quot;unit_mgt_delete&quot;)</span>
+
+                        // 登入記錄相關權限
+<span class="fc" id="L63">                        .requestMatchers(HttpMethod.GET, &quot;/loginRecord/**&quot;).hasAnyAuthority(</span>
+                                &quot;login_rec_read&quot;,
+                                &quot;login_rec_read_id&quot;,
+                                &quot;login_rec_read_dept&quot;,
+                                &quot;login_rec_read_unit&quot;
+                        )
+<span class="fc" id="L69">                        .requestMatchers(HttpMethod.POST, &quot;/loginRecord/**&quot;).hasAuthority(&quot;login_rec_create&quot;)</span>
+<span class="fc" id="L70">                        .requestMatchers(HttpMethod.PUT, &quot;/loginRecord/**&quot;).hasAuthority(&quot;login_rec_update&quot;)</span>
+<span class="fc" id="L71">                        .requestMatchers(HttpMethod.DELETE, &quot;/loginRecord/**&quot;).hasAuthority(&quot;login_rec_delete&quot;)</span>
+<span class="fc" id="L72">                        .requestMatchers(HttpMethod.POST, &quot;/role/**&quot;).hasAuthority(&quot;role_mgt_create&quot;)</span>
+
+                                // 其他請求需要認證
+<span class="fc" id="L75">                                .anyRequest().authenticated()</span>
+
+//                        .anyRequest().denyAll()
+                )
+                // 1/1 新增
+<span class="fc" id="L80">                .exceptionHandling(exception -&gt; exception</span>
+<span class="fc" id="L81">                        .authenticationEntryPoint((request, response, authException) -&gt; {</span>
+<span class="nc" id="L82">                          response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401</span>
+<span class="nc" id="L83">                          response.getWriter().write(&quot;Unauthorized: &quot; + authException.getMessage());</span>
+<span class="nc" id="L84">                        })</span>
+<span class="fc" id="L85">                        .accessDeniedHandler((request, response, accessDeniedException) -&gt; {</span>
+<span class="nc" id="L86">                          response.setStatus(HttpServletResponse.SC_FORBIDDEN); // 403</span>
+<span class="nc" id="L87">                          response.getWriter().write(&quot;Access Denied: &quot; + accessDeniedException.getMessage());</span>
+<span class="nc" id="L88">                        })</span>
+                )
+
+<span class="fc" id="L91">                .addFilterBefore(new JwtAuthFilter(jwtService), UsernamePasswordAuthenticationFilter.class)</span>
+<span class="fc" id="L92">                .sessionManagement(session -&gt; session</span>
+<span class="fc" id="L93">                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS));</span>
+
+//                .httpBasic(httpBasic -&gt; httpBasic.disable());
+<span class="fc" id="L96">        return http.build();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

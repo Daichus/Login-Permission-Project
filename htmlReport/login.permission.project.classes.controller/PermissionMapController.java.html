@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PermissionMapController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">classes in demo Coverage Results</a> &gt; <a href="index.source.html" class="el_package">login.permission.project.classes.controller</a> &gt; <span class="el_source">PermissionMapController.java</span></div><h1>PermissionMapController.java</h1><pre class="source lang-java linenums">package login.permission.project.classes.controller;
+
+import login.permission.project.classes.model.PermissionMap;
+import login.permission.project.classes.service.PermissionMapService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping(&quot;/api/permissionMap&quot;)
+<span class="fc" id="L12">public class PermissionMapController {</span>
+
+    @Autowired
+    private PermissionMapService pms; // 使用 pms 作為變數名稱
+
+    // 獲取所有權限設定
+    @GetMapping(&quot;/get&quot;)
+    public List&lt;PermissionMap&gt; getAllPermissionMaps() {
+<span class="nc" id="L20">        return pms.getAllPermissionMaps();</span>
+    }
+
+    // 新增權限設定
+    @PostMapping(&quot;/add&quot;)
+    public String addPermissionMap(@RequestBody PermissionMap permissionMap) {
+<span class="nc" id="L26">        return pms.addPermissionMap(permissionMap);</span>
+    }
+
+    // 修改權限設定
+    @PutMapping(&quot;/edit&quot;)
+    public String editPermissionMap(@RequestBody PermissionMap permissionMap) {
+<span class="nc" id="L32">        return pms.updatePermissionMap(permissionMap);</span>
+    }
+
+    // 刪除權限設定
+    @DeleteMapping(&quot;/delete/{id}&quot;)
+    public String deletePermissionMap(@PathVariable int id) {
+<span class="nc" id="L38">        return pms.deletePermissionMap(id);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

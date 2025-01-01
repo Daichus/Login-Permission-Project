@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PermissionService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">classes in demo Coverage Results</a> &gt; <a href="index.source.html" class="el_package">login.permission.project.classes.service</a> &gt; <span class="el_source">PermissionService.java</span></div><h1>PermissionService.java</h1><pre class="source lang-java linenums">package login.permission.project.classes.service;
+
+import jakarta.servlet.http.HttpServletRequest;
+import login.permission.project.classes.model.util.JwtUtil;
+import login.permission.project.classes.model.Permission;
+import login.permission.project.classes.model.util.ResponseUtil;
+import login.permission.project.classes.repository.EmployeeRepository;
+import login.permission.project.classes.repository.PermissionRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+<span class="fc" id="L18">public class PermissionService {</span>
+
+  @Autowired
+  PermissionRepository permissionRepository;
+
+  @Autowired
+  JwtUtil jwtUtil;
+
+  @Autowired
+  EmployeeRepository employeeRepository;
+
+
+  /**
+   * 前端透過傳遞jwt token驗證,
+   * 獲取所有權限,回傳的資料結構為[ {permission_id, permission_name,category, permission_code},{}...]
+   */
+  public ResponseEntity&lt;?&gt; getAllPermission(HttpServletRequest request) {
+    try{
+<span class="nc" id="L36">      jwtUtil.validateRequest(request);</span>
+<span class="nc" id="L37">      List&lt;Permission&gt; permissions = permissionRepository.findAll();</span>
+<span class="nc" id="L38">      return ResponseUtil.success(&quot;獲取權限成功&quot;,permissions);</span>
+<span class="nc" id="L39">    } catch(IllegalArgumentException e) {</span>
+<span class="nc" id="L40">      return ResponseUtil.error(&quot;你沒有獲取所有權限的權力&quot;, HttpStatus.UNAUTHORIZED);</span>
+    }
+  }
+
+  // 測試獲取員工自己的權限
+  public ResponseEntity&lt;?&gt; getPermissionById(HttpServletRequest request, int id) {
+    try{
+<span class="nc" id="L47">      jwtUtil.validateRequest(request);</span>
+<span class="nc" id="L48">      List&lt;String&gt; permissions = employeeRepository.getPermissionById(id);</span>
+<span class="nc" id="L49">      return ResponseUtil.success(&quot;獲取員工本人權限成功&quot;,permissions);</span>
+<span class="nc" id="L50">    } catch(IllegalArgumentException e) {</span>
+<span class="nc" id="L51">      return ResponseUtil.error(&quot;你沒有獲取員工本人所有權限的權力&quot;, HttpStatus.UNAUTHORIZED);</span>
+    }
+  }
+
+
+  /**
+   * 添加Permission的方法,前端需傳遞jwt token供驗證外,需傳遞和Permission物件相同構造的body,但無須傳送id,
+   * 例:{
+   *   permission_name:&quot;Admin&quot;,
+   *   category:&quot;部門管理&quot;,
+   *   permission_code:&quot;dept_read_edit&quot;
+   * }
+   */
+  public ResponseEntity&lt;?&gt; addPermission(Permission permission, HttpServletRequest request) {
+    try{
+<span class="nc" id="L66">      jwtUtil.validateRequest(request);</span>
+<span class="nc" id="L67">      permissionRepository.save(permission);</span>
+<span class="nc" id="L68">      return ResponseUtil.success(&quot;新增權限成功&quot;,permission);</span>
+<span class="nc" id="L69">    } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L70">      return ResponseUtil.error(&quot;你沒有添加權限的權利&quot;,HttpStatus.UNAUTHORIZED);</span>
+    }
+  }
+
+  /**
+   *更新權限的代碼,方法大致與添加類似,只是前端傳遞的資料須包含permission id,結構必須為:
+   *  {
+   *     permission_id: 1
+   *     permission_name:&quot;Admin&quot;,
+   *     category:&quot;部門管理&quot;,
+   *     permission_code:&quot;dept_read_edit&quot;
+   *  }
+   */
+  public ResponseEntity&lt;?&gt; updatePermission(Permission permission, HttpServletRequest request) {
+    try {
+<span class="nc" id="L85">      jwtUtil.validateRequest(request);</span>
+<span class="nc" id="L86">      Optional&lt;Permission&gt; oldPermission = permissionRepository.findById(permission.getPermission_id());</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">      if (oldPermission.isPresent()) {</span>
+<span class="nc" id="L88">        permissionRepository.save(permission);</span>
+<span class="nc" id="L89">        return ResponseUtil.success(&quot;更新權限成功&quot;, permission);</span>
+      } else {
+<span class="nc" id="L91">        return ResponseUtil.error(&quot;找不到指定id的權限&quot;, HttpStatus.NOT_FOUND);</span>
+      }
+<span class="nc" id="L93">    } catch(IllegalArgumentException e) {</span>
+<span class="nc" id="L94">      return ResponseUtil.error(&quot;你沒有修改權限的權利&quot;,HttpStatus.UNAUTHORIZED);</span>
+    }
+  }
+
+  //delete
+  public String deletePermission(int id) {
+<span class="nc" id="L100">    permissionRepository.deleteById(id);</span>
+<span class="nc" id="L101">    return &quot;刪除權限成功&quot;;</span>
+  }
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

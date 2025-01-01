@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RoleModelTest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">classes in demo Coverage Results</a> &gt; <a href="index.source.html" class="el_package">login.permission.project.classes.model</a> &gt; <span class="el_source">RoleModelTest.java</span></div><h1>RoleModelTest.java</h1><pre class="source lang-java linenums">package login.permission.project.classes.model;
+
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+import java.util.HashSet;
+import java.util.Set;
+
+/**
+ * Role 模型的單元測試類
+ * 測試 Role 實體的基本功能、關聯關係和資料完整性
+ */
+<span class="fc" id="L12">public class RoleModelTest {</span>
+
+  /**
+   * 測試 Role 實體的建構函數和基本屬性
+   */
+  @Test
+  public void testRoleConstructorAndGetters() {
+    // 建立測試資料
+<span class="fc" id="L20">    Set&lt;Permission&gt; permissions = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L21">    permissions.add(new Permission(1, &quot;READ&quot;, &quot;category&quot;, &quot;description&quot;));</span>
+
+<span class="fc" id="L23">    Role role = new Role(1, &quot;ADMIN&quot;, permissions);</span>
+
+    // 驗證基本屬性
+<span class="fc" id="L26">    assertEquals(1, role.getRole_id());</span>
+<span class="fc" id="L27">    assertEquals(&quot;ADMIN&quot;, role.getRole());</span>
+<span class="fc" id="L28">    assertNotNull(role.getPermissions());</span>
+<span class="fc" id="L29">    assertEquals(1, role.getPermissions().size());</span>
+<span class="fc" id="L30">  }</span>
+
+  /**
+   * 測試 Role 實體的 setter 方法
+   */
+  @Test
+  public void testRoleSetters() {
+<span class="fc" id="L37">    Role role = new Role();</span>
+<span class="fc" id="L38">    role.setRole_id(1);</span>
+<span class="fc" id="L39">    role.setRole(&quot;USER&quot;);</span>
+
+<span class="fc" id="L41">    Set&lt;Permission&gt; permissions = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L42">    permissions.add(new Permission(1, &quot;WRITE&quot;, &quot;category&quot;, &quot;description&quot;));</span>
+<span class="fc" id="L43">    role.setPermissions(permissions);</span>
+
+    // 驗證設置的值
+<span class="fc" id="L46">    assertEquals(1, role.getRole_id());</span>
+<span class="fc" id="L47">    assertEquals(&quot;USER&quot;, role.getRole());</span>
+<span class="fc" id="L48">    assertEquals(1, role.getPermissions().size());</span>
+<span class="fc" id="L49">  }</span>
+
+  /**
+   * 測試權限集合的操作
+   */
+  @Test
+  public void testPermissionsCollection() {
+<span class="fc" id="L56">    Role role = new Role();</span>
+<span class="fc" id="L57">    Set&lt;Permission&gt; permissions = new HashSet&lt;&gt;();</span>
+
+    // 添加權限
+<span class="fc" id="L60">    permissions.add(new Permission(1, &quot;READ&quot;, &quot;category&quot;, &quot;description&quot;));</span>
+<span class="fc" id="L61">    permissions.add(new Permission(2, &quot;WRITE&quot;, &quot;category&quot;, &quot;description&quot;));</span>
+<span class="fc" id="L62">    role.setPermissions(permissions);</span>
+
+    // 驗證權限集合
+<span class="fc" id="L65">    assertEquals(2, role.getPermissions().size());</span>
+<span class="fc" id="L66">    assertTrue(role.getPermissions().stream()</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">            .anyMatch(p -&gt; p.getPermission_id() == 1));</span>
+<span class="fc" id="L68">    assertTrue(role.getPermissions().stream()</span>
+<span class="pc bpc" id="L69" title="1 of 2 branches missed.">            .anyMatch(p -&gt; p.getPermission_id() == 2));</span>
+<span class="fc" id="L70">  }</span>
+
+  /**
+   * 測試 equals 和 hashCode 方法（由 Lombok @Data 生成）
+   */
+  @Test
+  public void testEqualsAndHashCode() {
+<span class="fc" id="L77">    Role role1 = new Role(1, &quot;ADMIN&quot;, new HashSet&lt;&gt;());</span>
+<span class="fc" id="L78">    Role role2 = new Role(1, &quot;ADMIN&quot;, new HashSet&lt;&gt;());</span>
+<span class="fc" id="L79">    Role role3 = new Role(2, &quot;USER&quot;, new HashSet&lt;&gt;());</span>
+
+    // 測試相等性
+<span class="fc" id="L82">    assertEquals(role1, role2);</span>
+<span class="fc" id="L83">    assertNotEquals(role1, role3);</span>
+
+    // 測試 HashCode
+<span class="fc" id="L86">    assertEquals(role1.hashCode(), role2.hashCode());</span>
+<span class="fc" id="L87">    assertNotEquals(role1.hashCode(), role3.hashCode());</span>
+<span class="fc" id="L88">  }</span>
+
+  /**
+   * 測試 toString 方法（由 Lombok @Data 生成）
+   */
+  @Test
+  public void testToString() {
+<span class="fc" id="L95">    Role role = new Role(1, &quot;ADMIN&quot;, new HashSet&lt;&gt;());</span>
+<span class="fc" id="L96">    String toString = role.toString();</span>
+
+    // 驗證 toString 包含所有重要欄位
+<span class="fc" id="L99">    assertTrue(toString.contains(&quot;role_id=1&quot;));</span>
+<span class="fc" id="L100">    assertTrue(toString.contains(&quot;role=ADMIN&quot;));</span>
+<span class="fc" id="L101">    assertTrue(toString.contains(&quot;permissions=[]&quot;));</span>
+<span class="fc" id="L102">  }</span>
+
+  /**
+   * 測試空構造函數（由 Lombok @NoArgsConstructor 生成）
+   */
+  @Test
+  public void testNoArgsConstructor() {
+<span class="fc" id="L109">    Role role = new Role();</span>
+
+    // 驗證默認值
+<span class="fc" id="L112">    assertEquals(0, role.getRole_id());</span>
+<span class="fc" id="L113">    assertNull(role.getRole());</span>
+<span class="fc" id="L114">    assertNotNull(role.getPermissions());</span>
+<span class="fc" id="L115">    assertTrue(role.getPermissions().isEmpty());</span>
+<span class="fc" id="L116">  }</span>
+
+  /**
+   * 測試添加和移除權限的操作
+   */
+  @Test
+  public void testAddAndRemovePermissions() {
+<span class="fc" id="L123">    Role role = new Role();</span>
+<span class="fc" id="L124">    Permission permission1 = new Permission(1, &quot;READ&quot;, &quot;category&quot;, &quot;description&quot;);</span>
+<span class="fc" id="L125">    Permission permission2 = new Permission(2, &quot;WRITE&quot;, &quot;category&quot;, &quot;description&quot;);</span>
+
+    // 測試添加權限
+<span class="fc" id="L128">    role.getPermissions().add(permission1);</span>
+<span class="fc" id="L129">    assertEquals(1, role.getPermissions().size());</span>
+<span class="fc" id="L130">    assertTrue(role.getPermissions().contains(permission1));</span>
+
+    // 測試添加另一個權限
+<span class="fc" id="L133">    role.getPermissions().add(permission2);</span>
+<span class="fc" id="L134">    assertEquals(2, role.getPermissions().size());</span>
+
+    // 測試移除權限
+<span class="fc" id="L137">    role.getPermissions().remove(permission1);</span>
+<span class="fc" id="L138">    assertEquals(1, role.getPermissions().size());</span>
+<span class="fc" id="L139">    assertFalse(role.getPermissions().contains(permission1));</span>
+<span class="fc" id="L140">    assertTrue(role.getPermissions().contains(permission2));</span>
+<span class="fc" id="L141">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

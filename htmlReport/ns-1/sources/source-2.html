@@ -5,7 +5,7 @@
 <html id="htmlId">
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
-  <title>Coverage Report > DepartmentService</title>
+  <title>Coverage Report > JwtService</title>
   <style type="text/css">
     @import "../../css/coverage.css";
     @import "../../css/idea.min.css";
@@ -19,10 +19,10 @@
 <div class="breadCrumbs">
 Current scope:     <a href="../../index.html">all classes</a>
     <span class="separator">|</span>
-    <a href="../index.html">login.permission.project.classes.service</a>
+    <a href="../index.html">login.permission.project.classes</a>
 </div>
 
-<h1>Coverage Summary for Class: DepartmentService (login.permission.project.classes.service)</h1>
+<h1>Coverage Summary for Class: JwtService (login.permission.project.classes)</h1>
 
 <table class="coverageStats">
 <tr>
@@ -45,37 +45,37 @@ Current scope:     <a href="../../index.html">all classes</a>
 </th>
 </tr>
 <tr>
-  <td class="name">DepartmentService</td>
+  <td class="name">JwtService</td>
 <td class="coverageStat">
   <span class="percent">
-    0%
+    100%
   </span>
   <span class="absValue">
-    (0/1)
+    (1/1)
   </span>
 </td>
 <td class="coverageStat">
   <span class="percent">
-    0%
+    100%
   </span>
   <span class="absValue">
-    (0/5)
+    (4/4)
   </span>
 </td>
 <td class="coverageStat">
   <span class="percent">
-    0%
+    100%
   </span>
   <span class="absValue">
-    (0/2)
+    (4/4)
   </span>
 </td>
 <td class="coverageStat">
   <span class="percent">
-    0%
+    100%
   </span>
   <span class="absValue">
-    (0/13)
+    (27/27)
   </span>
 </td>
 </tr>
@@ -87,49 +87,110 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 
 <pre>
-<code class="sourceCode" id="sourceCode">&nbsp;package login.permission.project.classes.service;
+<code class="sourceCode" id="sourceCode">&nbsp;package login.permission.project.classes;
+&nbsp;
+&nbsp;import io.jsonwebtoken.*;
+&nbsp;import io.jsonwebtoken.io.Decoders;
+&nbsp;import io.jsonwebtoken.security.Keys;
+&nbsp;import jakarta.servlet.http.HttpServletRequest;
+&nbsp;import org.springframework.stereotype.Component;
+&nbsp;import java.security.Key;
+&nbsp;import java.util.*;
 &nbsp;
 &nbsp;
-&nbsp;import login.permission.project.classes.model.Department;
-&nbsp;import org.springframework.beans.factory.annotation.Autowired;
-&nbsp;import org.springframework.stereotype.Service;
-&nbsp;import login.permission.project.classes.repository.DepartmentRepository;
+&nbsp;/**
+&nbsp; * JwtService 類負責處理與 JWT Token相關的操作 。
 &nbsp;
-&nbsp;import java.util.List;
+&nbsp; * 本類主要功能包括：
+&nbsp; * 1. 生成 JWT Token，包含自定義的 Payload。
+&nbsp; * 2. 驗證前端請求中的 JWT Token，並提取 Payload 部分。
+&nbsp; * 3. 提供簽名密鑰生成方法，確保 JWT Token 的安全性。
 &nbsp;
-&nbsp;@Service
-<b class="nc">&nbsp;public class DepartmentService {</b>
+&nbsp; * 使用場景：
+&nbsp; * - 生成 Token 時，後端可將必要的使用者資訊（如登錄紀錄 ID、權限碼等）封裝至 Token 的 Payload，並返回給前端。
+&nbsp; * - 驗證 Token 時，後端可檢查 Token 的合法性及其內容，並提取相關的使用者資訊進行後續操作。
 &nbsp;
-&nbsp;    @Autowired
-&nbsp;    DepartmentRepository dr;
+&nbsp; * 注意：
+&nbsp; * - 簽名密鑰（KEY）僅能由後端擁有，不會暴露給前端或第三方。
+&nbsp; * - Token 的過期時間由 EXPIRATION_TIME 定義，需根據應用場景調整。
+&nbsp; */
+&nbsp;@Component
+<b class="fc">&nbsp;public class JwtService {</b>
 &nbsp;
-&nbsp;    public List&lt;Department&gt; getAllDepartments() {
-<b class="nc">&nbsp;        return dr.findAll();</b>
+&nbsp;    /**
+&nbsp;     * 用途：加密用字串
+&nbsp;     */
+&nbsp;    private static final String KEY = &quot;5gk4g4j5i32k7ru8auu4m4ul4t6su3ah9j14i2l4g45k4g4bu4ke7rul4kmpv4cl391j4cl3&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 用途：設定Token有效時間, 以毫秒為單位,每小時使用者需重新登錄
+&nbsp;     */
+&nbsp;    private static final long EXPIRATION_TIME = 3_600_000;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 用途：產生JWT Token
+&nbsp;     * 說明：
+&nbsp;     * 1.JWT包含Header,Payload,Signature三個部分
+&nbsp;     * 2.方法中需要手動設定JWT的Payload以定義要傳送回前端的訊息
+&nbsp;     */
+&nbsp;    public String generateToken(String employeeId,int recordId) {
+&nbsp;
+<b class="fc">&nbsp;        Map&lt;String, Object&gt; userData = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;        userData.put(&quot;loginRecordId&quot;,recordId);</b>
+<b class="fc">&nbsp;        userData.put(&quot;permissionCode&quot;,new String[]{});</b>
+&nbsp;
+<b class="fc">&nbsp;        Date expDate = new Date(System.currentTimeMillis() + EXPIRATION_TIME);</b>
+&nbsp;
+<b class="fc">&nbsp;        return Jwts.builder()</b>
+<b class="fc">&nbsp;                .setClaims(userData)</b>
+<b class="fc">&nbsp;                .setIssuer(&quot;Fcu 113-1 CSIE Team 2&quot;)</b>
+<b class="fc">&nbsp;                .setSubject(employeeId )</b>
+<b class="fc">&nbsp;                .setIssuedAt(new Date())</b>
+<b class="fc">&nbsp;                .setExpiration(expDate)</b>
+<b class="fc">&nbsp;                .signWith(getSigningKey(), SignatureAlgorithm.HS256)</b>
+<b class="fc">&nbsp;                .compact();</b>
 &nbsp;    }
 &nbsp;
-&nbsp;    public String addDepartment(Department department) {
-<b class="nc">&nbsp;        dr.save(department);</b>
-<b class="nc">&nbsp;        return String.format(&quot;新增部門成功\n部門名稱: %s\n部門id: %s\n部門代號: %s&quot;,</b>
-<b class="nc">&nbsp;                department.getDepartment_name(),</b>
-<b class="nc">&nbsp;                department.getDepartment_id(),</b>
-<b class="nc">&nbsp;                department.getDepartment_code());</b>
+&nbsp;    // 獲取簽名的 Key,Key僅為後端所擁有
+&nbsp;    private Key getSigningKey() {
+<b class="fc">&nbsp;        return Keys.hmacShaKeyFor(Decoders.BASE64.decode(KEY));</b>
 &nbsp;    }
 &nbsp;
-&nbsp;    public String updateDepartment (Department department) {
-<b class="nc">&nbsp;        if(department != null) {</b>
-<b class="nc">&nbsp;            dr.save(department);</b>
-<b class="nc">&nbsp;            return &quot;修改部門資訊完成&quot;;</b>
-&nbsp;        } else {
-<b class="nc">&nbsp;            return &quot;更新部門資訊失敗&quot;;</b>
+&nbsp;    /**
+&nbsp;     * 抽取使用者傳過來的
+&nbsp;     * token中的payload部分並進行驗證
+&nbsp;     * 並還原成Claims物件
+&nbsp;     */
+&nbsp;    public Claims verifyToken(HttpServletRequest request) {
+&nbsp;        Claims claims;
+&nbsp;        try{
+<b class="fc">&nbsp;            String authHeader = request.getHeader(&quot;Authorization&quot;);</b>
+<b class="fc">&nbsp;            if (authHeader == null || !authHeader.startsWith(&quot;Bearer &quot;)) {</b>
+<b class="fc">&nbsp;                return null;</b>
+&nbsp;            }
+<b class="fc">&nbsp;            String token = authHeader.substring(7);</b>
+<b class="fc">&nbsp;            claims =  Jwts.parserBuilder()</b>
+<b class="fc">&nbsp;                    .setSigningKey(getSigningKey())</b>
+<b class="fc">&nbsp;                    .requireIssuer(&quot;Fcu 113-1 CSIE Team 2&quot;)</b>
+<b class="fc">&nbsp;                    .build()</b>
+<b class="fc">&nbsp;                    .parseClaimsJws(token)</b>
+<b class="fc">&nbsp;                    .getBody();</b>
+<b class="fc">&nbsp;        } catch(JwtException e) {</b>
+<b class="fc">&nbsp;            claims =  null;</b>
 &nbsp;        }
+<b class="fc">&nbsp;        return claims;</b>
 &nbsp;    }
 &nbsp;
-&nbsp;    public String deleteDepartment (int id) {
-<b class="nc">&nbsp;        dr.deleteById(id);</b>
-<b class="nc">&nbsp;        return &quot;刪除部門成功&quot;;</b>
-&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
 &nbsp;
 &nbsp;}
+&nbsp;
+&nbsp;
+&nbsp;
 </code>
 </pre>
 </div>
@@ -153,7 +214,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 <div class="footer">
     
-    <div style="float:right;">generated on 2024-12-31 09:49</div>
+    <div style="float:right;">generated on 2025-01-02 02:53</div>
 </div>
 </body>
 </html>

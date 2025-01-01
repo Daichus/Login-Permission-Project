@@ -1,0 +1,123 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > Unit</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">login.permission.project.classes.model</a>
+</div>
+
+<h1>Coverage Summary for Class: Unit (login.permission.project.classes.model)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">Unit$HibernateInstantiator$C9blp7iV</td>
+  </tr>
+  <tr>
+    <td class="name">Unit$HibernateInstantiator$FPer6VpN</td>
+  </tr>
+  <tr>
+    <td class="name">Unit$HibernateInstantiator$N5XtoNhj</td>
+  </tr>
+  <tr>
+    <td class="name">Unit$HibernateProxy$banI5IX5</td>
+  </tr>
+  <tr>
+    <td class="name">Unit$HibernateProxy$mbVgKDdX</td>
+  </tr>
+  <tr>
+    <td class="name">Unit$HibernateProxy$RIWbw0x1</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package login.permission.project.classes.model;
+&nbsp;
+&nbsp;
+&nbsp;import jakarta.persistence.*;
+&nbsp;import lombok.AllArgsConstructor;
+&nbsp;import lombok.Data;
+&nbsp;import lombok.NoArgsConstructor;
+&nbsp;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;@Entity
+&nbsp;@AllArgsConstructor
+&nbsp;@NoArgsConstructor
+&nbsp;@Data
+&nbsp;@Table(name=&quot;Unit&quot;)
+&nbsp;public class Unit {
+&nbsp;
+&nbsp;    @Id
+&nbsp;    @Column(name=&quot;unit_id&quot;)
+&nbsp;    private int unit_id;
+&nbsp;
+&nbsp;    @Column(name=&quot;unit_name&quot;)
+&nbsp;    private String unit_name;
+&nbsp;
+&nbsp;    @Column(name=&quot;unit_code&quot;)
+&nbsp;    private String unit_code;
+&nbsp;
+&nbsp;    @Column(name = &quot;department_id&quot;)
+&nbsp;    private Integer department_id;
+&nbsp;
+&nbsp;    @ManyToOne
+&nbsp;    @JoinColumn(name = &quot;department_id&quot;, insertable = false, updatable = false)
+&nbsp;    private Department department;
+&nbsp;
+&nbsp;    @OneToMany(mappedBy = &quot;unit&quot;)
+&nbsp;    private Set&lt;Position&gt; positions;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-01-02 02:53</div>
+</div>
+</body>
+</html>

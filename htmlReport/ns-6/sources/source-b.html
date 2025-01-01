@@ -1,0 +1,159 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > StatusService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">login.permission.project.classes.service</a>
+</div>
+
+<h1>Coverage Summary for Class: StatusService (login.permission.project.classes.service)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">StatusService</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    20%
+  </span>
+  <span class="absValue">
+    (1/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    8.3%
+  </span>
+  <span class="absValue">
+    (1/12)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package login.permission.project.classes.service;
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;import login.permission.project.classes.model.Status;
+&nbsp;import login.permission.project.classes.repository.StatusRepository;
+&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;@Service
+<b class="fc">&nbsp;public class StatusService {</b>
+&nbsp;
+&nbsp;    @Autowired
+&nbsp;    StatusRepository sr;
+&nbsp;
+&nbsp;    public List&lt;Status&gt; getAllStatus() {
+<b class="nc">&nbsp;        return sr.findAll();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String addStatus(Status status) {
+<b class="nc">&nbsp;        sr.save(status);</b>
+<b class="nc">&nbsp;        return String.format(&quot;新增員工狀態成功\n狀態名稱: %s\n狀態id: %s&quot;,</b>
+<b class="nc">&nbsp;                status.getName(),</b>
+<b class="nc">&nbsp;                status.getStatus_id());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String updateStatus (Status status) {
+<b class="nc">&nbsp;        if(status != null) {</b>
+<b class="nc">&nbsp;            sr.save(status);</b>
+<b class="nc">&nbsp;            return &quot;修改員工狀態完成&quot;;</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            return &quot;更新員工狀態失敗&quot;;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;    public String deleteStatus (int id) {
+<b class="nc">&nbsp;        sr.deleteById(id);</b>
+<b class="nc">&nbsp;        return &quot;刪除員工狀態成功&quot;;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-01-02 02:53</div>
+</div>
+</body>
+</html>

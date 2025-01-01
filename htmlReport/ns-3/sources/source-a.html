@@ -1,0 +1,133 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > Role</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">login.permission.project.classes.model</a>
+</div>
+
+<h1>Coverage Summary for Class: Role (login.permission.project.classes.model)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">Role$HibernateInstantiator$0cuA8teh</td>
+  </tr>
+  <tr>
+    <td class="name">Role$HibernateInstantiator$frfXunIf</td>
+  </tr>
+  <tr>
+    <td class="name">Role$HibernateInstantiator$Uk9awKyt</td>
+  </tr>
+  <tr>
+    <td class="name">Role$HibernateProxy$3PgpP9cz</td>
+  </tr>
+  <tr>
+    <td class="name">Role$HibernateProxy$4oQjNf6E</td>
+  </tr>
+  <tr>
+    <td class="name">Role$HibernateProxy$GATpXGtp</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package login.permission.project.classes.model;
+&nbsp;
+&nbsp;
+&nbsp;import jakarta.persistence.*;
+&nbsp;import lombok.AllArgsConstructor;
+&nbsp;import lombok.Data;
+&nbsp;import lombok.NoArgsConstructor;
+&nbsp;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;@Entity
+&nbsp;@AllArgsConstructor
+&nbsp;@NoArgsConstructor
+&nbsp;@Data
+&nbsp;@Table(name=&quot;Role&quot;)
+&nbsp;public class Role {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 角色id,作為對對多
+&nbsp;     */
+&nbsp;    @Id
+&nbsp;    @GeneratedValue(strategy = GenerationType.IDENTITY)
+&nbsp;    @Column(name=&quot;role_id&quot;)
+&nbsp;    private int role_id;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 僅供標示角色名稱用
+&nbsp;     */
+&nbsp;    @Column(name=&quot;Role&quot;)
+&nbsp;    private String role;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * 由jpa自動生成關聯表,對應permission表
+&nbsp;     */
+&nbsp;    @ManyToMany(fetch = FetchType.EAGER)
+&nbsp;    @JoinTable(name = &quot;RolePermissionMap&quot;,
+&nbsp;               joinColumns = @JoinColumn(name = &quot;role_id&quot;),
+&nbsp;               inverseJoinColumns = @JoinColumn(name = &quot;permission_id&quot;)
+&nbsp;    )
+&nbsp;    private Set&lt;Permission&gt; permissions = new HashSet&lt;&gt;();
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-01-02 02:53</div>
+</div>
+</body>
+</html>

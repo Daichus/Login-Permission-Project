@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JwtAuthFilter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">classes in demo Coverage Results</a> &gt; <a href="index.source.html" class="el_package">login.permission.project.classes.security</a> &gt; <span class="el_source">JwtAuthFilter.java</span></div><h1>JwtAuthFilter.java</h1><pre class="source lang-java linenums">package login.permission.project.classes.security;
+
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import login.permission.project.classes.JwtService;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.filter.OncePerRequestFilter;
+import io.jsonwebtoken.Claims;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class JwtAuthFilter extends OncePerRequestFilter {
+  private final JwtService jwtService;
+
+<span class="fc" id="L21">  public JwtAuthFilter(JwtService jwtService) {</span>
+<span class="fc" id="L22">    this.jwtService = jwtService;</span>
+<span class="fc" id="L23">  }</span>
+
+  @Override
+  protected void doFilterInternal(
+          HttpServletRequest request,
+          HttpServletResponse response,
+          FilterChain filterChain
+  ) throws ServletException, IOException {
+    // 首先檢查是否有 Authorization header
+<span class="fc" id="L32">    String authHeader = request.getHeader(&quot;Authorization&quot;);</span>
+<span class="pc bpc" id="L33" title="1 of 4 branches missed.">    if (authHeader == null || !authHeader.startsWith(&quot;Bearer &quot;)) {</span>
+<span class="fc" id="L34">      response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);</span>
+<span class="fc" id="L35">      response.setContentType(&quot;application/json&quot;);</span>
+<span class="fc" id="L36">      response.getWriter().write(&quot;{\&quot;message\&quot;:\&quot;Token not provided.\&quot;}&quot;);</span>
+<span class="fc" id="L37">      return;  // 直接返回，不執行 filterChain</span>
+    }
+
+<span class="fc" id="L40">    Claims claims = jwtService.verifyToken(request);</span>
+
+<span class="fc bfc" id="L42" title="All 2 branches covered.">    if (claims == null) {</span>
+<span class="fc" id="L43">      response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);</span>
+<span class="fc" id="L44">      response.setContentType(&quot;application/json&quot;);</span>
+<span class="fc" id="L45">      response.getWriter().write(&quot;{\&quot;message\&quot;:\&quot;Invalid token.\&quot;}&quot;);</span>
+<span class="fc" id="L46">      return;  // 直接返回，不執行 filterChain</span>
+    }
+
+<span class="fc" id="L49">    List&lt;String&gt; permissions = (List&lt;String&gt;) claims.get(&quot;permissionCode&quot;);</span>
+
+<span class="fc" id="L51">    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(</span>
+<span class="fc" id="L52">            claims.getSubject(),</span>
+            null,
+<span class="fc" id="L54">            permissions.stream()</span>
+<span class="fc" id="L55">                    .map(SimpleGrantedAuthority::new)</span>
+<span class="fc" id="L56">                    .collect(Collectors.toList())</span>
+    );
+
+<span class="fc" id="L59">    SecurityContextHolder.getContext().setAuthentication(authentication);</span>
+<span class="fc" id="L60">    filterChain.doFilter(request, response);</span>
+<span class="fc" id="L61">  }</span>
+
+  @Override
+  protected boolean shouldNotFilter(HttpServletRequest request) {
+<span class="fc" id="L65">    String path = request.getServletPath();</span>
+<span class="pc bpc" id="L66" title="1 of 2 branches missed.">    return path.equals(&quot;/employee/test/login&quot;) ||</span>
+<span class="pc bpc" id="L67" title="1 of 2 branches missed.">            path.startsWith(&quot;/error&quot;);</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -166,19 +166,19 @@ public class LoginRecordControllerTest {
             .andExpect(content().string("Unauthorized: Full authentication is required to access this resource"));
   }
 
-//  /**
-//   * 測試：使用無效 Token 訪問
-//   */
-//  @Test
-//  public void whenGetAllLoginRecordsWithInvalidToken_thenStatus401() throws Exception {
-//    when(jwtService.isTokenValid(any(HttpServletRequest.class))).thenReturn(null);
-//
-//    mvc.perform(get("/api/loginRecord/get")
-//                    .header("Authorization", "Bearer invalid-token"))
-//            .andDo(print())
-//            .andExpect(status().isUnauthorized())
-//            .andExpect(content().string("Unauthorized: Invalid Token"));
-//
-//  }
+  /**
+   * 測試：使用無效 Token 訪問
+   */
+  @Test
+  public void whenGetAllLoginRecordsWithInvalidToken_thenStatus401() throws Exception {
+    when(jwtService.verifyToken(any(HttpServletRequest.class))).thenReturn(null);
+
+    mvc.perform(get("/api/loginRecord/get")
+                    .header("Authorization", "Bearer invalid-token"))
+            .andDo(print())
+            .andExpect(status().isUnauthorized())
+            .andExpect(content().string("Unauthorized: Invalid Token"));
+
+  }
 
 }
