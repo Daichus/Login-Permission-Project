@@ -170,6 +170,12 @@ public class EmployeeService {
      */
     public ResponseEntity<?> setEmployeeRole (EmployeeRoleDto dto, HttpServletRequest request) {
        try {
+           //檢查RoleId符合格式與否
+           String error = checkRoleDtoId(dto);
+           if (error != null) {
+               return ResponseUtil.error(error, HttpStatus.BAD_REQUEST);
+           }
+
            jwtUtil.validateRequest(request);
            Optional<Employee> employeeOptional = er.findById(dto.getEmployee_id());
            if(employeeOptional.isPresent()) {
@@ -187,6 +193,18 @@ public class EmployeeService {
        } catch (IllegalArgumentException e) {
            return ResponseUtil.error("你沒有設定角色的權限",HttpStatus.UNAUTHORIZED);
        }
+    }
+
+    private String checkRoleDtoId (EmployeeRoleDto dto) {
+            if (dto.getRoleIds() == null) {
+                return "角色ID不能為空";
+            }
+            for (String roleId : dto.getRoleIds()) {
+                if (!roleId.matches("\\d+")) {
+                    return "角色ID格式只能是數字且不得包含負號: " + roleId;
+                }
+            }
+            return null;
     }
 
 

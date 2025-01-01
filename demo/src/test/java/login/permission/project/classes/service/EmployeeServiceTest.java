@@ -11,6 +11,8 @@ import login.permission.project.classes.repository.RoleRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -119,7 +121,7 @@ class EmployeeServiceTest {
 
     @Test
     @DisplayName("測試驗證Jwt token不通過的情形")
-    void testSetEmployeeId_InvalidToken() {
+    void testSetEmployeeRole_InvalidToken() {
         EmployeeRoleDto dto = new EmployeeRoleDto();
         dto.setEmployee_id(1);
         dto.setRoleIds(new String[]{"1", "2"});
@@ -131,6 +133,29 @@ class EmployeeServiceTest {
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         assertNotNull(response.getBody());
         System.out.println(response.getBody());
+    }
+
+    @ParameterizedTest
+    @DisplayName("測驗Role Id格式錯誤的情形")
+    @CsvSource({
+            "'1,abc,3'",
+            "'1,-2,3'",
+            "'-1,-2,-3'",
+            "'#1,2,3'",
+            "'1 1,2,3'",
+            "''"
+    })
+    void testSetEmployeeRole_InvalidRoleId (String roleIdsCsv) {
+        EmployeeRoleDto dto = new EmployeeRoleDto();
+        dto.setEmployee_id(1);
+        if (!roleIdsCsv.isEmpty()) {
+            dto.setRoleIds(roleIdsCsv.split(","));
+        } else {
+            dto.setRoleIds(null);
+        }
+        ResponseEntity<?> response = employeeService.setEmployeeRole(dto, mock(HttpServletRequest.class));
+        System.out.println("Response Body: " + response.getBody());
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
 
 
