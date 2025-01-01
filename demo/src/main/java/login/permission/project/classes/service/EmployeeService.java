@@ -180,7 +180,7 @@ public class EmployeeService {
                Employee employee = employeeOptional.get();
                employee.setRoles(roles);
                er.save(employee);
-               return ResponseUtil.error("設定員工角色成功",HttpStatus.OK);
+               return ResponseUtil.success("設定員工角色成功",null);
            } else {
                return ResponseUtil.error("找不到指定id的員工",HttpStatus.NOT_FOUND);
            }
