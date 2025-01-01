@@ -186,7 +186,7 @@ class LoginRecordServiceTest {
   }
 
   /**
-   *
+   * 驗證在 JWT Token 解析失敗或 Claims 無效時，系統能正確返回錯誤回應。
    */
   @Test
   void getRecordByPermissionCode_InvalidClaims() {
