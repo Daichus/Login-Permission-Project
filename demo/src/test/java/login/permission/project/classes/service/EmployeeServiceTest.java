@@ -621,7 +621,7 @@ class EmployeeServiceTest {
   void testAddEmployee_FullDataValidation() {
     // Arrange
     Employee employee = new Employee();
-    employee.setName("Complete Employee");
+    employee.setName("TestCompleteEmployee");
     employee.setEmail("complete@example.com");
     employee.setPhoneNumber("0912345678");
     employee.setStatus_id(1);
@@ -642,7 +642,7 @@ class EmployeeServiceTest {
     assertEquals(21, employee.getEmployee_id());
     assertNotNull(employee.getVerificationToken());
     assertFalse(employee.isEnabled());
-    assertEquals("Complete Employee", employee.getName());
+    assertEquals("TestCompleteEmployee", employee.getName());
     assertEquals("complete@example.com", employee.getEmail());
     assertEquals("0912345678", employee.getPhoneNumber());
     assertEquals(Integer.valueOf(1), employee.getStatus_id());
@@ -693,7 +693,7 @@ class EmployeeServiceTest {
   /**
    *
    * 測試驗證碼
-   * 無效的Token
+   * 無效的Token(驗證碼)
    */
   @Test
   void testVerifyAccount_InvalidToken() {
