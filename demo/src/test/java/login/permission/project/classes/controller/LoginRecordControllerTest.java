@@ -140,7 +140,7 @@ public class LoginRecordControllerTest {
     Claims claims = new DefaultClaims();
     claims.put("permissionCode", Arrays.asList("login_rec_read"));
 
-    when(jwtService.isTokenValid(any(HttpServletRequest.class))).thenReturn(claims);
+    when(jwtService.verifyToken(any(HttpServletRequest.class))).thenReturn(claims);
 
     ResponseEntity<String> response = ResponseEntity.ok("權限驗證成功");
 

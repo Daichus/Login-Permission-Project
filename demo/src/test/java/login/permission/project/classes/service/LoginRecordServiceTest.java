@@ -74,7 +74,7 @@ class LoginRecordServiceTest {
   void getRecordByPermissionCode_WithPermission() {
     // Arrange
     Claims claims = mock(Claims.class);
-    when(jwtService.isTokenValid(request)).thenReturn(claims);
+    when(jwtService.verifyToken(request)).thenReturn(claims);
     when(claims.get("permissionCode", List.class)).thenReturn(List.of("login_rec_read"));
 
     List<LoginRecord> records = List.of(
@@ -99,7 +99,7 @@ class LoginRecordServiceTest {
   void getRecordByPermissionCode_WithInvalidPermission() {
     // Arrange
     Claims claims = mock(Claims.class);
-    when(jwtService.isTokenValid(request)).thenReturn(claims);
+    when(jwtService.verifyToken(request)).thenReturn(claims);
     when(claims.get("permissionCode", List.class)).thenReturn(List.of("other_permission"));
     when(claims.getSubject()).thenReturn("1");
 
@@ -126,7 +126,7 @@ class LoginRecordServiceTest {
   void getRecordByPermissionCode_WithoutPermission() {
     // Arrange
     Claims claims = mock(Claims.class);
-    when(jwtService.isTokenValid(request)).thenReturn(claims);
+    when(jwtService.verifyToken(request)).thenReturn(claims);
     when(claims.get("permissionCode", List.class)).thenReturn(List.of("other_permission"));
     when(claims.getSubject()).thenReturn("1");
 
@@ -152,7 +152,7 @@ class LoginRecordServiceTest {
   void getRecordByPermissionCode_EmptyPermissionCode() {
     // Arrange
     Claims claims = mock(Claims.class);
-    when(jwtService.isTokenValid(request)).thenReturn(claims);
+    when(jwtService.verifyToken(request)).thenReturn(claims);
     when(claims.get("permissionCode", List.class)).thenReturn(List.of());
 
     // Act
@@ -172,7 +172,7 @@ class LoginRecordServiceTest {
   void getRecordByPermissionCode_NullSubject() {
     // Arrange
     Claims claims = mock(Claims.class);
-    when(jwtService.isTokenValid(request)).thenReturn(claims);
+    when(jwtService.verifyToken(request)).thenReturn(claims);
     when(claims.get("permissionCode", List.class)).thenReturn(List.of("other_permission"));
     when(claims.getSubject()).thenReturn(null);
 
@@ -191,7 +191,7 @@ class LoginRecordServiceTest {
   @Test
   void getRecordByPermissionCode_InvalidClaims() {
     // Arrange
-    when(jwtService.isTokenValid(request)).thenReturn(null);
+    when(jwtService.verifyToken(request)).thenReturn(null);
 
     // Act
     ResponseEntity<?> response = loginRecordService.getRecordByPermissionCode(request);
@@ -210,7 +210,7 @@ class LoginRecordServiceTest {
   void getRecordByPermissionCode_WithMultipleValidPermissions() {
     // Arrange
     Claims claims = mock(Claims.class);
-    when(jwtService.isTokenValid(request)).thenReturn(claims);
+    when(jwtService.verifyToken(request)).thenReturn(claims);
     when(claims.get("permissionCode", List.class)).thenReturn(List.of("login_rec_update", "other_permission"));
     when(claims.getSubject()).thenReturn("1"); // 確保有有效的 subject
 
@@ -237,7 +237,7 @@ class LoginRecordServiceTest {
   void getRecordByPermissionCode_WithMultipleInvalidPermissions() {
     // Arrange
     Claims claims = mock(Claims.class);
-    when(jwtService.isTokenValid(request)).thenReturn(claims);
+    when(jwtService.verifyToken(request)).thenReturn(claims);
     when(claims.get("permissionCode", List.class)).thenReturn(List.of("invalid_permission1", "invalid_permission2"));
     when(claims.getSubject()).thenReturn("1");
 
@@ -368,7 +368,7 @@ class LoginRecordServiceTest {
   void updateLogoutTime_Success() {
     // Arrange
     Claims claims = mock(Claims.class);
-    when(jwtService.isTokenValid(request)).thenReturn(claims);
+    when(jwtService.verifyToken(request)).thenReturn(claims);
     when(claims.get("loginRecordId", Integer.class)).thenReturn(1);
 
     LoginRecord record = new LoginRecord(
@@ -396,7 +396,7 @@ class LoginRecordServiceTest {
   @Test
   void updateLogoutTime_Unauthorized() {
     // Arrange
-    when(jwtService.isTokenValid(request)).thenReturn(null);
+    when(jwtService.verifyToken(request)).thenReturn(null);
 
     // Act
     ResponseEntity<?> response = loginRecordService.updateLogoutTime(request);
@@ -415,7 +415,7 @@ class LoginRecordServiceTest {
   void updateLogoutTime_RecordNotFound() {
     // Arrange
     Claims claims = mock(Claims.class);
-    when(jwtService.isTokenValid(request)).thenReturn(claims);
+    when(jwtService.verifyToken(request)).thenReturn(claims);
     when(claims.get("loginRecordId", Integer.class)).thenReturn(999); // 記錄不存在
     when(loginRecordRepository.findById(999)).thenReturn(Optional.empty());
 
@@ -434,7 +434,7 @@ class LoginRecordServiceTest {
   @Test
   void updateLogoutTime_InvalidToken() {
     // Arrange
-    when(jwtService.isTokenValid(request)).thenReturn(null);
+    when(jwtService.verifyToken(request)).thenReturn(null);
 
     // Act
     ResponseEntity<?> response = loginRecordService.updateLogoutTime(request);
@@ -452,7 +452,7 @@ class LoginRecordServiceTest {
   void updateLogoutTime_NullLoginRecordId() {
     // Arrange
     Claims claims = mock(Claims.class);
-    when(jwtService.isTokenValid(request)).thenReturn(claims);
+    when(jwtService.verifyToken(request)).thenReturn(claims);
     when(claims.get("loginRecordId", Integer.class)).thenReturn(null);
 
     // Act
