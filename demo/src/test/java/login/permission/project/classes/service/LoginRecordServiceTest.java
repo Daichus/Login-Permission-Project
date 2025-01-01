@@ -65,6 +65,60 @@ class LoginRecordServiceTest {
     verify(loginRecordRepository, times(1)).findAll();
   }
 
+
+  /**
+   * 測試：根據權限碼獲取登入記錄（擁有正確權限）
+   * 驗證使用者擁有 'login_rec_read' 權限時，所有記錄都被返回。
+   */
+  @Test
+  void getRecordByPermissionCode_WithPermission() {
+    // Arrange
+    Claims claims = mock(Claims.class);
+    when(jwtService.isTokenValid(request)).thenReturn(claims);
+    when(claims.get("permissionCode", List.class)).thenReturn(List.of("login_rec_read"));
+
+    List<LoginRecord> records = List.of(
+            new LoginRecord(1, "127.0.0.1", LocalDateTime.now(), null, "SUCCESS")
+    );
+
+    when(loginRecordRepository.findAll()).thenReturn(records);
+
+    // Act
+    ResponseEntity<?> result = loginRecordService.getRecordByPermissionCode(request);
+
+    // Assert
+    assertEquals(HttpStatus.OK, result.getStatusCode());
+    assertEquals(records, result.getBody());
+    verify(loginRecordRepository, times(1)).findAll();
+  }
+  /**
+   * 測試：根據權限碼獲取登入記錄（無權限）
+   * 驗證當使用者無相關權限時，只返回個人記錄。
+   */
+  @Test
+  void getRecordByPermissionCode_WithoutPermission() {
+    // Arrange
+    Claims claims = mock(Claims.class);
+    when(jwtService.isTokenValid(request)).thenReturn(claims);
+    when(claims.get("permissionCode", List.class)).thenReturn(List.of("other_permission"));
+    when(claims.getSubject()).thenReturn("1");
+
+    List<LoginRecord> records = List.of(
+            new LoginRecord(1, "127.0.0.1", LocalDateTime.now(), null, "SUCCESS")
+    );
+
+    when(loginRecordRepository.findByEmployeeId(1)).thenReturn(records);
+
+    // Act
+    ResponseEntity<?> result = loginRecordService.getRecordByPermissionCode(request);
+
+    // Assert
+    assertEquals(HttpStatus.OK, result.getStatusCode());
+    assertEquals(records, result.getBody());
+    verify(loginRecordRepository, times(1)).findByEmployeeId(1);
+  }
+
+
   /**
    * 測試：新增登入記錄
    * 驗證記錄成功儲存，並返回正確訊息。
@@ -92,6 +146,21 @@ class LoginRecordServiceTest {
   }
 
   /**
+   * 測試：資料庫異常處理
+   * 目的： 驗證當 addLoginRecord 遇到資料庫異常時，應正確處理異常。
+   */
+  @Test
+  void addLoginRecord_DatabaseException() {
+    // Arrange
+    LoginRecord record = new LoginRecord(1, "127.0.0.1", LocalDateTime.now(), null, "SUCCESS");
+    doThrow(new RuntimeException("Database Error")).when(loginRecordRepository).save(record);
+
+    // Act & Assert
+    assertThrows(RuntimeException.class, () -> loginRecordService.addLoginRecord(record));
+    verify(loginRecordRepository, times(1)).save(record);
+  }
+
+  /**
    * 測試：更新登入記錄
    * 驗證記錄成功更新，並返回正確訊息。
    */
@@ -114,24 +183,6 @@ class LoginRecordServiceTest {
     // Assert
     assertEquals("修改登入記錄資訊完成", result);
     verify(loginRecordRepository, times(1)).save(record);
-  }
-
-  /**
-   * 測試：刪除登入記錄
-   * 驗證記錄成功刪除，並返回正確訊息。
-   */
-  @Test
-  void deleteLoginRecord() {
-    // Arrange
-    int recordId = 1;
-    doNothing().when(loginRecordRepository).deleteById(recordId);
-
-    // Act
-    String result = loginRecordService.deleteLoginRecord(recordId);
-
-    // Assert
-    assertEquals("刪除登入記錄成功", result);
-    verify(loginRecordRepository, times(1)).deleteById(recordId);
   }
 
   /**
@@ -163,58 +214,75 @@ class LoginRecordServiceTest {
     assertEquals("登出成功", result.getBody());
     verify(loginRecordRepository, times(1)).save(record);
   }
-
   /**
-   * 測試：根據權限碼獲取登入記錄（擁有正確權限）
-   * 驗證使用者擁有 'login_rec_read' 權限時，所有記錄都被返回。
+   *測試：JWT 無效時更新登出時間
+   * 驗證當 JWT 無效時，updateLogoutTime 應返回未授權的錯誤。
    */
   @Test
-  void getRecordByPermissionCode_WithPermission() {
+  void updateLogoutTime_Unauthorized() {
     // Arrange
-    Claims claims = mock(Claims.class);
-    when(jwtService.isTokenValid(request)).thenReturn(claims);
-    when(claims.get("permissionCode", List.class)).thenReturn(List.of("login_rec_read"));
-
-    List<LoginRecord> records = List.of(
-            new LoginRecord(1, "127.0.0.1", LocalDateTime.now(), null, "SUCCESS")
-    );
-
-    when(loginRecordRepository.findAll()).thenReturn(records);
+    when(jwtService.isTokenValid(request)).thenReturn(null);
 
     // Act
-    ResponseEntity<?> result = loginRecordService.getRecordByPermissionCode(request);
+    ResponseEntity<?> response = loginRecordService.updateLogoutTime(request);
 
     // Assert
-    assertEquals(HttpStatus.OK, result.getStatusCode());
-    assertEquals(records, result.getBody());
-    verify(loginRecordRepository, times(1)).findAll();
+    assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+    assertEquals("未授權的JWT", response.getBody());
+    verify(loginRecordRepository, never()).save(any());
   }
 
   /**
-   * 測試：根據權限碼獲取登入記錄（無權限）
-   * 驗證當使用者無相關權限時，只返回個人記錄。
+   * 測試：傳入空登入記錄
+   * 目的： 驗證當 updateLoginRecord 接收到 null 記錄時，應返回失敗訊息。
    */
   @Test
-  void getRecordByPermissionCode_WithoutPermission() {
+  void updateLoginRecord_WithNullRecord() {
+    // Act
+    String result = loginRecordService.updateLoginRecord(null);
+
+    // Assert
+    assertEquals("更新登入記錄資訊失敗", result);
+    verify(loginRecordRepository, never()).save(any());
+  }
+
+  /**
+   * 測試：JWT 合法但記錄不存在
+   * 目的： 驗證當 JWT 合法但找不到登入記錄時，不進行保存操作。
+   */
+  @Test
+  void updateLogoutTime_RecordNotFound() {
     // Arrange
     Claims claims = mock(Claims.class);
     when(jwtService.isTokenValid(request)).thenReturn(claims);
-    when(claims.get("permissionCode", List.class)).thenReturn(List.of("other_permission"));
-    when(claims.getSubject()).thenReturn("1");
-
-    List<LoginRecord> records = List.of(
-            new LoginRecord(1, "127.0.0.1", LocalDateTime.now(), null, "SUCCESS")
-    );
-
-    when(loginRecordRepository.findByEmployeeId(1)).thenReturn(records);
+    when(claims.get("loginRecordId", Integer.class)).thenReturn(999); // 記錄不存在
+    when(loginRecordRepository.findById(999)).thenReturn(Optional.empty());
 
     // Act
-    ResponseEntity<?> result = loginRecordService.getRecordByPermissionCode(request);
+    ResponseEntity<?> response = loginRecordService.updateLogoutTime(request);
 
     // Assert
-    assertEquals(HttpStatus.OK, result.getStatusCode());
-    assertEquals(records, result.getBody());
-    verify(loginRecordRepository, times(1)).findByEmployeeId(1);
+    assertEquals(HttpStatus.OK, response.getStatusCode()); // 不應拋出異常
+    verify(loginRecordRepository, never()).save(any());
+  }
+
+
+  /**
+   * 測試：刪除登入記錄
+   * 驗證記錄成功刪除，並返回正確訊息。
+   */
+  @Test
+  void deleteLoginRecord() {
+    // Arrange
+    int recordId = 1;
+    doNothing().when(loginRecordRepository).deleteById(recordId);
+
+    // Act
+    String result = loginRecordService.deleteLoginRecord(recordId);
+
+    // Assert
+    assertEquals("刪除登入記錄成功", result);
+    verify(loginRecordRepository, times(1)).deleteById(recordId);
   }
 
 }
