@@ -154,6 +154,7 @@ class LoginRecordServiceTest {
     Claims claims = mock(Claims.class);
     when(jwtService.isTokenValid(request)).thenReturn(claims);
     when(claims.get("permissionCode", List.class)).thenReturn(List.of("login_rec_update", "other_permission"));
+    when(claims.getSubject()).thenReturn("1"); // 確保有有效的 subject
 
     List<LoginRecord> records = List.of(
             new LoginRecord(1, "127.0.0.1", LocalDateTime.now(), null, "SUCCESS")
