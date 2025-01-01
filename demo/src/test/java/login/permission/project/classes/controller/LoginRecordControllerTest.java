@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
@@ -142,9 +143,11 @@ public class LoginRecordControllerTest {
     when(jwtService.isTokenValid(any(HttpServletRequest.class))).thenReturn(claims);
 
     ResponseEntity<String> response = ResponseEntity.ok("權限驗證成功");
-//    // 使用 doReturn 來避免泛型問題
-//    doReturn(response).when(loginRecordService).getRecordByPermissionCode(any(HttpServletRequest.class));
 
+    // 使用 doReturn 來避免泛型問題
+
+    doReturn(response).when(loginRecordService).getRecordByPermissionCode(any(HttpServletRequest.class));
+    // Act & Assert
     mvc.perform(post("/api/loginRecord/getLoginRecord")
                     .header("Authorization", "Bearer mock-token"))
             .andDo(print())
@@ -159,7 +162,8 @@ public class LoginRecordControllerTest {
   public void whenGetAllLoginRecordsWithoutToken_thenStatus401() throws Exception {
     mvc.perform(get("/api/loginRecord/get"))
             .andDo(print())
-            .andExpect(status().isUnauthorized());
+            .andExpect(status().isUnauthorized())
+            .andExpect(content().string("Unauthorized: Full authentication is required to access this resource"));
   }
 
   /**
@@ -172,6 +176,9 @@ public class LoginRecordControllerTest {
     mvc.perform(get("/api/loginRecord/get")
                     .header("Authorization", "Bearer invalid-token"))
             .andDo(print())
-            .andExpect(status().isUnauthorized());
+            .andExpect(status().isUnauthorized())
+            .andExpect(content().string("Unauthorized: Invalid Token"));
+
   }
+
 }
