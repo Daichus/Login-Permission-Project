@@ -457,4 +457,108 @@ class EmployeeServiceTest {
     assertEquals("無效的驗證碼", result);
   }
 
+  /**
+   * 測試更新員工資訊成功
+   */
+  @Test
+  void testUpdateEmployee_Success() {
+    // Arrange
+    Employee employee = new Employee(
+            1,
+            "updated@gmail.com",
+            "Updated Name",
+            "password123",
+            "0987654321",
+            1,
+            true,
+            null,
+            mockStatus,
+            mockRoles,
+            mockLoginRecords
+    );
+
+    Mockito.when(employeeRepository.save(Mockito.any(Employee.class)))
+            .thenReturn(employee);
+
+    // Act
+    String result = employeeService.updateEmployee(employee);
+
+    // Assert
+    assertEquals("更新員工資訊完成", result);
+    Mockito.verify(employeeRepository).save(employee);
+  }
+
+  /**
+   * 測試更新員工資訊
+   * 空值測試
+   */
+  @Test
+  void testUpdateEmployee_NullEmployee() {
+    // Arrange
+    Employee employee = null;
+
+    // Act
+    String result = employeeService.updateEmployee(employee);
+
+    // Assert
+    assertEquals("更新員工資訊失敗", result);
+    Mockito.verify(employeeRepository, Mockito.never()).save(Mockito.any());
+  }
+
+  /**
+   * 測試更新員工資訊
+   * 資料庫異常
+   */
+  @Test
+  void testUpdateEmployee_DatabaseError() {
+    // Arrange
+    Employee employee = new Employee();
+    employee.setEmployee_id(1);
+    employee.setName("Test Employee");
+
+    Mockito.when(employeeRepository.save(Mockito.any(Employee.class)))
+            .thenThrow(new RuntimeException("Database error"));
+
+    // Act & Assert
+    Exception exception = assertThrows(RuntimeException.class, () -> {
+      employeeService.updateEmployee(employee);
+    });
+    assertTrue(exception.getMessage().contains("Database error"));
+  }
+
+  /**
+   * 測試刪除員工成功
+   */
+  @Test
+  void testDeleteEmployee_Success() {
+    // Arrange
+    int employeeId = 1;
+    Mockito.doNothing().when(employeeRepository).deleteById(employeeId);
+
+    // Act
+    String result = employeeService.deleteEmployee(employeeId);
+
+    // Assert
+    assertEquals("刪除員工成功", result);
+    Mockito.verify(employeeRepository).deleteById(employeeId);
+  }
+
+  /**
+   * 測試刪除員工
+   * 員工不存在
+   */
+  @Test
+  void testDeleteEmployee_NotFound() {
+    // Arrange
+    int nonExistentId = 999;
+    Mockito.doThrow(new RuntimeException("Employee not found"))
+            .when(employeeRepository).deleteById(nonExistentId);
+
+    // Act & Assert
+    Exception exception = assertThrows(RuntimeException.class, () -> {
+      employeeService.deleteEmployee(nonExistentId);
+    });
+    assertTrue(exception.getMessage().contains("Employee not found"));
+  }
+
 }
