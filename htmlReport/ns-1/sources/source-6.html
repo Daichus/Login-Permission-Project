@@ -1,0 +1,216 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > LoginRecordService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">login.permission.project.classes.service</a>
+</div>
+
+<h1>Coverage Summary for Class: LoginRecordService (login.permission.project.classes.service)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">LoginRecordService</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/18)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/36)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package login.permission.project.classes.service;
+&nbsp;
+&nbsp;import io.jsonwebtoken.Claims;
+&nbsp;import jakarta.persistence.Column;
+&nbsp;import jakarta.servlet.http.HttpServletRequest;
+&nbsp;import login.permission.project.classes.JwtService;
+&nbsp;import login.permission.project.classes.model.LoginRecord;
+&nbsp;import login.permission.project.classes.repository.LoginRecordRepository;
+&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;import org.springframework.http.HttpStatus;
+&nbsp;import org.springframework.http.MediaType;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;
+&nbsp;import java.time.LocalDateTime;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;@Service
+<b class="nc">&nbsp;public class LoginRecordService {</b>
+&nbsp;
+&nbsp;    @Autowired
+&nbsp;    LoginRecordRepository lrr;
+&nbsp;
+&nbsp;    @Autowired
+&nbsp;    JwtService js;
+&nbsp;
+&nbsp;    public List&lt;LoginRecord&gt; getAllLoginRecords() {
+<b class="nc">&nbsp;        return lrr.findAll();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String addLoginRecord(LoginRecord loginRecord) {
+<b class="nc">&nbsp;        lrr.save(loginRecord);</b>
+<b class="nc">&nbsp;        return String.format(&quot;新增登入記錄成功\n登入代號: %s\n員工代號: %s\n登入時間: %s\n登出時間: %s\nip位址: %s\n狀態: %s&quot;,</b>
+<b class="nc">&nbsp;                loginRecord.getRecord_id(),</b>
+<b class="nc">&nbsp;                loginRecord.getEmployee_id(),</b>
+<b class="nc">&nbsp;                loginRecord.getLogin_time(),</b>
+<b class="nc">&nbsp;                loginRecord.getLogout_time(),</b>
+<b class="nc">&nbsp;                loginRecord.getIp_address(),</b>
+<b class="nc">&nbsp;                loginRecord.getStatus());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    //登入代號	員工代號	登入時間	登出時間	ip位址	狀態(成功或失敗)
+&nbsp;
+&nbsp;    public String updateLoginRecord (LoginRecord empPositionMap) {
+<b class="nc">&nbsp;        if(empPositionMap != null) {</b>
+<b class="nc">&nbsp;            lrr.save(empPositionMap);</b>
+<b class="nc">&nbsp;            return &quot;修改登入記錄資訊完成&quot;;</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            return &quot;更新登入記錄資訊失敗&quot;;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    public String deleteLoginRecord (int id) {
+<b class="nc">&nbsp;        lrr.deleteById(id);</b>
+<b class="nc">&nbsp;        return &quot;刪除登入記錄成功&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public ResponseEntity&lt;?&gt; updateLogoutTime (HttpServletRequest request) {
+<b class="nc">&nbsp;        Claims claims = js.isTokenValid(request);</b>
+&nbsp;
+<b class="nc">&nbsp;        if(claims != null) {</b>
+<b class="nc">&nbsp;            Integer loginRecordId = claims.get(&quot;loginRecordId&quot;, Integer.class);</b>
+<b class="nc">&nbsp;            Optional&lt;LoginRecord&gt; loginRecordOp = lrr.findById(loginRecordId);</b>
+&nbsp;
+<b class="nc">&nbsp;            if (loginRecordOp.isPresent()) {</b>
+<b class="nc">&nbsp;                LoginRecord loginRecord = loginRecordOp.get();</b>
+<b class="nc">&nbsp;                loginRecord.setLogout_time(LocalDateTime.now());  // 設置登出時間</b>
+<b class="nc">&nbsp;                lrr.save(loginRecord);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            return ResponseEntity.ok(&quot;登出成功&quot;);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(&quot;未授權的JWT&quot;);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    public  ResponseEntity&lt;?&gt; getRecordByPermissionCode(HttpServletRequest request) {
+<b class="nc">&nbsp;        Claims claims = js.isTokenValid(request);</b>
+<b class="nc">&nbsp;        List&lt;LoginRecord&gt; loginRecords = null;</b>
+&nbsp;
+<b class="nc">&nbsp;        if(claims != null) {</b>
+<b class="nc">&nbsp;            List&lt;String&gt; permissionCode = claims.get(&quot;permissionCode&quot;, List.class);</b>
+<b class="nc">&nbsp;            for(String code : permissionCode) {</b>
+<b class="nc">&nbsp;                if(code.equals(&quot;login_rec_read&quot;) || code.equals(&quot;login_rec_update&quot;) || code.equals(&quot;login_rec_create&quot;) || code.equals(&quot;login_rec_delete&quot;)) {</b>
+<b class="nc">&nbsp;                    loginRecords = lrr.findAll();</b>
+&nbsp;                } else {
+<b class="nc">&nbsp;                    loginRecords = lrr.findByEmployeeId(Integer.parseInt(claims.getSubject()));</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;        } else {
+<b class="nc">&nbsp;            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(&quot;Login record not found&quot;);</b>
+&nbsp;        }
+<b class="nc">&nbsp;            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(loginRecords);</b>
+&nbsp;
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-12-31 09:49</div>
+</div>
+</body>
+</html>

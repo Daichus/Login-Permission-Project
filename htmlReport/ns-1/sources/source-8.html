@@ -1,0 +1,221 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > PermissionService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">login.permission.project.classes.service</a>
+</div>
+
+<h1>Coverage Summary for Class: PermissionService (login.permission.project.classes.service)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PermissionService</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/26)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package login.permission.project.classes.service;
+&nbsp;
+&nbsp;import jakarta.servlet.http.HttpServletRequest;
+&nbsp;import login.permission.project.classes.model.util.JwtUtil;
+&nbsp;import login.permission.project.classes.model.Permission;
+&nbsp;import login.permission.project.classes.model.util.ResponseUtil;
+&nbsp;import login.permission.project.classes.repository.EmployeeRepository;
+&nbsp;import login.permission.project.classes.repository.PermissionRepository;
+&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;import org.springframework.http.HttpStatus;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;@Service
+<b class="nc">&nbsp;public class PermissionService {</b>
+&nbsp;
+&nbsp;  @Autowired
+&nbsp;  PermissionRepository permissionRepository;
+&nbsp;
+&nbsp;  @Autowired
+&nbsp;  JwtUtil jwtUtil;
+&nbsp;
+&nbsp;  @Autowired
+&nbsp;  EmployeeRepository employeeRepository;
+&nbsp;
+&nbsp;
+&nbsp;  /**
+&nbsp;   * 前端透過傳遞jwt token驗證,
+&nbsp;   * 獲取所有權限,回傳的資料結構為[ {permission_id, permission_name,category, permission_code},{}...]
+&nbsp;   */
+&nbsp;  public ResponseEntity&lt;?&gt; getAllPermission(HttpServletRequest request) {
+&nbsp;    try{
+<b class="nc">&nbsp;      jwtUtil.validateRequest(request);</b>
+<b class="nc">&nbsp;      List&lt;Permission&gt; permissions = permissionRepository.findAll();</b>
+<b class="nc">&nbsp;      return ResponseUtil.success(&quot;獲取權限成功&quot;,permissions);</b>
+<b class="nc">&nbsp;    } catch(IllegalArgumentException e) {</b>
+<b class="nc">&nbsp;      return ResponseUtil.error(&quot;你沒有獲取所有權限的權力&quot;, HttpStatus.UNAUTHORIZED);</b>
+&nbsp;    }
+&nbsp;  }
+&nbsp;
+&nbsp;  // 測試獲取員工自己的權限
+&nbsp;  public ResponseEntity&lt;?&gt; getPermissionById(HttpServletRequest request, int id) {
+&nbsp;    try{
+<b class="nc">&nbsp;      jwtUtil.validateRequest(request);</b>
+<b class="nc">&nbsp;      List&lt;String&gt; permissions = employeeRepository.getPermissionById(id);</b>
+<b class="nc">&nbsp;      return ResponseUtil.success(&quot;獲取員工本人權限成功&quot;,permissions);</b>
+<b class="nc">&nbsp;    } catch(IllegalArgumentException e) {</b>
+<b class="nc">&nbsp;      return ResponseUtil.error(&quot;你沒有獲取員工本人所有權限的權力&quot;, HttpStatus.UNAUTHORIZED);</b>
+&nbsp;    }
+&nbsp;  }
+&nbsp;
+&nbsp;
+&nbsp;  /**
+&nbsp;   * 添加Permission的方法,前端需傳遞jwt token供驗證外,需傳遞和Permission物件相同構造的body,但無須傳送id,
+&nbsp;   * 例:{
+&nbsp;   *   permission_name:&quot;Admin&quot;,
+&nbsp;   *   category:&quot;部門管理&quot;,
+&nbsp;   *   permission_code:&quot;dept_read_edit&quot;
+&nbsp;   * }
+&nbsp;   */
+&nbsp;  public ResponseEntity&lt;?&gt; addPermission(Permission permission, HttpServletRequest request) {
+&nbsp;    try{
+<b class="nc">&nbsp;      jwtUtil.validateRequest(request);</b>
+<b class="nc">&nbsp;      permissionRepository.save(permission);</b>
+<b class="nc">&nbsp;      return ResponseUtil.success(&quot;新增權限成功&quot;,permission);</b>
+<b class="nc">&nbsp;    } catch (IllegalArgumentException e) {</b>
+<b class="nc">&nbsp;      return ResponseUtil.error(&quot;你沒有添加權限的權利&quot;,HttpStatus.UNAUTHORIZED);</b>
+&nbsp;    }
+&nbsp;  }
+&nbsp;
+&nbsp;  /**
+&nbsp;   *更新權限的代碼,方法大致與添加類似,只是前端傳遞的資料須包含permission id,結構必須為:
+&nbsp;   *  {
+&nbsp;   *     permission_id: 1
+&nbsp;   *     permission_name:&quot;Admin&quot;,
+&nbsp;   *     category:&quot;部門管理&quot;,
+&nbsp;   *     permission_code:&quot;dept_read_edit&quot;
+&nbsp;   *  }
+&nbsp;   */
+&nbsp;  public ResponseEntity&lt;?&gt; updatePermission(Permission permission, HttpServletRequest request) {
+&nbsp;    try {
+<b class="nc">&nbsp;      jwtUtil.validateRequest(request);</b>
+<b class="nc">&nbsp;      Optional&lt;Permission&gt; oldPermission = permissionRepository.findById(permission.getPermission_id());</b>
+<b class="nc">&nbsp;      if (oldPermission.isPresent()) {</b>
+<b class="nc">&nbsp;        permissionRepository.save(permission);</b>
+<b class="nc">&nbsp;        return ResponseUtil.success(&quot;更新權限成功&quot;, permission);</b>
+&nbsp;      } else {
+<b class="nc">&nbsp;        return ResponseUtil.error(&quot;找不到指定id的權限&quot;, HttpStatus.NOT_FOUND);</b>
+&nbsp;      }
+<b class="nc">&nbsp;    } catch(IllegalArgumentException e) {</b>
+<b class="nc">&nbsp;      return ResponseUtil.error(&quot;你沒有修改權限的權利&quot;,HttpStatus.UNAUTHORIZED);</b>
+&nbsp;    }
+&nbsp;  }
+&nbsp;
+&nbsp;  //delete
+&nbsp;  public String deletePermission(int id) {
+<b class="nc">&nbsp;    permissionRepository.deleteById(id);</b>
+<b class="nc">&nbsp;    return &quot;刪除權限成功&quot;;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-12-31 09:49</div>
+</div>
+</body>
+</html>
