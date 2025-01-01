@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -141,8 +142,8 @@ public class LoginRecordControllerTest {
     when(jwtService.isTokenValid(any(HttpServletRequest.class))).thenReturn(claims);
 
     ResponseEntity<String> response = ResponseEntity.ok("權限驗證成功");
-    when(loginRecordService.getRecordByPermissionCode(any(HttpServletRequest.class)))
-            .thenReturn(response);
+//    // 使用 doReturn 來避免泛型問題
+//    doReturn(response).when(loginRecordService).getRecordByPermissionCode(any(HttpServletRequest.class));
 
     mvc.perform(post("/api/loginRecord/getLoginRecord")
                     .header("Authorization", "Bearer mock-token"))
