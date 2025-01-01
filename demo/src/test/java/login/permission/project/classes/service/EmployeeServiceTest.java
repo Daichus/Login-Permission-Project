@@ -269,6 +269,7 @@ class EmployeeServiceTest {
     assertEquals("獲取員工資訊成功", serverResponse.getMessage());
 
     List<Employee> employees = (List<Employee>) serverResponse.getData();
+    // empty but not null
     assertNotNull(employees);
     assertTrue(employees.isEmpty());
   }
@@ -404,7 +405,7 @@ class EmployeeServiceTest {
   /**
    *
    * 測試登入
-   * 沒有驗證碼
+   * 電子郵件沒有驗證
    */
   @Test
   void testLogin_UnverifiedAccount() {
@@ -418,7 +419,6 @@ class EmployeeServiceTest {
 
     assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
 
-    // 修改為處理 ServerResponse
     ServerResponse serverResponse = (ServerResponse) response.getBody();
     assertNotNull(serverResponse);
     assertEquals("請先驗證您的電子郵件", serverResponse.getMessage());
@@ -451,7 +451,7 @@ class EmployeeServiceTest {
 
   /**
    * 測試登入失敗
-   * 保存登入記錄異常
+   * 測試當保存登入記錄時發生資料庫錯誤的情況
    */
   @Test
   void testLogin_SaveLoginRecordError() {
@@ -499,16 +499,17 @@ class EmployeeServiceTest {
    */
   @Test
   void testLogin_InvalidPasswordLoginRecord() {
-    // Arrange
+    // 創建一個帶有錯誤密碼的登入請求
     EmployeeLoginRequest request = new EmployeeLoginRequest(1, "wrongPassword");
+    // 模擬資料庫中存在的員工資料
     Employee mockEmployee = new Employee(1, "test@gmail.com", "Test", "correctPassword", "0911", 1, true, null, mockStatus, mockRoles, mockLoginRecords);
-
+    // 設置模擬行為：當查詢 ID=1 的員工時，返回我們準備的模擬員工資料
     Mockito.when(employeeRepository.findById(1)).thenReturn(Optional.of(mockEmployee));
 
-    // Act
+    // 調用登入
     ResponseEntity<?> response = employeeService.login(request);
 
-    // Assert
+    // 驗證回應狀態碼為未授權
     assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
 
     // 驗證保存失敗的登入記錄
