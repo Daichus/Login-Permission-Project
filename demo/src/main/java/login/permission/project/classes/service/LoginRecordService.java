@@ -1,7 +1,6 @@
 package login.permission.project.classes.service;
 
 import io.jsonwebtoken.Claims;
-import jakarta.persistence.Column;
 import jakarta.servlet.http.HttpServletRequest;
 import login.permission.project.classes.JwtService;
 import login.permission.project.classes.model.LoginRecord;
@@ -13,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -58,7 +56,7 @@ public class LoginRecordService {
     }
 
     public ResponseEntity<?> updateLogoutTime (HttpServletRequest request) {
-        Claims claims = js.isTokenValid(request);
+        Claims claims = js.verifyToken(request);
 
         if(claims != null) {
             Integer loginRecordId = claims.get("loginRecordId", Integer.class);
@@ -76,7 +74,7 @@ public class LoginRecordService {
     }
 
     public  ResponseEntity<?> getRecordByPermissionCode(HttpServletRequest request) {
-        Claims claims = js.isTokenValid(request);
+        Claims claims = js.verifyToken(request);
         List<LoginRecord> loginRecords = null;
 
         if(claims != null) {

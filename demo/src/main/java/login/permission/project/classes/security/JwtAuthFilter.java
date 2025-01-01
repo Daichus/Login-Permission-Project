@@ -28,7 +28,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
           HttpServletResponse response,
           FilterChain filterChain
   ) throws ServletException, IOException {
-    Claims claims = jwtService.isTokenValid(request);
+    Claims claims = jwtService.verifyToken(request);
 
     if (claims != null) {
       List<String> permissions = (List<String>) claims.get("permissionCode");

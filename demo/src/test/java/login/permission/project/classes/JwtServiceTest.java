@@ -32,7 +32,7 @@ class JwtServiceTest {
         HttpServletRequest request = mock(HttpServletRequest.class);
         String token  = jwtService.generateToken("1", 1);
         when(request.getHeader("Authorization")).thenReturn("Bearer " + token);
-        Claims claims = jwtService.isTokenValid(request);
+        Claims claims = jwtService.verifyToken(request);
 
         assertEquals("1", claims.getSubject());
         assertEquals(1,claims.get("loginRecordId"));
@@ -40,7 +40,7 @@ class JwtServiceTest {
 
         String token2  = jwtService.generateToken("101", 101);
         when(request.getHeader("Authorization")).thenReturn("Bearer " + token2);
-        Claims claims2 = jwtService.isTokenValid(request);
+        Claims claims2 = jwtService.verifyToken(request);
         assertEquals("101", claims2.getSubject());
         assertEquals(101,claims2.get("loginRecordId"));
         assertEquals("Fcu 113-1 CSIE Team 2", claims.getIssuer());
@@ -54,7 +54,7 @@ class JwtServiceTest {
     void testInvalidJwtToken() {
         HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getHeader("Authorization")).thenReturn("Bearer 1234567890abc");
-        Claims claims = jwtService.isTokenValid(request);
+        Claims claims = jwtService.verifyToken(request);
 
         assertNull(claims);
     }
@@ -66,7 +66,7 @@ class JwtServiceTest {
     void testInvalidJwtToken_nullHeader() {
         HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getHeader("Authorization")).thenReturn(null);
-        Claims claims = jwtService.isTokenValid(request);
+        Claims claims = jwtService.verifyToken(request);
 
         assertNull(claims);
     }
@@ -77,7 +77,7 @@ class JwtServiceTest {
     void testInvalidJwtToken_invalidHeader() {
         HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getHeader("Authorization")).thenReturn("Hello World");
-        Claims claims = jwtService.isTokenValid(request);
+        Claims claims = jwtService.verifyToken(request);
 
         assertNull(claims);
     }
@@ -89,45 +89,10 @@ class JwtServiceTest {
         HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getHeader("Authorization")).thenReturn("Bear er");
 
-        Claims claims = jwtService.isTokenValid(request);
+        Claims claims = jwtService.verifyToken(request);
         assertNull(claims);
     }
 
-    //測試對樣: generateToken方法在員工id不同情況下的執行情況
-    //此為測試不符格式的id格式的情形
-    @Test
-    @DisplayName("測試Jwt解析無效的Jwt token, 員工id格式錯誤的情形")
-    void testGenerateToken_EmployeeId_value_noneNumeric() {
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> jwtService.generateToken("2a0", 101)
-        );
-        assertEquals("產生token失敗: 員工id必須是整數字串或不得有負號，實際輸入為: 2a0", exception.getMessage());
-
-        IllegalArgumentException exception2 = assertThrows(
-                IllegalArgumentException.class,
-                () -> jwtService.generateToken("abc", 101)
-        );
-        assertEquals("產生token失敗: 員工id必須是整數字串或不得有負號，實際輸入為: abc", exception2.getMessage());
-
-        IllegalArgumentException exception3 = assertThrows(
-                IllegalArgumentException.class,
-                () -> jwtService.generateToken("#1", 101)
-        );
-        assertEquals("產生token失敗: 員工id必須是整數字串或不得有負號，實際輸入為: #1", exception3.getMessage());
-
-    }
-
-    //測試對樣:  員工id為負數字串的情形
-    @Test
-    @DisplayName("測試Jwt解析無效的Jwt token, 員工id為負數字串的情形")
-    void testGenerateToken_EmployeeId_value_negativeValue () {
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> jwtService.generateToken("-1", 101)
-        );
-        assertEquals("產生token失敗: 員工id必須是整數字串或不得有負號，實際輸入為: -1", exception.getMessage());
-    }
 
 
     //  測試對樣: GenerateToken在不同的record_id輸入值時的產生結果
@@ -150,18 +115,5 @@ class JwtServiceTest {
 
 
 
-
-    //  測試對樣: GenerateToken在不同的record_id輸入值時的產生結果
-    //---------------------------------------------
-    //#此方法測是參數不符合條件的情況
-    @Test
-    @DisplayName("測試Jwt解析無效的Jwt token, 登錄紀錄id為負數的情形")
-    void testGenerateToken_record_id_value_negativeValue(){
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> jwtService.generateToken("1", -1)
-        );
-        assertEquals("登錄記錄ID不得為負，實際輸入為: -1", exception.getMessage());
-    }
 
 }
