@@ -75,6 +75,54 @@ class EmployeeServiceTest {
   }
 
   /**
+   * 測試獲取全部員工資訊
+   * 無權限訪問
+   */
+  @Test
+  void getAllEmployees_Unauthorized() {
+    // Arrange
+    HttpServletRequest mockRequest = Mockito.mock(HttpServletRequest.class);
+    Mockito.doThrow(new IllegalArgumentException()).when(jwtUtil).validateRequest(mockRequest);
+
+    // Act
+    ResponseEntity<?> response = employeeService.getAllEmployees(mockRequest);
+
+    // Assert
+    assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+    ServerResponse serverResponse = (ServerResponse) response.getBody();
+    assertNotNull(serverResponse);
+    assertEquals("你沒有獲取員工資訊的權限", serverResponse.getMessage());
+    assertNull(serverResponse.getData());
+  }
+
+  /**
+   * 測試獲取全部員工資訊
+   * 空列表
+   */
+  @Test
+  void getAllEmployees_EmptyList() {
+    // Arrange
+    List<Employee> mockEmployees = new ArrayList<>();
+    HttpServletRequest mockRequest = Mockito.mock(HttpServletRequest.class);
+
+    Mockito.when(employeeRepository.findAll()).thenReturn(mockEmployees);
+    Mockito.doNothing().when(jwtUtil).validateRequest(mockRequest);
+
+    // Act
+    ResponseEntity<?> response = employeeService.getAllEmployees(mockRequest);
+
+    // Assert
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    ServerResponse serverResponse = (ServerResponse) response.getBody();
+    assertNotNull(serverResponse);
+    assertEquals("獲取員工資訊成功", serverResponse.getMessage());
+
+    List<Employee> employees = (List<Employee>) serverResponse.getData();
+    assertNotNull(employees);
+    assertTrue(employees.isEmpty());
+  }
+
+  /**
    * 測試根據ID獲取員工資訊成功
    */
   @Test
