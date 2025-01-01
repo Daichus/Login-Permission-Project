@@ -8,6 +8,7 @@ import login.permission.project.classes.repository.EmployeeRepository;
 import login.permission.project.classes.repository.LoginRecordRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -272,6 +273,103 @@ class EmployeeServiceTest {
     assertNotNull(serverResponse);
     assertEquals("請先驗證您的電子郵件", serverResponse.getMessage());
     assertNull(serverResponse.getData());
+  }
+
+  /**
+   * 測試登入
+   * 找不到用戶
+   */
+  @Test
+  void testLogin_UserNotFound() {
+    // Arrange
+    EmployeeLoginRequest request = new EmployeeLoginRequest(999, "password1");
+    Mockito.when(employeeRepository.findById(999)).thenReturn(Optional.empty());
+
+    // Act
+    ResponseEntity<?> response = employeeService.login(request);
+
+    // Assert
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    ServerResponse serverResponse = (ServerResponse) response.getBody();
+    assertNotNull(serverResponse);
+    assertEquals("找不到用戶", serverResponse.getMessage());
+    assertNull(serverResponse.getData());
+
+    // 驗證沒有創建登入記錄
+    Mockito.verify(logRecRepository, Mockito.never()).save(Mockito.any(LoginRecord.class));
+  }
+
+  /**
+   * 測試登入失敗
+   * 保存登入記錄異常
+   */
+  @Test
+  void testLogin_SaveLoginRecordError() {
+    // Arrange
+    EmployeeLoginRequest request = new EmployeeLoginRequest(1, "password1");
+    Employee mockEmployee = new Employee(1, "test@gmail.com", "Test", "password1", "0911", 1, true, null, mockStatus, mockRoles, mockLoginRecords);
+
+    Mockito.when(employeeRepository.findById(1)).thenReturn(Optional.of(mockEmployee));
+    Mockito.when(logRecRepository.save(Mockito.any(LoginRecord.class)))
+            .thenThrow(new RuntimeException("Database error"));
+
+    // Act & Assert
+    Exception exception = assertThrows(RuntimeException.class, () -> {
+      employeeService.login(request);
+    });
+    assertTrue(exception.getMessage().contains("Database error"));
+  }
+
+  /**
+   * 測試登入失敗
+   * JWT 生成異常
+   */
+  @Test
+  void testLogin_JwtGenerationError() {
+    // Arrange
+    EmployeeLoginRequest request = new EmployeeLoginRequest(1, "password1");
+    Employee mockEmployee = new Employee(1, "test@gmail.com", "Test", "password1", "0911", 1, true, null, mockStatus, mockRoles, mockLoginRecords);
+
+    Mockito.when(employeeRepository.findById(1)).thenReturn(Optional.of(mockEmployee));
+    Mockito.when(logRecRepository.save(Mockito.any(LoginRecord.class)))
+            .thenReturn(new LoginRecord());
+    Mockito.when(jwtService.generateToken(Mockito.anyString(), Mockito.anyInt()))
+            .thenThrow(new RuntimeException("JWT generation error"));
+
+    // Act & Assert
+    Exception exception = assertThrows(RuntimeException.class, () -> {
+      employeeService.login(request);
+    });
+    assertTrue(exception.getMessage().contains("JWT generation error"));
+  }
+
+  /**
+   * 測試登入失敗
+   * 密碼錯誤時的登入記錄
+   */
+  @Test
+  void testLogin_InvalidPasswordLoginRecord() {
+    // Arrange
+    EmployeeLoginRequest request = new EmployeeLoginRequest(1, "wrongPassword");
+    Employee mockEmployee = new Employee(1, "test@gmail.com", "Test", "correctPassword", "0911", 1, true, null, mockStatus, mockRoles, mockLoginRecords);
+
+    Mockito.when(employeeRepository.findById(1)).thenReturn(Optional.of(mockEmployee));
+
+    // Act
+    ResponseEntity<?> response = employeeService.login(request);
+
+    // Assert
+    assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+
+    // 驗證保存失敗的登入記錄
+    ArgumentCaptor<LoginRecord> loginRecordCaptor = ArgumentCaptor.forClass(LoginRecord.class);
+    Mockito.verify(logRecRepository).save(loginRecordCaptor.capture());
+
+    LoginRecord savedRecord = loginRecordCaptor.getValue();
+    assertEquals(1, savedRecord.getEmployee_id());
+    assertEquals("testIpAddress", savedRecord.getIp_address());
+    assertEquals("失敗", savedRecord.getStatus());
+    assertNotNull(savedRecord.getLogin_time());
   }
 
   /**
