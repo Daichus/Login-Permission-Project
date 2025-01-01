@@ -75,25 +75,63 @@ public class LoginRecordService {
         }
     }
 
-    public  ResponseEntity<?> getRecordByPermissionCode(HttpServletRequest request) {
+//    public  ResponseEntity<?> getRecordByPermissionCode(HttpServletRequest request) {
+//        Claims claims = js.isTokenValid(request);
+//        List<LoginRecord> loginRecords = null;
+//
+//        if(claims != null) {
+//            List<String> permissionCode = claims.get("permissionCode", List.class);
+//            for(String code : permissionCode) {
+//                if(code.equals("login_rec_read") || code.equals("login_rec_update") || code.equals("login_rec_create") || code.equals("login_rec_delete")) {
+//                    loginRecords = lrr.findAll();
+//                } else {
+//                    loginRecords = lrr.findByEmployeeId(Integer.parseInt(claims.getSubject()));
+//                }
+//            }
+//        } else {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Login record not found");
+//        }
+//            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(loginRecords);
+//
+//
+//    }
+
+    // 修正邏輯,避免迴圈覆蓋
+    public ResponseEntity<?> getRecordByPermissionCode(HttpServletRequest request) {
         Claims claims = js.isTokenValid(request);
         List<LoginRecord> loginRecords = null;
 
-        if(claims != null) {
+        if (claims != null) {
             List<String> permissionCode = claims.get("permissionCode", List.class);
-            for(String code : permissionCode) {
-                if(code.equals("login_rec_read") || code.equals("login_rec_update") || code.equals("login_rec_create") || code.equals("login_rec_delete")) {
+            if (permissionCode != null && !permissionCode.isEmpty()) {
+                if (permissionCode.stream().anyMatch(code ->
+                        code.equals("login_rec_read") ||
+                                code.equals("login_rec_update") ||
+                                code.equals("login_rec_create") ||
+                                code.equals("login_rec_delete"))) {
+
+                    // 如果有任何一個權限符合條件，返回所有記錄
                     loginRecords = lrr.findAll();
                 } else {
-                    loginRecords = lrr.findByEmployeeId(Integer.parseInt(claims.getSubject()));
+                    try {
+                        int employeeId = Integer.parseInt(claims.getSubject());
+                        loginRecords = lrr.findByEmployeeId(employeeId);
+                    } catch (NumberFormatException e) {
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                .body("Invalid employee ID format in token subject.");
+                    }
                 }
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("No permissions found in the token.");
             }
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Login record not found");
         }
-            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(loginRecords);
 
-
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(loginRecords);
     }
 
 
