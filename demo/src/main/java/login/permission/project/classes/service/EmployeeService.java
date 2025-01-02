@@ -173,9 +173,7 @@ public class EmployeeService {
            jwtUtil.validateRequest(request);
            Optional<Employee> employeeOptional = er.findById(dto.getEmployee_id());
            if(employeeOptional.isPresent()) {
-               Set<Integer> roleIds = Arrays.stream(dto.getRoleIds())
-                       .map(Integer::parseInt)
-                       .collect(Collectors.toSet());
+               Set<String> roleIds =getRoleIdSet(dto);
                Set<Role> roles = new HashSet<>(roleRepository.findAllById(roleIds));
                Employee employee = employeeOptional.get();
                employee.setRoles(roles);
@@ -187,6 +185,12 @@ public class EmployeeService {
        } catch (IllegalArgumentException e) {
            return ResponseUtil.error("你沒有設定角色的權限",HttpStatus.UNAUTHORIZED);
        }
+    }
+
+    private Set<String> getRoleIdSet (EmployeeRoleDto dto) {
+        return Arrays.stream(dto.getRoleIds())
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
     }
 
 

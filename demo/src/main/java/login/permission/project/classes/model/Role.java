@@ -20,9 +20,8 @@ public class Role {
      * 角色id,作為對對多
      */
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="role_id")
-    private int role_id;
+    private String  role_id;
 
     /**
      * 僅供標示角色名稱用
