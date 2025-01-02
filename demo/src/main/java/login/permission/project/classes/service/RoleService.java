@@ -74,7 +74,7 @@ public class RoleService {
     public ResponseEntity<?> updateRole(RoleDTO roleDto, HttpServletRequest request) {
         try{
             jwtUtil.validateRequest(request);
-            Optional<Role> roleOption = roleRepository.findById(roleDto.getRole_id());
+            Optional<Role> roleOption = roleRepository.findById(roleDto.getId());
             if(roleOption.isPresent()) {
                 Role role = roleOption.get();
                 setupRole(role, roleDto);
@@ -93,6 +93,7 @@ public class RoleService {
      *  更新Role(角色)的方法,設定Role名稱與Role的多對多關聯
      */
     private void setupRole(Role role, RoleDTO roleDto) {
+        role.setRole_id(roleDto.getId());
         role.setRole(roleDto.getRoleName());
         role.setPermissions(getPermissionsFromIds(roleDto.getPermission_id()));
     }

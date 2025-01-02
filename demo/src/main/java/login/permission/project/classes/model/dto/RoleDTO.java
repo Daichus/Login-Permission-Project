@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 public class RoleDTO {
 
-    private int role_id;
+    private String id;
 
     private String roleName;
 
