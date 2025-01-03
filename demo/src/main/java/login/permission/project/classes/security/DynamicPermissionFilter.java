@@ -20,19 +20,22 @@ public class DynamicPermissionFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        // 獲取 `requestPermissionCode`，支持 JSON 格式或 query parameter 格式
-        String[] requestPermissionCode = request.getParameterValues("requestPermissionCode");
+        // 從自定義 Header 中提取權限代碼
+        String permissionCodeHeader = request.getHeader("X-Request-Permission-Code");
 
-        // 如果有傳入 `requestPermissionCode`
-        if (requestPermissionCode != null) {
+        if (permissionCodeHeader != null && !permissionCodeHeader.isEmpty()) {
+            // 將權限代碼分割成列表
+            String[] requestPermissionCodes = permissionCodeHeader.split(",");
+
+            // 獲取當前認證信息
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-            // 確保用戶已經認證
             if (authentication != null && authentication.isAuthenticated()) {
-                // 動態添加權限
                 Collection<GrantedAuthority> authorities = new ArrayList<>(authentication.getAuthorities());
-                for (String code : requestPermissionCode) {
-                    authorities.add(new SimpleGrantedAuthority(code));
+
+                // 動態添加權限
+                for (String code : requestPermissionCodes) {
+                    authorities.add(new SimpleGrantedAuthority(code.trim()));
                 }
 
                 // 更新認證對象
@@ -42,6 +45,7 @@ public class DynamicPermissionFilter extends OncePerRequestFilter {
                         authorities
                 );
 
+                // 更新 SecurityContext
                 SecurityContextHolder.getContext().setAuthentication(updatedAuth);
             }
         }
