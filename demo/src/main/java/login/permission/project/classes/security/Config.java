@@ -80,6 +80,7 @@ public class Config {
                         )
                         .requestMatchers(HttpMethod.POST,"/role/create").hasAuthority("role_mgt_create")
                                 .requestMatchers(HttpMethod.PUT,"/role/edit").hasAuthority("role_mgt_update")
+                                .requestMatchers(HttpMethod.DELETE,"/role/delete").hasAuthority("role_mgt_delete")
                         .requestMatchers(HttpMethod.POST, "/loginRecord/**").hasAuthority("login_rec_create")
                         .requestMatchers(HttpMethod.PUT, "/loginRecord/**").hasAuthority("login_rec_update")
                         .requestMatchers(HttpMethod.DELETE, "/loginRecord/**").hasAuthority("login_rec_delete")
