@@ -114,11 +114,15 @@ public class EmployeeService {
 
     public String updateEmployee (Employee employee) {
         if(employee != null) {
-            er.save(employee);
-            return "更新員工資訊完成";
-        } else {
-            return "更新員工資訊失敗";
+            Employee existingEmployee = er.findById(employee.getEmployee_id()).orElse(null);
+            if(existingEmployee != null) {
+                // 保留原有的密碼
+                employee.setPassword(existingEmployee.getPassword());
+                er.save(employee);
+                return "更新員工資訊成功";
+            }
         }
+        return "更新員工資訊失敗";
     }
 
     public String deleteEmployee (int id) {
