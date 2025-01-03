@@ -9,47 +9,46 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/loginRecord")
 public class LoginRecordController {
 
     @Autowired
-    private LoginRecordService lrs; // 變數名稱改為 lrs
+    private LoginRecordService loginRecordService; // 變數名稱改為 lrs
 
     // 獲取所有登入記錄
     @GetMapping("/get")
     @PreAuthorize("hasAuthority('login_rec_read')")
     public List<LoginRecord> getAllLoginRecords() {
-        return lrs.getAllLoginRecords();
+        return loginRecordService.getAllLoginRecords();
     }
 
     // 新增登入記錄
     @PostMapping("/add")
     @PreAuthorize("hasAuthority('login_rec_create')")
     public String addLoginRecord(@RequestBody LoginRecord loginRecord) {
-        return lrs.addLoginRecord(loginRecord);
+        return loginRecordService.addLoginRecord(loginRecord);
     }
 
     // 修改登入記錄
     @PutMapping("/edit")
     @PreAuthorize("hasAuthority('login_rec_update')")
     public String updateLoginRecord(@RequestBody LoginRecord loginRecord) {
-        return lrs.updateLoginRecord(loginRecord);
+        return loginRecordService.updateLoginRecord(loginRecord);
     }
 
     // 刪除登入記錄
     @DeleteMapping("/delete/{id}")
     @PreAuthorize("hasAuthority('login_rec_delete')")
     public String deleteLoginRecord(@PathVariable int id) {
-        return lrs.deleteLoginRecord(id);
+        return loginRecordService.deleteLoginRecord(id);
     }
 
-    @PostMapping("/getLoginRecord")
-    @PreAuthorize("hasAuthority('login_rec_create','login_rec_read')")
-    public ResponseEntity<?> getRecordByPermissionId(HttpServletRequest request) {
-        return lrs.getRecordByPermissionCode(request);
+    @GetMapping ("/getLoginRecord/{employee_id}")
+    @PreAuthorize("hasAuthority('rec_login_read_self')")
+    public ResponseEntity<?> getRecordByPermissionId(@PathVariable int employee_id) {
+        return loginRecordService.getLoginRecordById(employee_id);
     }
 }
 
