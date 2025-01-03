@@ -1,5 +1,6 @@
 package login.permission.project.classes.security;
 import login.permission.project.classes.JwtService;
+import login.permission.project.classes.repository.EmployeeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,8 +18,15 @@ import java.util.List;
 public class Config {
 
   @Autowired
-  private JwtService jwtService;
 
+    private final JwtService jwtService;
+    private final EmployeeRepository employeeRepository;
+
+
+    public Config(JwtService jwtService, EmployeeRepository employeeRepository) {
+        this.jwtService = jwtService;
+        this.employeeRepository = employeeRepository;
+    }
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
         http
@@ -78,8 +86,8 @@ public class Config {
 
 //                        .anyRequest().denyAll()
                 )
-                .addFilterBefore(new JwtAuthFilter(jwtService), UsernamePasswordAuthenticationFilter.class)
-                .addFilterAfter(new DynamicPermissionFilter(), JwtAuthFilter.class)
+                .addFilterBefore(new JwtAuthFilter(jwtService, employeeRepository), UsernamePasswordAuthenticationFilter.class)
+
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
