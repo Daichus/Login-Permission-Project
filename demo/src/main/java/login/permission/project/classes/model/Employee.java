@@ -40,6 +40,7 @@ public class Employee {
     @Column(name = "verification_token")
     private String verificationToken;  // 驗證碼
 
+//    @Column(name="department")
 
 //一對多與多對多關聯表
     @ManyToOne(fetch = FetchType.EAGER)
