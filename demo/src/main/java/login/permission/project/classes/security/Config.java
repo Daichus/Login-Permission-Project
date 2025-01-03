@@ -55,7 +55,7 @@ public class Config {
                                         "/Permission/test/get",
                                         "/Position/get",
                                 "/status/test/get",
-                                        "/employee/test/getAllEmployeeInfo",
+                                        "/employee/test/get",
                                         "/role/getAll"
                                 ).permitAll()
 
