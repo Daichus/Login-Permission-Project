@@ -43,8 +43,8 @@ public class Config {
                 }))
                 .authorizeHttpRequests(auth -> auth
 
-                        // 允許不需要驗證的端點
-                        // 登入和註冊不需要權限
+//                        // 允許不需要驗證的端點
+//                        // 登入和註冊不需要權限
                         .requestMatchers(
                                 "/employee/test/login",
                                 "/employee/test/add"   // 添加註冊端點
@@ -71,19 +71,22 @@ public class Config {
                         .requestMatchers(HttpMethod.PUT, "/unit/**").hasAuthority("unit_mgt_update")
                         .requestMatchers(HttpMethod.DELETE, "/unit/**").hasAuthority("unit_mgt_delete")
 
-                        // 登入記錄相關權限
-                        .requestMatchers(HttpMethod.GET, "/loginRecord/**").hasAnyAuthority(
-                                "login_rec_read",
-                                "login_rec_read_id",
-                                "login_rec_read_dept",
-                                "login_rec_read_unit"
+
+                        .requestMatchers(HttpMethod.GET, "/api/loginRecord/**").hasAnyAuthority(
+
+                                "rec_login_read",
+                                "rec_login_read_id",
+                                "rec_login_read_dept",
+                                "rec_login_read_unit"
                         )
+
                         .requestMatchers(HttpMethod.POST,"/role/create").hasAuthority("role_mgt_create")
                                 .requestMatchers(HttpMethod.PUT,"/role/edit").hasAuthority("role_mgt_update")
                                 .requestMatchers(HttpMethod.DELETE,"/role/delete").hasAuthority("role_mgt_delete")
-                        .requestMatchers(HttpMethod.POST, "/loginRecord/**").hasAuthority("login_rec_create")
-                        .requestMatchers(HttpMethod.PUT, "/loginRecord/**").hasAuthority("login_rec_update")
-                        .requestMatchers(HttpMethod.DELETE, "/loginRecord/**").hasAuthority("login_rec_delete")
+                        .requestMatchers(HttpMethod.POST, "/api/loginRecord/**").hasAuthority("rec_login_create")
+                        .requestMatchers(HttpMethod.PUT, "/api/loginRecord/**").hasAuthority("rec_login_update")
+                        .requestMatchers(HttpMethod.DELETE, "/api/loginRecord/**").hasAuthority("rec_login_delete")
+                                .requestMatchers(HttpMethod.GET,"/api/loginRecord/getLoginRecord/**").hasAuthority("rec_login_read_self")
                                 // 其他請求需要認證
                                 .anyRequest().authenticated()
 
