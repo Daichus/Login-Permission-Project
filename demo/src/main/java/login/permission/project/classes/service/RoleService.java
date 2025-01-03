@@ -48,15 +48,14 @@ public class RoleService {
      * }資料的body,這筆資料需要用於創建新的Role
      */
     public ResponseEntity<?> createRole (RoleDTO roleDto, HttpServletRequest request) {
-        try {
-            jwtUtil.validateRequest(request);
-            Role role = new Role();
-            setupRole(role, roleDto);
-            roleRepository.save(role);
-            return  ResponseUtil.success("新增角色成功",  HttpStatus.OK);
-        } catch ( IllegalArgumentException e) {
-            return  ResponseUtil.error("你沒有新增角色的權限",  HttpStatus.UNAUTHORIZED);
-        }
+        Role newRole = new Role();
+        Integer maxRoleId = roleRepository.findMaxRoleId();
+        int newRoleId = (maxRoleId == null ? 1 : maxRoleId + 1);
+        newRole.setRole_id(newRoleId); // 生成主鍵
+        newRole.setRole(roleDto.getRoleName());
+        newRole.setPermissions(getPermissionsFromIds(roleDto.getPermission_id()));
+        roleRepository.save(newRole);
+        return ResponseUtil.success("新增角色成功", HttpStatus.CREATED);
 
     }
 
@@ -72,23 +71,27 @@ public class RoleService {
      *      的資料
      */
     public ResponseEntity<?> updateRole(RoleDTO roleDto, HttpServletRequest request) {
-        try{
-            jwtUtil.validateRequest(request);
-            Optional<Role> roleOption = roleRepository.findById(roleDto.getRole_id());
-            if(roleOption.isPresent()) {
-                Role role = roleOption.get();
-                setupRole(role, roleDto);
-                roleRepository.save(role);
-                return ResponseUtil.success("修改角色成功",  HttpStatus.OK);
-            } else {
-                return   ResponseUtil.error("找不到指定id的角色",  HttpStatus.NOT_FOUND);
-            }
-        } catch (IllegalArgumentException e) {
-            return   ResponseUtil.error("你沒有修改角色的權限",  HttpStatus.UNAUTHORIZED);
+        Optional<Role> roleOption = roleRepository.findById(roleDto.getRole_id());
+        if (roleOption.isPresent()) {
+            Role role = roleOption.get();
+            setupRole(role, roleDto); // 僅更新名稱和權限
+            roleRepository.save(role);
+            return ResponseUtil.success("修改角色成功", HttpStatus.OK);
+        } else {
+            return ResponseUtil.error("找不到指定id的角色", HttpStatus.NOT_FOUND);
         }
     }
 
 
+    public ResponseEntity<?> deleteRole (int role_id){
+        Optional<Role> roleOption = roleRepository.findById(role_id);
+        if(roleOption.isPresent()) {
+            roleRepository.deleteById(role_id);
+            return ResponseUtil.success("刪除角色成功", HttpStatus.OK);
+        } else {
+            return ResponseUtil.error("找不到指定id的角色", HttpStatus.NOT_FOUND);
+        }
+    }
     /**
      *  更新Role(角色)的方法,設定Role名稱與Role的多對多關聯
      */
@@ -96,6 +99,8 @@ public class RoleService {
         role.setRole(roleDto.getRoleName());
         role.setPermissions(getPermissionsFromIds(roleDto.getPermission_id()));
     }
+
+
 
 
     /**

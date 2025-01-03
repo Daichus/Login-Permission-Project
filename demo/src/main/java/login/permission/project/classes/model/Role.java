@@ -21,7 +21,7 @@ public class Role {
      */
     @Id
     @Column(name="role_id")
-    private String  role_id;
+    private int  role_id;
 
     /**
      * 僅供標示角色名稱用

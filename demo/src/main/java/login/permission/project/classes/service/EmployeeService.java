@@ -173,7 +173,7 @@ public class EmployeeService {
            jwtUtil.validateRequest(request);
            Optional<Employee> employeeOptional = er.findById(dto.getEmployee_id());
            if(employeeOptional.isPresent()) {
-               Set<String> roleIds =getRoleIdSet(dto);
+               Set<Integer> roleIds = getRoleIdSet(dto);
                Set<Role> roles = new HashSet<>(roleRepository.findAllById(roleIds));
                Employee employee = employeeOptional.get();
                employee.setRoles(roles);
@@ -187,9 +187,10 @@ public class EmployeeService {
        }
     }
 
-    private Set<String> getRoleIdSet (EmployeeRoleDto dto) {
+    private Set<Integer> getRoleIdSet (EmployeeRoleDto dto) {
         return Arrays.stream(dto.getRoleIds())
-                .filter(Objects::nonNull)
+                .filter(Objects::nonNull) // 排除空值
+                .map(Integer::valueOf) // 将 String 转换为 Integer
                 .collect(Collectors.toSet());
     }
 
