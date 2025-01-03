@@ -16,4 +16,5 @@ public class RoleDTO {
 
     private String [] permission_id;
 
+    private String [] requestPermissionCode;
 }

@@ -14,4 +14,6 @@ public class EmployeeRoleDto {
 
     private String [] roleIds;
 
+    private String [] requestPermissionCode;
+
 }
