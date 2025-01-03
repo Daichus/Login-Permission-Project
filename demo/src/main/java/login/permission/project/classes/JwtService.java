@@ -46,20 +46,23 @@ public class JwtService {
      */
     public String generateToken(String employeeId,int recordId) {
 
-        Map<String, Object> userData = new HashMap<>();
-        userData.put("loginRecordId",recordId);
-        userData.put("permissionCode",new String[]{});
 
-        Date expDate = new Date(System.currentTimeMillis() + EXPIRATION_TIME);
+            Map<String, Object> userData = new HashMap<>();
+            userData.put("loginRecordId",recordId);
+            userData.put("permissionCode",new String[]{});
 
-        return Jwts.builder()
-                .setClaims(userData)
-                .setIssuer("Fcu 113-1 CSIE Team 2")
-                .setSubject(employeeId )
-                .setIssuedAt(new Date())
-                .setExpiration(expDate)
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
-                .compact();
+            Date expDate = new Date(System.currentTimeMillis() + EXPIRATION_TIME);
+
+            return Jwts.builder()
+                    .setClaims(userData)
+                    .setIssuer("Fcu 113-1 CSIE Team 2")
+                    .setSubject(employeeId )
+                    .setIssuedAt(new Date())
+                    .setExpiration(expDate)
+                    .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                    .compact();
+
+
     }
 
     // 獲取簽名的 Key,Key僅為後端所擁有

@@ -178,11 +178,12 @@ public class EmployeeService {
 
            jwtUtil.validateRequest(request);
            Optional<Employee> employeeOptional = er.findById(dto.getEmployee_id());
-           if(employeeOptional.isPresent()) {
-               Set<Integer> roleIds = Arrays.stream(dto.getRoleIds())
-                       .map(Integer::parseInt)
+           if (employeeOptional.isPresent()) {
+
+               Set<String> roleIds = Arrays.stream(dto.getRoleIds())
                        .collect(Collectors.toSet());
                Set<Role> roles = new HashSet<>(roleRepository.findAllById(roleIds));
+
                Employee employee = employeeOptional.get();
                employee.setRoles(roles);
                er.save(employee);
