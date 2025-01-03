@@ -78,7 +78,8 @@ public class Config {
 
 //                        .anyRequest().denyAll()
                 )
-               .addFilterBefore(new DynamicPermissionFilter(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtAuthFilter(jwtService), UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(new DynamicPermissionFilter(), JwtAuthFilter.class)
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
