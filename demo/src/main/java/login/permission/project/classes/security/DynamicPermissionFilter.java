@@ -20,37 +20,29 @@ public class DynamicPermissionFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        // 從自定義 Header 中提取權限代碼
         String permissionCodeHeader = request.getHeader("X-Request-Permission-Code");
 
         if (permissionCodeHeader != null && !permissionCodeHeader.isEmpty()) {
-            // 將權限代碼分割成列表
+            // 將權限代碼分割為數組
             String[] requestPermissionCodes = permissionCodeHeader.split(",");
 
-            // 獲取當前認證信息
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-            if (authentication != null && authentication.isAuthenticated()) {
-                Collection<GrantedAuthority> authorities = new ArrayList<>(authentication.getAuthorities());
-
-                // 動態添加權限
-                for (String code : requestPermissionCodes) {
-                    authorities.add(new SimpleGrantedAuthority(code.trim()));
-                }
-
-                // 更新認證對象
-                Authentication updatedAuth = new UsernamePasswordAuthenticationToken(
-                        authentication.getPrincipal(),
-                        authentication.getCredentials(),
-                        authorities
-                );
-
-                // 更新 SecurityContext
-                SecurityContextHolder.getContext().setAuthentication(updatedAuth);
+            // 構建權限列表
+            Collection<GrantedAuthority> authorities = new ArrayList<>();
+            for (String code : requestPermissionCodes) {
+                authorities.add(new SimpleGrantedAuthority(code.trim()));
             }
+
+            // 將權限應用到 SecurityContext（不依賴 JWT）
+            Authentication authentication = new UsernamePasswordAuthenticationToken(
+                    null, // 沒有 Principal
+                    null, // 沒有 Credentials
+                    authorities
+            );
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         }
 
         // 繼續處理請求
         filterChain.doFilter(request, response);
     }
+
 }
