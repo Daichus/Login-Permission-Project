@@ -31,5 +31,7 @@ public class Position {
     @JoinColumn(name = "unit_id", insertable = false, updatable = false)
     private Unit unit;
 
+    @OneToMany(mappedBy = "position", fetch = FetchType.LAZY)
+    private Set<Employee> employees;
 
 }

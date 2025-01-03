@@ -26,4 +26,7 @@ public class Department {
 
     @OneToMany(mappedBy = "department")
     private Set<Unit> units;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "department")
+    private Set<Employee> employees;
 }
