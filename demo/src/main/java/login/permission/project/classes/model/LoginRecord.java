@@ -1,6 +1,7 @@
 package login.permission.project.classes.model;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -47,7 +48,8 @@ public class LoginRecord {
     @Column(name = "status")
     private String status;
 
-    @ManyToOne
+    @JsonBackReference
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "employee_id", insertable = false, updatable = false)
     private Employee employee;
 }
