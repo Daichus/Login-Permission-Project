@@ -19,40 +19,40 @@ import org.springframework.web.bind.annotation.*;
 public class EmployeeController {
 
     @Autowired
-    EmployeeService es;
+    EmployeeService employeeService;
 
     @Autowired
     LoginRecordService lrs;
 
     @GetMapping("/get")
     public ResponseEntity<?> getAllEmployees(HttpServletRequest request) {
-        return es.getAllEmployees( request);
+        return employeeService.getAllEmployees( request);
     }
 
     @PostMapping("/login")
     @CrossOrigin("http://localhost:5173/")
     public ResponseEntity<?> login (@RequestBody EmployeeLoginRequest request) {
-        return  es.login(request);
+        return  employeeService.login(request);
     }
 
     @PostMapping("/getEmployeeById/{id}")
     public ResponseEntity<?> getEmployeeById(@PathVariable int id,HttpServletRequest request) {
-        return es.getEmployeeById(id,request);
+        return employeeService.getEmployeeById(id,request);
     }
 
     @PostMapping("/add")
     public String addEmployee(@RequestBody Employee employee) {
-        return es.addEmployee(employee);
+        return employeeService.addEmployee(employee);
     }
 
     @PutMapping("/edit")
     public String updateDepartment (@RequestBody Employee employee) {
-        return es.updateEmployee(employee);
+        return employeeService.updateEmployee(employee);
     }
 
     @DeleteMapping("/delete/{id}")
     public String deleteStudent(@PathVariable int id) {
-        return es.deleteEmployee(id);
+        return employeeService.deleteEmployee(id);
     }
 
     @PostMapping("/logout")
@@ -60,13 +60,13 @@ public class EmployeeController {
         return lrs.updateLogoutTime(request);
     }
 
-    @PostMapping("/setRole")
-    public ResponseEntity<?> setEmployeeRole (@RequestBody EmployeeRoleDto dto, HttpServletRequest request) {
-            return es.setEmployeeRole(dto,request);
+    @PutMapping("/update")
+    public ResponseEntity<?> updateEmployee (@RequestBody EmployeeRoleDto dto ) {
+            return employeeService.updateEmployee(dto);
     }
 
     @GetMapping("/verify")
     public String verifyAccount(@RequestParam String token) {
-        return es.verifyAccount(token);
+        return employeeService.verifyAccount(token);
     }
 }

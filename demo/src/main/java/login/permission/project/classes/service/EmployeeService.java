@@ -172,23 +172,22 @@ public class EmployeeService {
      * 的body, JPA將會根據role id尋找相對應的所有Role
      * ,回傳一個Set<Role>,並進行更新員工的角色多對多關聯
      */
-    public ResponseEntity<?> setEmployeeRole (EmployeeRoleDto dto, HttpServletRequest request) {
-       try {
-           jwtUtil.validateRequest(request);
+    public ResponseEntity<?> updateEmployee(EmployeeRoleDto dto ) {
            Optional<Employee> employeeOptional = er.findById(dto.getEmployee_id());
            if(employeeOptional.isPresent()) {
                Set<Integer> roleIds = getRoleIdSet(dto);
                Set<Role> roles = new HashSet<>(roleRepository.findAllById(roleIds));
                Employee employee = employeeOptional.get();
                employee.setRoles(roles);
+               employee.setName(dto.getName());
+               employee.setEmail(dto.getEmail());
+               employee.setPhoneNumber(dto.getPhoneNumber());
                er.save(employee);
                return ResponseUtil.error("設定員工角色成功",HttpStatus.OK);
            } else {
                return ResponseUtil.error("找不到指定id的員工",HttpStatus.NOT_FOUND);
            }
-       } catch (IllegalArgumentException e) {
-           return ResponseUtil.error("你沒有設定角色的權限",HttpStatus.UNAUTHORIZED);
-       }
+
     }
 
     private Set<Integer> getRoleIdSet (EmployeeRoleDto dto) {
