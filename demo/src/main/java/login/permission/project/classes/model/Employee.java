@@ -1,5 +1,6 @@
 package login.permission.project.classes.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -61,6 +62,7 @@ public class Employee {
     )
     private Set<Role> roles;
 
+    @JsonManagedReference
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "employee")
     private Set<LoginRecord> loginRecords;
 

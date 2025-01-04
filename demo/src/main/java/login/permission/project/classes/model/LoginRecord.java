@@ -48,7 +48,6 @@ public class LoginRecord {
     @Column(name = "status")
     private String status;
 
-    @JsonBackReference
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "employee_id", insertable = false, updatable = false)
     private Employee employee;
