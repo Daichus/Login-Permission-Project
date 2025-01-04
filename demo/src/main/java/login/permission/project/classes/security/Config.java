@@ -66,10 +66,10 @@ public class Config {
                         .requestMatchers(HttpMethod.DELETE, "/department/**").hasAuthority("dept_mgt_delete")
 
                         // 單位管理相關權限
-                        .requestMatchers(HttpMethod.GET, "/unit/**").hasAuthority("unit_mgt_read")
-                        .requestMatchers(HttpMethod.POST, "/unit/**").hasAuthority("unit_mgt_create")
-                        .requestMatchers(HttpMethod.PUT, "/unit/**").hasAuthority("unit_mgt_update")
-                        .requestMatchers(HttpMethod.DELETE, "/unit/**").hasAuthority("unit_mgt_delete")
+                        .requestMatchers(HttpMethod.GET, "/unit/test/get").hasAuthority("unit_mgt_read")
+                        .requestMatchers(HttpMethod.POST, "/unit/test/add").hasAuthority("unit_mgt_create")
+                        .requestMatchers(HttpMethod.PUT, "/unit/test/edit").hasAuthority("unit_mgt_update")
+                        .requestMatchers(HttpMethod.DELETE, "/unit/test/**").hasAuthority("unit_mgt_delete")
 
 
                         .requestMatchers(HttpMethod.GET, "/api/loginRecord/**").hasAnyAuthority(

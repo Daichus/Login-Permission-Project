@@ -15,6 +15,7 @@ import java.util.Set;
 @Table(name="Unit")
 public class Unit {
 
+    //非自動添加
     @Id
     @Column(name="unit_id")
     private int unit_id;
