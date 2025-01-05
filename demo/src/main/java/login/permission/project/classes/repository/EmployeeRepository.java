@@ -25,9 +25,14 @@ public interface EmployeeRepository extends JpaRepository<Employee, Integer> {
 
 
 
-    //驗證 Mail
+    // 註冊驗證 Mail
     Optional<Employee> findByVerificationToken(String token);
 
     @Query("SELECT MAX(e.employee_id) FROM Employee e")
     Integer findMaxEmployeeId();
+
+    // 忘記密碼，找到該員工 Email
+    Optional<Employee> findByEmail(String email);
+    // 忘記密碼後，Email確認後，有一個重置密碼驗證碼
+    Optional<Employee> findByResetPasswordToken(String token);
 }

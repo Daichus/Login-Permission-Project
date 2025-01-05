@@ -15,7 +15,11 @@ import java.time.format.DateTimeFormatter;
 public class EmailService {
   private final JavaMailSender mailSender;
 
-  // 驗證郵件方法
+  /**
+   *
+   * 員工註冊
+   * 驗證郵件方法
+   */
   public void sendVerificationEmail(String to, String token) {
     SimpleMailMessage message = new SimpleMailMessage();
     message.setFrom("wwwhow37@gamil.com"); // 設定寄件者
@@ -35,7 +39,12 @@ public class EmailService {
     }
   }
 
-  // 登入系統，通知郵件方法
+
+  /**
+   *
+   * 登入系統
+   * 通知郵件方法
+   */
   public void sendLoginNotification(Employee employee) {
     SimpleMailMessage message = new SimpleMailMessage();
     message.setFrom("wwwhow37@gamil.com");
@@ -75,6 +84,30 @@ public class EmailService {
     } catch (MailException e) {
       // 這裡我們可以只記錄錯誤而不拋出異常，因為這不應該影響登入流程
       System.err.println("登入通知郵件發送失敗: " + e.getMessage());
+    }
+  }
+
+
+  /**
+   *
+   * 忘記密碼
+   * 發送重置密碼郵件的方法
+   */
+  public void sendResetPasswordEmail(String to, String token) {
+    SimpleMailMessage message = new SimpleMailMessage();
+    message.setFrom("wwwhow37@gamil.com");
+    message.setTo(to);
+    message.setSubject("密碼重置請求");
+    message.setText("親愛的員工，您好：\n\n"
+            + "我們收到了您的密碼重置請求。請點擊以下連結重置您的密碼：\n"
+            + "http://localhost:5173/reset-password?token=" + token + "\n\n"
+            + "此連結有效期為1小時，請儘速完成密碼重置。\n"
+            + "如果這不是您發起的請求，請忽略此郵件。");
+
+    try {
+      mailSender.send(message);
+    } catch (MailException e) {
+      throw new RuntimeException("郵件發送失敗: " + e.getMessage());
     }
   }
 

@@ -173,6 +173,52 @@ public class EmployeeService {
         return ResponseUtil.error("找不到用戶",HttpStatus.NOT_FOUND);
     }
 
+    /**
+     *
+     * 忘記密碼
+     * 發送重置密碼郵件
+     */
+    public ResponseEntity<?> requestPasswordReset(String email) {
+        Optional<Employee> employeeOpt = er.findByEmail(email);
+        if (employeeOpt.isEmpty()) {
+            return ResponseUtil.error("找不到該 Email 對應的員工", HttpStatus.NOT_FOUND);
+        }
+
+        Employee employee = employeeOpt.get();
+        String token = UUID.randomUUID().toString();
+        employee.setResetPasswordToken(token);
+        employee.setResetPasswordTokenExpiry(LocalDateTime.now().plusHours(1));
+        er.save(employee);
+
+        try {
+            emailService.sendResetPasswordEmail(email, token);
+            return ResponseUtil.success("重置密碼郵件已發送", null);
+        } catch (Exception e) {
+            return ResponseUtil.error("郵件發送失敗", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    // 驗證重置密碼的 token 並更新密碼
+    public ResponseEntity<?> resetPassword(String token, String newPassword) {
+        Optional<Employee> employeeOpt = er.findByResetPasswordToken(token);
+        if (employeeOpt.isEmpty()) {
+            return ResponseUtil.error("無效的重置連結", HttpStatus.BAD_REQUEST);
+        }
+
+        Employee employee = employeeOpt.get();
+        if (employee.getResetPasswordTokenExpiry().isBefore(LocalDateTime.now())) {
+            return ResponseUtil.error("重置連結已過期", HttpStatus.BAD_REQUEST);
+        }
+
+        // 更新密碼
+        employee.setPassword(newPassword);
+        employee.setResetPasswordToken(null);
+        employee.setResetPasswordTokenExpiry(null);
+        er.save(employee);
+
+        return ResponseUtil.success("密碼重置成功", null);
+    }
+
 
     /**
      *此方法用於設定員工的角色, 前端應傳送結構為:

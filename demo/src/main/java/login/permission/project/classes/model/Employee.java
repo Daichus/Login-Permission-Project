@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Entity
@@ -39,7 +40,13 @@ public class Employee {
     private boolean enabled = false;  // 是否已驗證
 
     @Column(name = "verification_token")
-    private String verificationToken;  // 驗證碼
+    private String verificationToken;  // 註冊，Email驗證後會返回的驗證碼
+
+    @Column(name = "reset_password_token")
+    private String resetPasswordToken;  // 忘記密碼，重置密碼要使用的 token
+
+    @Column(name = "reset_password_token_expiry")
+    private LocalDateTime resetPasswordTokenExpiry;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "department_id", referencedColumnName = "department_id") // 外鍵列

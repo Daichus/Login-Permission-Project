@@ -57,6 +57,8 @@ public class Config {
                                 "/status/test/get",
                                         "/employee/test/get",
                                         "/employee/test/verify",
+                                        "/employee/test/forgot-password",
+                                        "/employee/test/reset-password",
                                         "/role/getAll"
                                 ).permitAll()
 
