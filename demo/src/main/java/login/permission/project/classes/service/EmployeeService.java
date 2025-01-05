@@ -216,7 +216,7 @@ public class EmployeeService {
         employee.setResetPasswordTokenExpiry(null);
         er.save(employee);
 
-        return ResponseUtil.success("密碼重置成功", null);
+        return ResponseEntity.ok(Map.of("success", true, "message", "密碼重置成功"));
     }
 
 
