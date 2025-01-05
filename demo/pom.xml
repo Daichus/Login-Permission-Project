@@ -88,6 +88,12 @@
 			<artifactId>spring-boot-starter-mail</artifactId>
 			<version>3.3.4</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-java -->
+		<dependency>
+			<groupId>org.seleniumhq.selenium</groupId>
+			<artifactId>selenium-java</artifactId>
+			<version>4.27.0</version>
+		</dependency>
 
 	</dependencies>
 
