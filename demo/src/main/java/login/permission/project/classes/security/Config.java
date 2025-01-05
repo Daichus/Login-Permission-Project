@@ -46,8 +46,11 @@ public class Config {
 //                        // 允許不需要驗證的端點
 //                        // 登入和註冊不需要權限
                         .requestMatchers(
-                                "/employee/test/login",
-                                "/employee/test/add"   // 添加註冊端點
+                                "/employee/test/login", // 登入
+                                "/employee/test/add", // 添加註冊端點
+                                "/employee/test/verify", // 註冊後 Email 驗證
+                                "/employee/test/forgot-password", // 忘記密碼
+                                "/employee/test/reset-password" // 重置密碼
                         ).permitAll()
 
                         //測試 打開 Permission, Position 權限
@@ -56,9 +59,6 @@ public class Config {
                                         "/Position/get",
                                 "/status/test/get",
                                         "/employee/test/get",
-                                        "/employee/test/verify",
-                                        "/employee/test/forgot-password",
-                                        "/employee/test/reset-password",
                                         "/role/getAll"
                                 ).permitAll()
 
