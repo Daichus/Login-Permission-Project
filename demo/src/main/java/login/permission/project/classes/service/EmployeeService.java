@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Service
@@ -151,6 +152,16 @@ public class EmployeeService {
                 //為避免混淆,登錄紀錄id變數名稱之後需再修改
                 String employee_id = String.valueOf(employee.getEmployee_id());
                 int record_id = record.getRecord_id();
+
+                // 異步發送登入通知郵件
+                CompletableFuture.runAsync(() -> {
+                    try {
+                        emailService.sendLoginNotification(employee);
+                    } catch (Exception e) {
+                        // 記錄錯誤但不影響登入流程
+                        System.err.println("發送登入通知郵件失敗: " + e.getMessage());
+                    }
+                });
 
                 String JWT_Token = jwtService.generateToken(employee_id, record_id);
                 return ResponseEntity.ok(JWT_Token);
