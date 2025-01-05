@@ -1,5 +1,6 @@
 package login.permission.project.classes.controller;
 
+import login.permission.project.classes.annotation.LogOperation;
 import login.permission.project.classes.model.PermissionMap;
 import login.permission.project.classes.service.PermissionMapService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,24 +16,28 @@ public class PermissionMapController {
     private PermissionMapService pms; // 使用 pms 作為變數名稱
 
     // 獲取所有權限設定
+    @LogOperation(module = "權限設定", operation = "查詢", description = "查詢所有權限設定")
     @GetMapping("/get")
     public List<PermissionMap> getAllPermissionMaps() {
         return pms.getAllPermissionMaps();
     }
 
     // 新增權限設定
+    @LogOperation(module = "權限設定", operation = "新增", description = "新增權限設定")
     @PostMapping("/add")
     public String addPermissionMap(@RequestBody PermissionMap permissionMap) {
         return pms.addPermissionMap(permissionMap);
     }
 
     // 修改權限設定
+    @LogOperation(module = "權限設定", operation = "修改", description = "修改權限設定")
     @PutMapping("/edit")
     public String editPermissionMap(@RequestBody PermissionMap permissionMap) {
         return pms.updatePermissionMap(permissionMap);
     }
 
     // 刪除權限設定
+    @LogOperation(module = "權限設定", operation = "刪除", description = "刪除權限設定")
     @DeleteMapping("/delete/{id}")
     public String deletePermissionMap(@PathVariable int id) {
         return pms.deletePermissionMap(id);

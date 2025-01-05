@@ -61,6 +61,8 @@ public class Config {
                                         "/employee/test/get",
                                         "/role/getAll"
                                 ).permitAll()
+                        // 操作日誌相關權限
+                        .requestMatchers(HttpMethod.GET, "/api/logs/**").hasAuthority("rec_audit_log_read")
 
                         // 部門管理相關權限
                         .requestMatchers(HttpMethod.GET, "/department/**").hasAuthority("dept_mgt_read")
