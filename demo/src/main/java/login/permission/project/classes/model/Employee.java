@@ -62,7 +62,7 @@ public class Employee {
     )
     private Set<Role> roles;
 
-    @JsonManagedReference
+//    @JsonManagedReference
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "employee")
     private Set<LoginRecord> loginRecords;
 
