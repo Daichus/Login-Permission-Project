@@ -125,6 +125,18 @@ class DemoApplicationTests {
 			"http://localhost:5173/Profile#settings",
 			"http://localhost:5173/Home#dashboard",
 			"http://localhost:5173/department-announcements#details",
+			"http://localhost:5173/Profile#/admin/dashboard",
+			"http://localhost:5173/Home#/Profile/settings",
+			"http://localhost:5173/Profile#/../admin",
+			//特殊字符
+			"http://localhost:5173/Profile//",
+			"http://localhost:5173//Profile",
+			"http://localhost:5173/Profile/%20/",
+			"http://localhost:5173/Profile%20",
+			//大小寫
+			"http://localhost:5173/PROFILE",
+			"http://localhost:5173/proFile",
+			"http://localhost:5173/HOME",
 	})
 	void testRouterGuard(String url) throws InterruptedException {
 		driver.get(url);
