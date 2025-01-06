@@ -55,9 +55,9 @@ public class EmployeeService {
         try{
             jwtUtil.validateRequest(request);
             List<Employee> employees = employeeRepository.findAll();
-            for(Employee employee : employees) {
-                employee.setPassword("NaN");
-            }
+//            for(Employee employee : employees) {
+//                employee.setPassword("NaN");
+//            }
             return ResponseUtil.success("獲取員工資訊成功",employees);
         } catch (IllegalArgumentException e) {
             return ResponseUtil.error("你沒有獲取員工資訊的權限",HttpStatus.UNAUTHORIZED);
@@ -70,7 +70,7 @@ public class EmployeeService {
             Optional<Employee> employeeOption = employeeRepository.findById(id);
             if(employeeOption.isPresent()) {
                 Employee employee = employeeOption.get();
-                employee.setPassword("NaN");
+//                employee.setPassword("NaN");
                 return ResponseUtil.success("獲取員工資訊成功",employee);
             } else {
                 return ResponseUtil.error("找不到指定的員工",HttpStatus.NOT_FOUND);
@@ -285,7 +285,7 @@ public class EmployeeService {
                     .ifPresent(employee::setPosition);
         }
         // 更新狀態（多對一）
-        if(dto.getStatus_id() > 0) {
+        if(dto.getStatus_id() >= 0) {
             statusRepository.findById(dto.getStatus_id())
                     .ifPresent(employee::setEmployeeStatus);
         }
