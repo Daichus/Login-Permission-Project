@@ -47,7 +47,11 @@ public class OperationLogAspect {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null) {
             operationLog.setUserId(authentication.getName());  // 假設用戶名就是userId
-            operationLog.setUsername(employeeService.getEmployeeNameById(authentication.getName()));
+            operationLog.setUsername(
+                    "anonymousUser".equals(authentication.getName())
+                            ? authentication.getName()
+                            : employeeService.getEmployeeNameById(authentication.getName())
+            );
         }
         
         // 獲取請求IP
