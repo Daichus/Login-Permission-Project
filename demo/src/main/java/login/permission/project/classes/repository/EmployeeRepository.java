@@ -22,7 +22,8 @@ public interface EmployeeRepository extends JpaRepository<Employee, Integer> {
             "WHERE e.employee_id = :employee_id")
     List<String> getPermissionById(@Param("employee_id") int employee_id);
 
-
+    @Query("SELECT e.name FROM Employee e WHERE e.employee_id = :id")
+    Optional<String> findNameById(@Param("id") String id);
 
 
     // 註冊驗證 Mail
