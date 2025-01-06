@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 public class EmployeeService {
 
     @Autowired
-    EmployeeRepository er;
+    EmployeeRepository employeeRepository;
 
     @Autowired
     LoginRecordRepository logRecRepository;
@@ -54,7 +54,7 @@ public class EmployeeService {
     public ResponseEntity<?> getAllEmployees(HttpServletRequest request) {
         try{
             jwtUtil.validateRequest(request);
-            List<Employee> employees = er.findAll();
+            List<Employee> employees = employeeRepository.findAll();
             for(Employee employee : employees) {
                 employee.setPassword("NaN");
             }
@@ -67,7 +67,7 @@ public class EmployeeService {
     public ResponseEntity<?> getEmployeeById(int id, HttpServletRequest request){
         try{
             jwtUtil.validateRequest(request);
-            Optional<Employee> employeeOption = er.findById(id);
+            Optional<Employee> employeeOption = employeeRepository.findById(id);
             if(employeeOption.isPresent()) {
                 Employee employee = employeeOption.get();
                 employee.setPassword("NaN");
@@ -83,7 +83,7 @@ public class EmployeeService {
     public String addEmployee (Employee employee) {
         if(employee != null){
             // 查詢最大的 employee_id
-            Integer maxId = er.findMaxEmployeeId();
+            Integer maxId = employeeRepository.findMaxEmployeeId();
             // 如果沒有記錄，從 1 開始，否則 +1
             int newId = (maxId == null) ? 1 : maxId + 1;
             employee.setEmployee_id(newId);
@@ -94,7 +94,7 @@ public class EmployeeService {
             employee.setEnabled(false); // 預設為未驗證
 
             // 保存員工資訊
-            er.save(employee);
+            employeeRepository.save(employee);
 
             // 發送驗證郵件
             try {
@@ -112,12 +112,12 @@ public class EmployeeService {
 
     // 驗證帳號
     public String verifyAccount(String token) {
-        Optional<Employee> employeeOptional = er.findByVerificationToken(token);
+        Optional<Employee> employeeOptional = employeeRepository.findByVerificationToken(token);
         if (employeeOptional.isPresent()) {
             Employee employee = employeeOptional.get();
             employee.setEnabled(true);
             employee.setVerificationToken(null); //清除驗證碼
-            er.save(employee);
+            employeeRepository.save(employee);
             return "帳號驗證成功";
         }
         return "無效的驗證碼";
@@ -125,11 +125,11 @@ public class EmployeeService {
 
     public String updateEmployee (Employee employee) {
         if(employee != null) {
-            Employee existingEmployee = er.findById(employee.getEmployee_id()).orElse(null);
+            Employee existingEmployee = employeeRepository.findById(employee.getEmployee_id()).orElse(null);
             if(existingEmployee != null) {
                 // 保留原有的密碼
                 employee.setPassword(existingEmployee.getPassword());
-                er.save(employee);
+                employeeRepository.save(employee);
                 return "更新員工資訊成功";
             }
         }
@@ -137,7 +137,7 @@ public class EmployeeService {
     }
 
     public String deleteEmployee (int id) {
-        er.deleteById(id);
+        employeeRepository.deleteById(id);
         return "刪除員工成功";
     }
 
@@ -146,7 +146,7 @@ public class EmployeeService {
      * 2. 修改登入方法，加入驗證檢查
      */
     public ResponseEntity<?> login (EmployeeLoginRequest request) {
-        Optional<Employee> employeeOp = er.findById(request.getEmployee_id());
+        Optional<Employee> employeeOp = employeeRepository.findById(request.getEmployee_id());
         Employee employee;
         if(employeeOp.isPresent()) {
             employee = employeeOp.get();
@@ -189,7 +189,7 @@ public class EmployeeService {
      * 發送重置密碼郵件
      */
     public ResponseEntity<?> requestPasswordReset(String email) {
-        Optional<Employee> employeeOpt = er.findByEmail(email);
+        Optional<Employee> employeeOpt = employeeRepository.findByEmail(email);
         if (employeeOpt.isEmpty()) {
             return ResponseUtil.error("找不到該 Email 對應的員工", HttpStatus.NOT_FOUND);
         }
@@ -198,7 +198,7 @@ public class EmployeeService {
         String token = UUID.randomUUID().toString();
         employee.setResetPasswordToken(token);
         employee.setResetPasswordTokenExpiry(LocalDateTime.now().plusHours(1));
-        er.save(employee);
+        employeeRepository.save(employee);
 
         try {
             emailService.sendResetPasswordEmail(email, token);
@@ -210,7 +210,7 @@ public class EmployeeService {
 
     // 驗證重置密碼的 token 並更新密碼
     public ResponseEntity<?> resetPassword(String token, String newPassword) {
-        Optional<Employee> employeeOpt = er.findByResetPasswordToken(token);
+        Optional<Employee> employeeOpt = employeeRepository.findByResetPasswordToken(token);
         if (employeeOpt.isEmpty()) {
             return ResponseUtil.error("無效的重置連結", HttpStatus.BAD_REQUEST);
         }
@@ -224,7 +224,7 @@ public class EmployeeService {
         employee.setPassword(newPassword);
         employee.setResetPasswordToken(null);
         employee.setResetPasswordTokenExpiry(null);
-        er.save(employee);
+        employeeRepository.save(employee);
 
         return ResponseEntity.ok(Map.of("success", true, "message", "密碼重置成功"));
     }
@@ -240,39 +240,11 @@ public class EmployeeService {
      * ,回傳一個Set<Role>,並進行更新員工的角色多對多關聯
      */
     public ResponseEntity<?> updateEmployee(EmployeeUpdateDto dto ) {
-           Optional<Employee> employeeOptional = er.findById(dto.getEmployee_id());
+           Optional<Employee> employeeOptional = employeeRepository.findById(dto.getEmployee_id());
            if(employeeOptional.isPresent()) {
                //更新角色
-               Set<Integer> roleIds = getRoleIdSet(dto);
-               Set<Role> roles = new HashSet<>(roleRepository.findAllById(roleIds));
                Employee employee = employeeOptional.get();
-               employee.setRoles(roles);
-               //更新姓名
-               employee.setName(dto.getName());
-               //更新email
-               employee.setEmail(dto.getEmail());
-               //更新電話
-               employee.setPhoneNumber(dto.getPhoneNumber());
-               // 更新部門（多對一）
-               Department department = departmentRepository.findById(dto.getDepartment_id())
-                       .orElseThrow(() -> new RuntimeException("找不到指定的部門 ID: " + dto.getDepartment_id()));
-               employee.setDepartment(department);
-
-               // 更新單位（多對一）
-               Unit unit = unitRepository.findById(dto.getUnit_id())
-                       .orElseThrow(() -> new RuntimeException("找不到指定的單位 ID: " + dto.getUnit_id()));
-               employee.setUnit(unit);
-
-               // 更新職位（多對一）
-               Position position = positionRepository.findById(dto.getPosition_id())
-                       .orElseThrow(() -> new RuntimeException("找不到指定的職位 ID: " + dto.getPosition_id()));
-               employee.setPosition(position);
-
-               // 更新狀態（多對一）
-               Status status = statusRepository.findById(dto.getStatus_id())
-                       .orElseThrow(() -> new RuntimeException("找不到指定的狀態 ID: " + dto.getStatus_id()));
-               employee.setEmployeeStatus(status);
-               er.save(employee);
+               updateEmployee(employee, dto);
                return ResponseUtil.error("設定員工角色成功",HttpStatus.OK);
            } else {
                return ResponseUtil.error("找不到指定id的員工",HttpStatus.NOT_FOUND);
@@ -287,6 +259,38 @@ public class EmployeeService {
                 .collect(Collectors.toSet());
     }
 
+    private void updateEmployee(Employee employee,EmployeeUpdateDto dto) {
+        Set<Integer> roleIds = getRoleIdSet(dto);
+        Set<Role> roles = new HashSet<>(roleRepository.findAllById(roleIds));
+        employee.setRoles(roles);
+        //更新姓名
+        employee.setName(dto.getName());
+        //更新email
+        employee.setEmail(dto.getEmail());
+        //更新電話
+        employee.setPhoneNumber(dto.getPhoneNumber());
+        // 更新部門（多對一）
+        if(dto.getDepartment_id() > 0) {
+            departmentRepository.findById(dto.getDepartment_id())
+                    .ifPresent(employee::setDepartment);
+        }
+        // 更新單位（多對一）
+        if(dto.getUnit_id() > 0) {
+            unitRepository.findById(dto.getUnit_id())
+                    .ifPresent(employee::setUnit);
+        }
+        // 更新職位（多對一）
+        if(dto.getPosition_id() > 0) {
+            positionRepository.findById(dto.getPosition_id())
+                    .ifPresent(employee::setPosition);
+        }
+        // 更新狀態（多對一）
+        if(dto.getStatus_id() > 0) {
+            statusRepository.findById(dto.getStatus_id())
+                    .ifPresent(employee::setEmployeeStatus);
+        }
+        employeeRepository.save(employee);
+    }
 
 
 

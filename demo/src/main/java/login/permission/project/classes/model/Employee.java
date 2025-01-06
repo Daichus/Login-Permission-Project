@@ -32,9 +32,7 @@ public class Employee {
 
     @Column(name = "phone_number")
     private String phoneNumber;
-//
-//    @Column(name = "status_id")
-//    private Integer status_id;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "unit_id", referencedColumnName = "unit_id") // 外鍵列
     private Unit unit;
