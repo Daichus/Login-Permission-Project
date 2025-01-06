@@ -33,8 +33,9 @@ public class Employee {
     @Column(name = "phone_number")
     private String phoneNumber;
 
-    @Column(name = "status_id")
-    private Integer status_id;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "unit_id", referencedColumnName = "unit_id") // 外鍵列
+    private Unit unit;
 
     @Column(name = "enabled")
     private boolean enabled = false;  // 是否已驗證
@@ -56,7 +57,7 @@ public class Employee {
     @JoinColumn(name = "position_id", referencedColumnName = "position_id") // 外鍵列
     private Position position;
 
-//一對多與多對多關聯表
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "status_id", insertable = false, updatable = false)
     private Status employeeStatus;

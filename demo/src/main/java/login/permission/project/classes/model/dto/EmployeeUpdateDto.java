@@ -1,7 +1,6 @@
 package login.permission.project.classes.model.dto;
 
 
-import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,7 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class EmployeeRoleDto {
+public class EmployeeUpdateDto {
 
     private int employee_id;
 
@@ -19,8 +18,13 @@ public class EmployeeRoleDto {
 
     private String phoneNumber;
 
+    private int unit_id;
+
+    private int department_id;
+
+    private int position_id;
+
+    private int status_id;
+
     private String [] roleIds;
-
-
-
 }
