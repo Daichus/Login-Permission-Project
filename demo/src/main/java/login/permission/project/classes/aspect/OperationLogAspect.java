@@ -2,7 +2,9 @@ package login.permission.project.classes.aspect;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import login.permission.project.classes.annotation.LogOperation;
+import login.permission.project.classes.model.Employee;
 import login.permission.project.classes.model.OperationLog;
+import login.permission.project.classes.service.EmployeeService;
 import login.permission.project.classes.service.OperationLogService;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -24,6 +26,9 @@ public class OperationLogAspect {
     
     @Autowired
     private OperationLogService operationLogService;
+
+    @Autowired
+    private EmployeeService employeeService;
     
     @Autowired
     private ObjectMapper objectMapper;
@@ -42,7 +47,7 @@ public class OperationLogAspect {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null) {
             operationLog.setUserId(authentication.getName());  // 假設用戶名就是userId
-            operationLog.setUsername(authentication.getName());
+            operationLog.setUsername(employeeService.getEmployeeNameById(authentication.getName()));
         }
         
         // 獲取請求IP

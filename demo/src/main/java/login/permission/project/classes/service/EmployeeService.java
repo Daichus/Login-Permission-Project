@@ -64,6 +64,10 @@ public class EmployeeService {
         }
     }
 
+    public String getEmployeeNameById(String id) {
+        return employeeRepository.findNameById(id).orElse(null);
+    }
+
     public ResponseEntity<?> getEmployeeById(int id, HttpServletRequest request){
         try{
             jwtUtil.validateRequest(request);
