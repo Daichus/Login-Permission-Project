@@ -4,12 +4,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import login.permission.project.classes.JwtService;
 import login.permission.project.classes.model.*;
 
-import login.permission.project.classes.model.dto.EmployeeRoleDto;
+import login.permission.project.classes.model.dto.EmployeeUpdateDto;
 import login.permission.project.classes.model.util.JwtUtil;
 import login.permission.project.classes.model.util.ResponseUtil;
-import login.permission.project.classes.repository.EmployeeRepository;
-import login.permission.project.classes.repository.LoginRecordRepository;
-import login.permission.project.classes.repository.RoleRepository;
+import login.permission.project.classes.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,6 +37,18 @@ public class EmployeeService {
 
     @Autowired
     RoleRepository roleRepository;
+
+    @Autowired
+    DepartmentRepository departmentRepository;
+
+    @Autowired
+    UnitRepository unitRepository;
+
+    @Autowired
+    PositionRepository positionRepository;
+
+    @Autowired
+    StatusRepository statusRepository;
 
 
     public ResponseEntity<?> getAllEmployees(HttpServletRequest request) {
@@ -229,16 +239,39 @@ public class EmployeeService {
      * 的body, JPA將會根據role id尋找相對應的所有Role
      * ,回傳一個Set<Role>,並進行更新員工的角色多對多關聯
      */
-    public ResponseEntity<?> updateEmployee(EmployeeRoleDto dto ) {
+    public ResponseEntity<?> updateEmployee(EmployeeUpdateDto dto ) {
            Optional<Employee> employeeOptional = er.findById(dto.getEmployee_id());
            if(employeeOptional.isPresent()) {
+               //更新角色
                Set<Integer> roleIds = getRoleIdSet(dto);
                Set<Role> roles = new HashSet<>(roleRepository.findAllById(roleIds));
                Employee employee = employeeOptional.get();
                employee.setRoles(roles);
+               //更新姓名
                employee.setName(dto.getName());
+               //更新email
                employee.setEmail(dto.getEmail());
+               //更新電話
                employee.setPhoneNumber(dto.getPhoneNumber());
+               // 更新部門（多對一）
+               Department department = departmentRepository.findById(dto.getDepartment_id())
+                       .orElseThrow(() -> new RuntimeException("找不到指定的部門 ID: " + dto.getDepartment_id()));
+               employee.setDepartment(department);
+
+               // 更新單位（多對一）
+               Unit unit = unitRepository.findById(dto.getUnit_id())
+                       .orElseThrow(() -> new RuntimeException("找不到指定的單位 ID: " + dto.getUnit_id()));
+               employee.setUnit(unit);
+
+               // 更新職位（多對一）
+               Position position = positionRepository.findById(dto.getPosition_id())
+                       .orElseThrow(() -> new RuntimeException("找不到指定的職位 ID: " + dto.getPosition_id()));
+               employee.setPosition(position);
+
+               // 更新狀態（多對一）
+               Status status = statusRepository.findById(dto.getStatus_id())
+                       .orElseThrow(() -> new RuntimeException("找不到指定的狀態 ID: " + dto.getStatus_id()));
+               employee.setEmployeeStatus(status);
                er.save(employee);
                return ResponseUtil.error("設定員工角色成功",HttpStatus.OK);
            } else {
@@ -247,7 +280,7 @@ public class EmployeeService {
 
     }
 
-    private Set<Integer> getRoleIdSet (EmployeeRoleDto dto) {
+    private Set<Integer> getRoleIdSet (EmployeeUpdateDto dto) {
         return Arrays.stream(dto.getRoleIds())
                 .filter(Objects::nonNull) // 排除空值
                 .map(Integer::valueOf) // 将 String 转换为 Integer

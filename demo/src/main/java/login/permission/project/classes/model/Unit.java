@@ -34,5 +34,8 @@ public class Unit {
     private Department department;
 
     @OneToMany(mappedBy = "unit")
+    private Set<Employee> employees;
+
+    @OneToMany(mappedBy = "unit")
     private Set<Position> positions;
 }

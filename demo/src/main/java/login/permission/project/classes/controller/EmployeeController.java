@@ -3,7 +3,7 @@ package login.permission.project.classes.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import login.permission.project.classes.model.Employee;
 import login.permission.project.classes.model.EmployeeLoginRequest;
-import login.permission.project.classes.model.dto.EmployeeRoleDto;
+import login.permission.project.classes.model.dto.EmployeeUpdateDto;
 import login.permission.project.classes.model.util.ResponseUtil;
 import login.permission.project.classes.service.EmployeeService;
 import login.permission.project.classes.service.LoginRecordService;
@@ -64,7 +64,7 @@ public class EmployeeController {
     }
 
     @PutMapping("/update")
-    public ResponseEntity<?> updateEmployee (@RequestBody EmployeeRoleDto dto ) {
+    public ResponseEntity<?> updateEmployee (@RequestBody EmployeeUpdateDto dto ) {
             return employeeService.updateEmployee(dto);
     }
 
