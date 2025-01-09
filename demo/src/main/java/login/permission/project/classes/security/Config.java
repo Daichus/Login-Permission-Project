@@ -63,6 +63,9 @@ public class Config {
                                 ).permitAll()
                         // 操作日誌相關權限
                         .requestMatchers(HttpMethod.GET, "/api/logs/**").hasAuthority("rec_audit_log_read")
+                                .requestMatchers(HttpMethod.GET,"/Position/get").hasAuthority("pos_mgt_read")
+                                .requestMatchers(HttpMethod.POST,"/Position/add").hasAuthority("pos_mgt_create")
+                                .requestMatchers(HttpMethod.PUT,"/Position/edit").hasAuthority("pos_mgt_update")
 
                         // 部門管理相關權限
                         .requestMatchers(HttpMethod.GET, "/department/**").hasAuthority("dept_mgt_read")

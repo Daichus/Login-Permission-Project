@@ -1,8 +1,14 @@
 package login.permission.project.classes.service;
 
 import login.permission.project.classes.model.Position;
+import login.permission.project.classes.model.Unit;
+import login.permission.project.classes.model.dto.PositionDTO;
+import login.permission.project.classes.model.util.ResponseUtil;
 import login.permission.project.classes.repository.PositionRepository;
+import login.permission.project.classes.repository.UnitRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,35 +18,38 @@ import java.util.Optional;
 public class PositionService {
 
     @Autowired
-    PositionRepository pr;
+    PositionRepository positionRepository;
+
+    @Autowired
+    UnitRepository unitRepository;
 
     public List<Position> getAllPositions() {
-        return pr.findAll();
+        return positionRepository.findAll();
     }
 
-    public List<Position> getPositionById(Integer unitId, Integer positionId) {
-        return pr.findByUnitIdAndPositionId(unitId, positionId);
+//    public List<Position> getPositionById(Integer unitId, Integer positionId) {
+//        return positionRepository.findByUnitIdAndPositionId(unitId, positionId);
+//    }
+
+    public ResponseEntity<?> addPosition(PositionDTO dto){
+        Optional<Unit> unitOptional = unitRepository.findById(dto.getUnit_id());
+        Position position = new Position();
+        position.setPosition(dto.getPosition());
+        unitOptional.ifPresent(position::setUnit);
+        positionRepository.save(position);
+        return ResponseUtil.success("新增職位成功",null);
     }
 
-    public String addPosition(Position position){
-        pr.save(position);
-        return String.format("新增職位成功\n職位名稱: %s\n職位id: %s\n科別代號: %s",
-                position.getPosition(),
-                position.getPosition_id(),
-                position.getUnit_id());
-    }
-
-    public String updatePosition(Position position) {
-        if (position != null) {
-            pr.save(position);
-            return "修改職位資訊完成";
-        } else {
-            return "更新職位資訊失敗";
-        }
+    public ResponseEntity<?> updatePosition(PositionDTO dto) {
+        Position position = positionRepository.findById(dto.getPosition_id()).get();
+        position.setPosition(dto.getPosition());
+        position.setUnit(unitRepository.findById(dto.getUnit_id()).get());
+        positionRepository.save(position);
+        return ResponseUtil.success("更新 Position 成功", position);
     }
 
     public String deletePosition(int id) {
-        pr.deleteById(id);
+        positionRepository.deleteById(id);
         return "刪除職位成功";
     }
 }

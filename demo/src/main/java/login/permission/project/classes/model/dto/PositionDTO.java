@@ -9,8 +9,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PositionDTO {
+
     private int position_id;
+
     private String position;
+
     private int unit_id;
-    private String unit_name;
+
 }

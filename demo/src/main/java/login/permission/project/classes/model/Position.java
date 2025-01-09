@@ -24,11 +24,11 @@ public class Position {
     @Column(name="position")
     private String position;
 
-    @Column(name = "unit_id")
-    private Integer unit_id;
+//    @Column(name = "unit_id")
+//    private Integer unit_id;
 
     @ManyToOne
-    @JoinColumn(name = "unit_id", insertable = false, updatable = false)
+    @JoinColumn(name = "unit_id" )
     private Unit unit;
 
     @OneToMany(mappedBy = "position", fetch = FetchType.LAZY)
