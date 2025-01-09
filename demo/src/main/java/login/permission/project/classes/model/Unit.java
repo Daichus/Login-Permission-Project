@@ -15,6 +15,7 @@ import java.util.Set;
 @Table(name="Unit")
 public class Unit {
 
+    //非自動添加
     @Id
     @Column(name="unit_id")
     private int unit_id;
@@ -31,6 +32,9 @@ public class Unit {
     @ManyToOne
     @JoinColumn(name = "department_id", insertable = false, updatable = false)
     private Department department;
+
+    @OneToMany(mappedBy = "unit")
+    private Set<Employee> employees;
 
     @OneToMany(mappedBy = "unit")
     private Set<Position> positions;

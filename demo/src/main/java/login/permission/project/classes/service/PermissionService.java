@@ -1,11 +1,18 @@
 package login.permission.project.classes.service;
 
+import jakarta.servlet.http.HttpServletRequest;
+import login.permission.project.classes.model.util.JwtUtil;
 import login.permission.project.classes.model.Permission;
+import login.permission.project.classes.model.util.ResponseUtil;
+import login.permission.project.classes.repository.EmployeeRepository;
 import login.permission.project.classes.repository.PermissionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PermissionService {
@@ -13,27 +20,78 @@ public class PermissionService {
   @Autowired
   PermissionRepository permissionRepository;
 
-  //get
-  public List<Permission> getAllPermission() {
-    return permissionRepository.findAll();
+  @Autowired
+  JwtUtil jwtUtil;
+
+  @Autowired
+  EmployeeRepository employeeRepository;
+
+
+  /**
+   * 前端透過傳遞jwt token驗證,
+   * 獲取所有權限,回傳的資料結構為[ {permission_id, permission_name,category, permission_code},{}...]
+   */
+  public ResponseEntity<?> getAllPermission(HttpServletRequest request) {
+    try{
+      jwtUtil.validateRequest(request);
+      List<Permission> permissions = permissionRepository.findAll();
+      return ResponseUtil.success("獲取權限成功",permissions);
+    } catch(IllegalArgumentException e) {
+      return ResponseUtil.error("你沒有獲取所有權限的權力", HttpStatus.UNAUTHORIZED);
+    }
   }
 
-  //post
-  public String addPermission(Permission permission) {
-    permissionRepository.save(permission);
-    return String.format("新增權限成功\n權限id: %s\n權限名稱: %s\n權限描述: %s",
-            permission.getPermission_id(),
-            permission.getPermission_name(),
-            permission.getDescription());
+  // 測試獲取員工自己的權限
+  public ResponseEntity<?> getPermissionById(HttpServletRequest request, int id) {
+    try{
+      jwtUtil.validateRequest(request);
+      List<String> permissions = employeeRepository.getPermissionById(id);
+      return ResponseUtil.success("獲取員工本人權限成功",permissions);
+    } catch(IllegalArgumentException e) {
+      return ResponseUtil.error("你沒有獲取員工本人所有權限的權力", HttpStatus.UNAUTHORIZED);
+    }
   }
 
-  //put
-  public String updatePermission(Permission permission) {
-    if(permission != null) {
+
+  /**
+   * 添加Permission的方法,前端需傳遞jwt token供驗證外,需傳遞和Permission物件相同構造的body,但無須傳送id,
+   * 例:{
+   *   permission_name:"Admin",
+   *   category:"部門管理",
+   *   permission_code:"dept_read_edit"
+   * }
+   */
+  public ResponseEntity<?> addPermission(Permission permission, HttpServletRequest request) {
+    try{
+      jwtUtil.validateRequest(request);
       permissionRepository.save(permission);
-      return "修改權限資訊完成";
-    } else {
-      return "更新權限資訊失敗";
+      return ResponseUtil.success("新增權限成功",permission);
+    } catch (IllegalArgumentException e) {
+      return ResponseUtil.error("你沒有添加權限的權利",HttpStatus.UNAUTHORIZED);
+    }
+  }
+
+  /**
+   *更新權限的代碼,方法大致與添加類似,只是前端傳遞的資料須包含permission id,結構必須為:
+   *  {
+   *     permission_id: 1
+   *     permission_name:"Admin",
+   *     category:"部門管理",
+   *     permission_code:"dept_read_edit"
+   *  }
+   */
+  public ResponseEntity<?> updatePermission(Permission permission, HttpServletRequest request) {
+    try {
+      jwtUtil.validateRequest(request);
+      Optional<Permission> oldPermission = permissionRepository.findById(permission.getPermission_id());
+      if (oldPermission.isPresent()) {
+        permissionRepository.save(permission);
+        return ResponseUtil.success("更新權限成功", permission);
+      } else {
+        return ResponseUtil.error("找不到指定id的權限", HttpStatus.NOT_FOUND);
+      }
+    } catch(IllegalArgumentException e) {
+      return ResponseUtil.error("你沒有修改權限的權利",HttpStatus.UNAUTHORIZED);
     }
   }
 

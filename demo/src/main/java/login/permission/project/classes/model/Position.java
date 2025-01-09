@@ -24,21 +24,14 @@ public class Position {
     @Column(name="position")
     private String position;
 
-    @Column(name = "unit_id")
-    private Integer unit_id;
+//    @Column(name = "unit_id")
+//    private Integer unit_id;
 
     @ManyToOne
-    @JoinColumn(name = "unit_id", insertable = false, updatable = false)
+    @JoinColumn(name = "unit_id" )
     private Unit unit;
 
-    @ManyToMany(mappedBy = "positions")
+    @OneToMany(mappedBy = "position", fetch = FetchType.LAZY)
     private Set<Employee> employees;
 
-    @ManyToMany
-    @JoinTable(
-            name = "PermissionMap",
-            joinColumns = @JoinColumn(name = "position_id"),
-            inverseJoinColumns = @JoinColumn(name = "permission_id")
-    )
-    private Set<Permission> permissions;
 }
