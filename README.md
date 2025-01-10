@@ -3,7 +3,7 @@ Login Permission Project
 
 專案名稱：銀行權限管理系統-後端
 
-使用框架：Spring Boot
+
 
 ## 專案介紹
 
