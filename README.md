@@ -42,7 +42,9 @@ Login Permission Project
    - 系統操作日誌
 
  ## 系統展示
-影片網址：https://www.youtube.com/watch?v=dxQSKz93Pw4
+影片網址-基礎功能展示：https://www.youtube.com/watch?v=dxQSKz93Pw4
+
+影片網址-操作紀錄功能展示：https://youtu.be/GkuseNdygjo
 
 ## 系統特色
 1. 彈性的權限管理
