@@ -41,4 +41,21 @@ Login Permission Project
    - 系統操作日誌
 
  ## 系統展示
-https://www.youtube.com/watch?v=dxQSKz93Pw4
+影片網址：https://www.youtube.com/watch?v=dxQSKz93Pw4
+
+## 系統特色
+1. 彈性的權限管理
+   - 採用角色群組機制，降低權限管理複雜度
+   - 支援多重角色配置，提升管理靈活性
+   - 權限異動即時生效
+2. 安全機制
+   - JWT Token 確保請求安全性
+   - Spring Security 進行權限驗證
+   - 操作與登入紀錄追蹤
+  
+## 開發心得
+1. 我們透過實作 Spring Security 與 JWT，理解了認證與授權機制的重要性
+2. 學會使用 JPA 進行資料庫操作，提升了開發效率
+3. 學會使用 Vue 進行前端開發
+4. 透過撰寫單元測試，確保程式碼的品質
+5. 學習到了如何管理專案進度與版本控制
