@@ -16,7 +16,7 @@ Login Permission Project
 只有持有允許修改角色權限的人員可以進行角色編輯的操作。如果人員發送修改請求，必須要有一種驗證身分的機制。本系統設計為每登錄都會發送一組 JWT Token 給予登入用戶，Token 內部含有員工自己的 id。每當進行請求操作，便需要將持有的 Token 傳送至後端，後端收到 Token 除了驗證簽章的有效性以外，會解析除內部的員工 id，隨後後台系統便會根據 id 去查找該名員工持有的權限，再決定該員工是否有訪問的權力。
 
  ## 技術架構
- - 後端：Spring Boot, JPA
+ - 後端：Spring Boot, Spring Boot JPA
  -  前端：Vue 3
  - 資料庫：MySQL
  - 安全驗證機制：Spring Security, JWT
